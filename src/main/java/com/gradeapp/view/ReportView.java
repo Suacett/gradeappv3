@@ -2,11 +2,15 @@ package com.gradeapp.view;
 
 import com.gradeapp.controller.ReportController;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.BarChart;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
+
 import java.util.Map;
 
 /**

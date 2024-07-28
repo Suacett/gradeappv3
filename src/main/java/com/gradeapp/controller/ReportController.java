@@ -1,9 +1,17 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.*;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcomes;
+import com.gradeapp.model.Student;
 import com.gradeapp.util.Calculator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Handles the generation and formatting of different types of reports.
@@ -46,7 +54,9 @@ public class ReportController {
 
     public Map<String, Object> generateStudentReport() {
         Map<String, Object> report = new HashMap<>();
-        report.put("studentName", getCurrentStudent().getName());
+        if (getCurrentStudent() != null) {
+            report.put("studentName", getCurrentStudent().getName());
+        }
         report.put("studentId", getCurrentStudent().getId() != null ? getCurrentStudent().getId() : "N/A");
 
         GradingController gradingController = new GradingController();
@@ -54,7 +64,7 @@ public class ReportController {
         report.put("outcomeAchievements", outcomeAchievements);
 
         List<Grade> grades = getCurrentStudent().getGrades();
-        
+
         // Calculate overall grade using the last assessment
         Assessment lastAssessment = grades.isEmpty() ? null : grades.get(grades.size() - 1).getAssessment();
         if (lastAssessment != null) {

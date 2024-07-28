@@ -1,14 +1,15 @@
 package com.gradeapp.view;
 
-import com.gradeapp.model.StudentGrade;
 import com.gradeapp.controller.GradingController;
+import com.gradeapp.model.StudentGrade;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.converter.DoubleStringConverter;
 
 /**

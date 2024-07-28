@@ -1,23 +1,18 @@
 package com.gradeapp.view;
 
+import com.gradeapp.controller.DataImportExportController;
+import com.gradeapp.controller.GradingController;
+import com.gradeapp.controller.ReportController;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import com.gradeapp.controller.DataImportExportController;
-import com.gradeapp.controller.GradingController;
-import com.gradeapp.controller.ReportController;
-import java.io.File;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.File;
 
 /**
  * Provides the main user interface for the application, integrating all other views and menu functionality.

@@ -1,6 +1,7 @@
 package com.gradeapp.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holds information about the course syllabus, including learning outcomes.

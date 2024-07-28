@@ -1,8 +1,16 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.*;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcomes;
+import com.gradeapp.model.Student;
+import com.gradeapp.model.StudentGrade;
 import com.gradeapp.util.WeightedAverageGradeCalculator;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GradingController {
     private WeightedAverageGradeCalculator calculator;

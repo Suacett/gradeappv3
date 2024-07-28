@@ -1,6 +1,7 @@
 package com.gradeapp.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a student in the system, storing personal information and associated grades.

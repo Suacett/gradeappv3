@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CodebuddyPersistentProjectState">
-    <option name="selectedModel" value="codebuddy:GPT4_Turbo_Haiku_V7" />
+    <option name="autoFileSelection" value="true" />
+    <option name="promptHistory">
+      <list>
+        <option value="0 demo3: rebuild failed At 28/07/2024 1:35 pm with 1 error&#10;0 Index -1 out of bounds for length 10&#10;&#10;1 sec, 420 ms&#10;&#10;java: Index -1 out of bounds for length 10&#10;&#10;what could be causing this error please fix " />
+      </list>
+    </option>
+    <option name="selectedModel" value="codebuddy:CLAUDE_3.5_SONNET_V7" />
+    <option name="ttsEnabled" value="false" />
   </component>
 </project>

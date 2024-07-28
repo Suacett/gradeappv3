@@ -1,6 +1,10 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.*;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcomes;
+import com.gradeapp.model.Student;
+
 import java.util.List;
 
 public class WeightedAverageGradeCalculator {

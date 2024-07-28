@@ -1,8 +1,10 @@
 package com.gradeapp.view;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 
 /**
  * Allows users to configure application settings and preferences.

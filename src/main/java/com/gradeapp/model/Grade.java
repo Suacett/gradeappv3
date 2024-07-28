@@ -11,7 +11,7 @@ public class Grade {
     public Grade(Student student, Assessment assessment, double score) {
         this.student = student;
         this.assessment = assessment;
-        setScore(score);
+        this.setScore(score);
     }
 
 // Getters and setters
