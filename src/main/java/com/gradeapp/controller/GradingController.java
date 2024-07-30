@@ -1,7 +1,6 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Course;
 import com.gradeapp.model.Grade;
 import com.gradeapp.model.Outcomes;
 import com.gradeapp.model.Student;
@@ -20,23 +19,36 @@ public class GradingController {
     }
 
     public double calculateOverallGrade(Student student, Assessment assessment) {
-        return calculateWeightedAverage(student, assessment);
+        return calculator.calculateWeightedAverage(student.getGrades(), assessment);
     }
 
-    public Map<String, Double> calculateOutcomeAchievement(Student student) {
-        Map<String, Double> achievements = new HashMap<>();
+    public Map<Outcomes, Double> calculateOutcomeAchievement(Student student) {
+        Map<Outcomes, Double> achievements = new HashMap<>();
         for (Outcomes outcome : student.getCourse().getOutcomes()) {
             double achievement = calculator.calculateOutcomeAchievement(student, outcome);
-            achievements.put(outcome.getName(), achievement);
+            achievements.put(outcome, achievement);
         }
         return achievements;
     }
 
-    private double calculateWeightedAverage(Student student, Assessment assessment) {
-        return calculator.calculateWeightedAverage(student.getGrades(), assessment);
+    public StudentGrade addGrade(Student student, Assessment assessment, double score, String feedback) {
+        StudentGrade grade = new StudentGrade(student.getName(), assessment.getName(), score);
+        grade.setFeedback(feedback);
+        student.addGrade(assessment, score, feedback);
+        student.getCourse().getGradeBook().addGrade(grade);
+        return grade;
+    }
+
+    public List<StudentGrade> getStudentGrades(Student student) {
+        return student.getGrades();
+    }
+
+    public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
+        return calculator.calculateWeightedAverage(grades, assessment);
     }
 
     public void saveGrades(List<StudentGrade> grades) {
-        // Implement the logic to save grades to the database or file
+        // Implementation for saving grades
+        // This method should update the grades in the database or persistent storage
     }
 }

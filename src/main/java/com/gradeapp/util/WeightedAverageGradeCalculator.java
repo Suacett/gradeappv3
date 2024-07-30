@@ -9,7 +9,7 @@ import java.util.List;
 
 public class WeightedAverageGradeCalculator {
 
-    public double calculateWeightedAverage(List<Grade> grades, Assessment assessment) {
+    public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
         double totalWeightedScore = 0;
         double totalWeight = 0;
 
@@ -25,7 +25,7 @@ public class WeightedAverageGradeCalculator {
     }
 
     public double calculateOutcomeAchievement(Student student, Outcomes outcome) {
-        List<Grade> relevantGrades = student.getGrades().stream()
+        List<? extends Grade> relevantGrades = student.getGrades().stream()
                 .filter(grade -> grade.getAssessment().getOutcomes().contains(outcome))
                 .toList();
 

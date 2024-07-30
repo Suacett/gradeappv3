@@ -1,75 +1,62 @@
 package com.gradeapp.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/*
-  Represents a course, containing lists of assessments and enrolled students.
- */
 public class Course {
     private String name;
     private List<Student> students;
-    private List<Outcomes> outcomes;
-    private List<Assessment> assessments;
     private GradeBook gradeBook;
+    private List<Assessment> assessments;
+    private Set<Outcomes> outcomes;
 
     public Course(String name) {
         this.name = name;
         this.students = new ArrayList<>();
-        this.assessments = new ArrayList<>();
-        this.outcomes = new ArrayList<>();
         this.gradeBook = new GradeBook();
-    }
-
-    public void addStudent(Student student) {
-        students.add(student);
-    }
-
-    public void addAssessment(Assessment assessment) {
-        assessments.add(assessment);
-    }
-
-    public void addGrade(Student student, Assessment assessment, double score) {
-        gradeBook.addGrade(student, assessment, score);
-    }
-
-    public GradeBook getGradeBook() {
-        return gradeBook;
-    }
-
-    public void setGradeBook(GradeBook gradeBook) {
-        this.gradeBook = gradeBook;
-    }
-
-    public List<Assessment> getAssessments() {
-        return assessments;
-    }
-
-    public void setAssessments(List<Assessment> assessments) {
-        this.assessments = assessments;
+        this.assessments = new ArrayList<>();
+        this.outcomes = new HashSet<>();
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<Student> getStudents() {
         return students;
     }
 
-    public void setStudents(List<Student> students) {
-        this.students = students;
+    public GradeBook getGradeBook() {
+        return gradeBook;
     }
 
-    public List<Outcomes> getOutcomes() {
-        return outcomes;
+    public List<Assessment> getAssessments() {
+        return new ArrayList<>(assessments);
     }
 
-    public void setOutcomes(List<Outcomes> outcomes) {
-        this.outcomes = outcomes;
+    public void addAssessment(Assessment assessment) {
+        assessments.add(assessment);
+    }
+
+    public Set<Outcomes> getOutcomes() {
+        return new HashSet<>(outcomes);
+    }
+
+    public void addOutcome(Outcomes outcome) {
+        outcomes.add(outcome);
+    }
+
+    public void addStudent(Student student) {
+        students.add(student);
+        student.setCourse(this);
+    }
+
+    public List<Grade> getAllGrades() {
+        return students.stream()
+            .flatMap(student -> student.getGrades().stream())
+            .collect(Collectors.toList());
     }
 }

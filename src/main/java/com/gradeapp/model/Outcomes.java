@@ -1,33 +1,51 @@
 package com.gradeapp.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-/**
- * Holds information about the course syllabus, including learning outcomes.
- */
 public class Outcomes {
+    private String id;
     private String name;
+    private String description;
     private List<String> learningOutcomes;
+    private Map<Assessment, Double> linkedAssessments;
+    private Map<Student, Double> studentAchievements;
 
-    public Outcomes(String name) {
+    public Outcomes(String id, String name, String description) {
+        this.id = id;
         this.name = name;
+        this.description = description;
         this.learningOutcomes = new ArrayList<>();
+        this.linkedAssessments = new HashMap<>();
+        this.studentAchievements = new HashMap<>();
     }
 
-    public void addOutcome(String outcome) {
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public List<String> getLearningOutcomes() { return new ArrayList<>(learningOutcomes); }
+
+    public void addLearningOutcome(String outcome) {
         learningOutcomes.add(outcome);
     }
 
-    public String getName() {
-        return name;
+    public void linkAssessment(Assessment assessment, double weight) {
+        linkedAssessments.put(assessment, weight);
     }
 
-    public List<String> getLearningOutcomes() {
-        return learningOutcomes;
+    public void updateStudentAchievement(Student student, double achievement) {
+        studentAchievements.put(student, achievement);
     }
 
-    public void setLearningOutcomes(List<String> learningOutcomes) {
-        this.learningOutcomes = learningOutcomes;
+    public double getStudentAchievement(Student student) {
+        return studentAchievements.getOrDefault(student, 0.0);
+    }
+
+    public Map<Assessment, Double> getLinkedAssessments() {
+        return new HashMap<>(linkedAssessments);
+    }
+
+    public double aggregateAchievement() {
+        return studentAchievements.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 }
+

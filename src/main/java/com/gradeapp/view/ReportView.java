@@ -41,7 +41,7 @@ public class ReportView {
         reportTypeComboBox.setValue("Class Report");
 
         generateReportButton = new Button("Generate Report");
-        generateReportButton.setOnAction(e -> generateReport(reportTypeComboBox.getValue()));
+       // generateReportButton.setOnAction(e -> generateReport(reportTypeComboBox.getValue()));
 
         reportTextArea = new TextArea();
         reportTextArea.setEditable(false);
@@ -51,13 +51,13 @@ public class ReportView {
 
         root.getChildren().addAll(titleLabel, reportTypeComboBox, generateReportButton, reportTextArea, chartContainer);
     }
-
+/**
     private void generateReport(String reportType) {
         Map<String, Object> reportData;
         if ("Class Report".equals(reportType)) {
-            reportData = reportController.generateClassReport();
+            reportData = reportController.generateClassReport(getCurrentCourse());
         } else {
-            reportData = reportController.generateStudentReport();
+            reportData = reportController.generateStudentReport(getCurrentStudent());
         }
 
         // Update the report text area
@@ -70,7 +70,7 @@ public class ReportView {
         // Generate and display charts
         generateCharts(reportData);
     }
-
+*/
     private void generateCharts(Map<String, Object> reportData) {
         chartContainer.getChildren().clear();
 

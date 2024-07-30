@@ -1,9 +1,7 @@
 package com.gradeapp.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class GradeBook {
     private Map<Student, Map<Assessment, Grade>> grades;
@@ -12,9 +10,23 @@ public class GradeBook {
         this.grades = new HashMap<>();
     }
 
-    public void addGrade(Student student, Assessment assessment, double score) {
-        grades.computeIfAbsent(student, k -> new HashMap<>())
-                .put(assessment, new Grade(student, assessment, score));
+    public void addGrade(Grade grade) {
+        grades.computeIfAbsent(grade.getStudent(), k -> new HashMap<>())
+                .put(grade.getAssessment(), grade);
+    }
+
+    private GradeBook gradeBook;
+
+
+    public GradeBook getGradeBook() {
+        return this.gradeBook;
+    }
+
+    public void removeGrade(Grade grade) {
+        Map<Assessment, Grade> studentGrades = grades.get(grade.getStudent());
+        if (studentGrades != null) {
+            studentGrades.remove(grade.getAssessment());
+        }
     }
 
     public Grade getGrade(Student student, Assessment assessment) {
@@ -22,12 +34,41 @@ public class GradeBook {
     }
 
     public Map<Assessment, Grade> getStudentGrades(Student student) {
-        return grades.getOrDefault(student, Collections.emptyMap());
+        return new HashMap<>(grades.getOrDefault(student, Collections.emptyMap()));
     }
 
     public List<Grade> getAllGrades() {
         return grades.values().stream()
                 .flatMap(m -> m.values().stream())
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    public double getAverageGradeForStudent(Student student) {
+        Map<Assessment, Grade> studentGrades = grades.get(student);
+        if (studentGrades == null || studentGrades.isEmpty()) {
+            return 0.0;
+        }
+        return studentGrades.values().stream()
+                .mapToDouble(Grade::getScore)
+                .average()
+                .orElse(0.0);
+    }
+
+    public Map<Student, Double> getAllStudentAverages() {
+        return grades.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().values().stream()
+                                .mapToDouble(Grade::getScore)
+                                .average()
+                                .orElse(0.0)
+                ));
+    }
+
+    public List<Grade> getGradesForAssessment(Assessment assessment) {
+        return grades.values().stream()
+                .map(m -> m.get(assessment))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

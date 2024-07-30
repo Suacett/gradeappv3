@@ -1,88 +1,64 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Course;
-import com.gradeapp.model.Grade;
-import com.gradeapp.model.Outcomes;
-import com.gradeapp.model.Student;
-import com.gradeapp.util.Calculator;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-/**
- * Handles the generation and formatting of different types of reports.
- */
+import com.gradeapp.model.*;
+import com.gradeapp.util.*;
+import javafx.scene.chart.BarChart;
+import java.util.*;
 
 public class ReportController {
-    public Map<String, Object> generateClassReport() {
+    private Calculator calculator;
+    private ChartGenerator chartGenerator;
+    private ReportExporter reportExporter;
+
+    public ReportController() {
+        this.calculator = Calculator.getInstance();
+        this.chartGenerator = new ChartGenerator();
+        this.reportExporter = new ReportExporter();
+    }
+
+    public Map<String, Object> generateClassReport(Course course) {
         Map<String, Object> report = new HashMap<>();
-        List<Grade> allGrades = new ArrayList<>();
+        List<Grade> allGrades = course.getAllGrades();
 
-        for (Student student : getCurrentCourse().getStudents()) {
-            allGrades.addAll(student.getGrades());
-        }
-
-        report.put("courseName", getCurrentCourse().getName());
-        report.put("studentCount", getCurrentCourse().getStudents().size());
-        report.put("meanGrade", String.format("%.2f", Calculator.calculateMean(allGrades)));
-        report.put("standardDeviation", String.format("%.2f", Calculator.calculateStandardDeviation(allGrades)));
-        report.put("highestGrade", getHighestGradeDetails(allGrades));
-        report.put("lowestGrade", getLowestGradeDetails(allGrades));
-
-        return report;
-    }
-//TEST TEST TEST TEST
-    private String getLowestGradeDetails(List<Grade> allGrades) {
-        Grade lowestGrade = Calculator.getLowestGrade(allGrades);
-        if (lowestGrade != null) {
-            return String.format("Student: %s, Grade: %.2f", lowestGrade.getStudent().getName(), lowestGrade.getScore());
-        }
-        return "N/A";
-    }
-
-    private String getHighestGradeDetails(List<Grade> allGrades) {
-        Grade highestGrade = Calculator.getHighestGrade(allGrades);
-        if (highestGrade != null) {
-            return String.format("Student: %s, Grade: %.2f", highestGrade.getStudent().getName(), highestGrade.getScore());
-        }
-        return "N/A";
-    }
-
-    public Map<String, Object> generateStudentReport() {
-        Map<String, Object> report = new HashMap<>();
-        if (getCurrentStudent() != null) {
-            report.put("studentName", getCurrentStudent().getName());
-        }
-        report.put("studentId", getCurrentStudent().getId() != null ? getCurrentStudent().getId() : "N/A");
-
-        GradingController gradingController = new GradingController();
-        Map<String, Double> outcomeAchievements = gradingController.calculateOutcomeAchievement(getCurrentStudent());
-        report.put("outcomeAchievements", outcomeAchievements);
-
-        List<Grade> grades = getCurrentStudent().getGrades();
-
-        // Calculate overall grade using the last assessment
-        Assessment lastAssessment = grades.isEmpty() ? null : grades.get(grades.size() - 1).getAssessment();
-        if (lastAssessment != null) {
-            double overallGrade = gradingController.calculateOverallGrade(getCurrentStudent(), lastAssessment);
-            report.put("overallGrade", String.format("%.2f", overallGrade));
-        } else {
-            report.put("overallGrade", "N/A");
-        }
+        report.put("courseName", course.getName());
+        report.put("studentCount", course.getStudents().size());
+        report.put("statistics", calculator.calculateStatistics(allGrades));
+        report.put("gradeDistribution", calculator.calculateGradeDistribution(allGrades));
+        report.put("gradeDistributionChart", (BarChart<String, Number>) chartGenerator.createGradeDistributionChart(allGrades));
 
         return report;
     }
 
-    private Course getCurrentCourse() {
-        return getCurrentStudent().getCourse();
+    public Map<String, Object> generateStudentReport(Student student) {
+        Map<String, Object> report = new HashMap<>();
+        report.put("studentName", student.getName());
+        report.put("studentId", student.getStudentId());
+        report.put("overallGrade", calculator.calculateOverallGrade(student));
+        report.put("gradesByAssessment", calculator.calculateGradesByAssessment(student));
+        report.put("outcomeAchievements", calculator.calculateOutcomeAchievement(student));
+        report.put("performanceChart", (BarChart<String, Number>) chartGenerator.createStudentPerformanceChart(student));
+
+        return report;
     }
 
-    private Student getCurrentStudent() {
-        // Implement logic to get the current student
-        return null;
+    public Map<String, Object> generateAssessmentReport(Assessment assessment) {
+        Map<String, Object> report = new HashMap<>();
+        List<Grade> assessmentGrades = assessment.getGradeBook().getGradesForAssessment(assessment);
+
+        report.put("assessmentName", assessment.getName());
+        report.put("statistics", calculator.calculateStatistics(assessmentGrades));
+        report.put("taskCompletionRates", calculator.calculateTaskCompletionRates(assessment));
+        report.put("gradeDistribution", calculator.calculateGradeDistribution(assessmentGrades));
+        report.put("gradeDistributionChart", (BarChart<String, Number>) chartGenerator.createGradeDistributionChart(assessmentGrades));
+
+        return report;
+    }
+
+    public void exportReport(Map<String, Object> report, String filePath, ReportFormat format) {
+        reportExporter.exportReport(report, filePath, format);
+    }
+
+    public enum ReportFormat {
+        PDF, XLS, CSV
     }
 }

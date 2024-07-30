@@ -1,6 +1,8 @@
 package com.gradeapp.view;
 
 import com.gradeapp.controller.GradingController;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Student;
 import com.gradeapp.model.StudentGrade;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,6 +13,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DoubleStringConverter;
+import java.util.ArrayList;
+
 
 /**
  * Offers an interface for inputting and displaying student grades.
@@ -49,30 +53,32 @@ public class GradingView {
 
     private TableView<StudentGrade> createGradeTable() {
         TableView<StudentGrade> table = new TableView<>();
-        
+
         TableColumn<StudentGrade, String> studentNameCol = new TableColumn<>("Student Name");
         studentNameCol.setCellValueFactory(new PropertyValueFactory<>("studentName"));
         studentNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        
+
         TableColumn<StudentGrade, String> assessmentNameCol = new TableColumn<>("Assessment");
         assessmentNameCol.setCellValueFactory(new PropertyValueFactory<>("assessmentName"));
         assessmentNameCol.setCellFactory(TextFieldTableCell.forTableColumn());
-        
+
         TableColumn<StudentGrade, Double> scoreCol = new TableColumn<>("Score");
         scoreCol.setCellValueFactory(new PropertyValueFactory<>("score"));
         scoreCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        
+
         table.getColumns().addAll(studentNameCol, assessmentNameCol, scoreCol);
 
         ObservableList<StudentGrade> data = FXCollections.observableArrayList(
-            new StudentGrade("John Doe", "Midterm", 85.5),
-            new StudentGrade("Jane Smith", "Final", 92.0)
+                new StudentGrade(new Student("John Doe", "001"), new Assessment("Midterm", "Description", 100, 0.4), 85.5, "Good job"),
+                new StudentGrade(new Student("Jane Smith", "002"), new Assessment("Final", "Description", 100, 0.6), 92.0, "Excellent work")
         );
+
         table.setItems(data);
         table.setEditable(true);
-        
+
         return table;
     }
+
 
     private void addGrade() {
         Dialog<StudentGrade> dialog = new Dialog<>();
@@ -88,7 +94,7 @@ public class GradingView {
 
     private void saveChanges() {
         // Call the GradingController to save the changes
-        gradingController.saveGrades(gradeTable.getItems());
+        gradingController.saveGrades(new ArrayList<>(gradeTable.getItems()));
     }
 
     public VBox getRoot() {

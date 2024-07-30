@@ -1,11 +1,8 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Task;
+import com.gradeapp.model.*;
+import java.util.*;
 
-/**
- * Offers methods to validate input data for consistency and correctness.
- */
 public class DataValidator {
     public static boolean isValidWeight(double weight) {
         return weight >= 0 && weight <= 100;
@@ -18,5 +15,49 @@ public class DataValidator {
     public static boolean isValidAssessment(Assessment assessment) {
         double totalWeight = assessment.getTasks().stream().mapToDouble(Task::getWeight).sum();
         return Math.abs(totalWeight - 100) < 0.001; // Allow for floating-point imprecision
+    }
+
+    public static List<String> validateImportData(List<Student> students) {
+        List<String> errors = new ArrayList<>();
+        for (Student student : students) {
+            if (student.getName() == null || student.getName().isEmpty()) {
+                errors.add("Invalid name for student ID: " + student.getStudentId());
+            }
+            // Add more student data validation as needed
+        }
+        return errors;
+    }
+
+    public static List<String> validateExportData(List<Grade> grades) {
+        List<String> errors = new ArrayList<>();
+        for (Grade grade : grades) {
+            if (!isValidScore(grade.getScore(), grade.getAssessment().getMaxScore())) {
+                errors.add("Invalid score for student: " + grade.getStudent().getName() +
+                        ", assessment: " + grade.getAssessment().getName());
+            }
+            // Add more grade data validation as needed
+        }
+        return errors;
+    }
+
+    public static boolean isValidFileFormat(String fileName, String... allowedExtensions) {
+        String lowercaseFileName = fileName.toLowerCase();
+        return Arrays.stream(allowedExtensions)
+                .anyMatch(ext -> lowercaseFileName.endsWith(ext));
+    }
+
+    public static void ensureDataIntegrity(Object data) throws IllegalArgumentException {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null");
+        }
+        // Add more data integrity checks as needed
+    }
+
+    public static String generateErrorReport(List<String> errors) {
+        StringBuilder report = new StringBuilder("Validation Errors:\n");
+        for (int i = 0; i < errors.size(); i++) {
+            report.append(i + 1).append(". ").append(errors.get(i)).append("\n");
+        }
+        return report.toString();
     }
 }

@@ -10,10 +10,18 @@ public class DataImportExportController {
     }
 
     public void importData(String filePath) {
-        // Implement import logic using FileHandler
+        try {
+            fileHandler.importData(filePath);
+        } catch (Exception e) {
+            // Handle exception (e.g., log error, show error message)
+        }
     }
 
     public void exportData(String filePath) {
-        // Implement export logic using FileHandler
+        try {
+            fileHandler.exportData(filePath);
+        } catch (Exception e) {
+            // Handle exception (e.g., log error, show error message)
+        }
     }
 }
