@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="coursesContainer" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
+<VBox fx:id="coursesContainer" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
     <!-- Add new course section -->
     <HBox prefHeight="65.0" prefWidth="519.0" spacing="10.0" HBox.hgrow="ALWAYS">
         <children>
