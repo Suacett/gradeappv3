@@ -1,4 +1,4 @@
-package com.gradeapp.view;
+/** package com.gradeapp.view;
 
 import com.gradeapp.controller.GradingController;
 import com.gradeapp.model.Assessment;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 /**
  * Offers an interface for inputting and displaying student grades.
- */
+
 public class GradingView {
     private VBox root;
     private TableView<StudentGrade> gradeTable;
@@ -101,3 +101,4 @@ public class GradingView {
         return root;
     }
 }
+*/

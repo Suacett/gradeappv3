@@ -1,0 +1,17 @@
+
+
+
+/* SIDE NAVIGATION BAR */
+/* Navigation item states */
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5;
+}
+.nav-item:hover {
+    -fx-background-color: #E0E0E0;
+    -fx-background-radius: 5;
+}
+.nav-item:selected {
+    -fx-background-color: #E0E0E0;
+    -fx-background-radius: 5;
+}

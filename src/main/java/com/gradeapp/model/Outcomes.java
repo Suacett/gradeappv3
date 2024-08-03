@@ -19,19 +19,17 @@ public class Outcomes {
         this.studentAchievements = new HashMap<>();
     }
 
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public List<String> getLearningOutcomes() { return new ArrayList<>(learningOutcomes); }
-
+    // Methods for managing learning outcomes
     public void addLearningOutcome(String outcome) {
         learningOutcomes.add(outcome);
     }
 
+    // Methods for linking assessments
     public void linkAssessment(Assessment assessment, double weight) {
         linkedAssessments.put(assessment, weight);
     }
 
+    // Methods for managing student achievements
     public void updateStudentAchievement(Student student, double achievement) {
         studentAchievements.put(student, achievement);
     }
@@ -40,12 +38,31 @@ public class Outcomes {
         return studentAchievements.getOrDefault(student, 0.0);
     }
 
+    public double aggregateAchievement() {
+        return studentAchievements.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+    }
+
+    // Getters
+    public String getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public List<String> getLearningOutcomes() {
+        return new ArrayList<>(learningOutcomes);
+    }
+
     public Map<Assessment, Double> getLinkedAssessments() {
         return new HashMap<>(linkedAssessments);
     }
-
-    public double aggregateAchievement() {
-        return studentAchievements.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-    }
 }
-

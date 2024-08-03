@@ -1,6 +1,7 @@
 package com.gradeapp.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,13 +9,15 @@ import java.util.stream.Collectors;
 
 public class Course {
     private String name;
+    private String description;
     private List<Student> students;
     private GradeBook gradeBook;
     private List<Assessment> assessments;
     private Set<Outcomes> outcomes;
 
-    public Course(String name) {
+    public Course(String name, String description) {
         this.name = name;
+        this.description = description;
         this.students = new ArrayList<>();
         this.gradeBook = new GradeBook();
         this.assessments = new ArrayList<>();
@@ -23,6 +26,10 @@ public class Course {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public List<Student> getStudents() {
@@ -34,7 +41,7 @@ public class Course {
     }
 
     public List<Assessment> getAssessments() {
-        return new ArrayList<>(assessments);
+        return Collections.unmodifiableList(assessments);
     }
 
     public void addAssessment(Assessment assessment) {
@@ -42,7 +49,7 @@ public class Course {
     }
 
     public Set<Outcomes> getOutcomes() {
-        return new HashSet<>(outcomes);
+        return Collections.unmodifiableSet(outcomes);
     }
 
     public void addOutcome(Outcomes outcome) {
@@ -56,7 +63,7 @@ public class Course {
 
     public List<Grade> getAllGrades() {
         return students.stream()
-            .flatMap(student -> student.getGrades().stream())
-            .collect(Collectors.toList());
+                .flatMap(student -> student.getGrades().stream())
+                .collect(Collectors.toList());
     }
 }

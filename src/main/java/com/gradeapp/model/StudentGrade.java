@@ -9,5 +9,4 @@ public class StudentGrade extends Grade {
     public StudentGrade(String studentName, String assessmentName, double score) {
         super(new Student(studentName, ""), new Assessment(assessmentName, "", 100, 100), score, "");
     }
-
 }

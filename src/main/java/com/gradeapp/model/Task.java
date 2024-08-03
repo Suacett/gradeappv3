@@ -17,33 +17,72 @@ public class Task {
         this.completed = false;
     }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public double getWeight() { return weight; }
+    // Methods for managing the task
+    public double getWeightedScore() {
+        return (score / maxScore) * weight;
+    }
+
+    // Getters and Setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getWeight() {
+        return weight;
+    }
+
     public void setWeight(double weight) {
         if (weight < 0 || weight > 100) {
             throw new IllegalArgumentException("Weight must be between 0 and 100");
         }
         this.weight = weight;
     }
-    public double getMaxScore() { return maxScore; }
-    public void setMaxScore(double maxScore) { this.maxScore = maxScore; }
-    public Assessment getAssessment() { return assessment; }
-    public void setAssessment(Assessment assessment) { this.assessment = assessment; }
-    public boolean isCompleted() { return completed; }
-    public void setCompleted(boolean completed) { this.completed = completed; }
-    public double getScore() { return score; }
+
+    public double getMaxScore() {
+        return maxScore;
+    }
+
+    public void setMaxScore(double maxScore) {
+        this.maxScore = maxScore;
+    }
+
+    public Assessment getAssessment() {
+        return assessment;
+    }
+
+    public void setAssessment(Assessment assessment) {
+        this.assessment = assessment;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
     public void setScore(double score) {
         if (score < 0 || score > maxScore) {
             throw new IllegalArgumentException("Score must be between 0 and max score");
         }
         this.score = score;
         this.completed = true;
-    }
-
-    public double getWeightedScore() {
-        return (score / maxScore) * weight;
     }
 }

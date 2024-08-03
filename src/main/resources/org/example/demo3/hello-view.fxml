@@ -2,15 +2,143 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.demo3.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
-
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.HelloController">
+   <top>
+      <HBox prefHeight="35.0" prefWidth="600.0" style="-fx-border-color: #D9D9D9; -fx-border-width: 0 0 1 0; -fx-background-color: #FFF;" BorderPane.alignment="CENTER">
+         <children>
+            <Label text="MarkBook+" textFill="#0d8359">
+               <font>
+                  <Font name="System Bold" size="28.0" />
+               </font>
+            </Label>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+         </padding>
+      </HBox>
+   </top>
+   <left>
+      <VBox prefHeight="200.0" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #FFF; -fx-border-color: #D9D9D9; -fx-border-width: 0 1 0 0;" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <children>
+            <HBox id="nav-item" fx:id="homeButton" alignment="CENTER_LEFT" onMouseClicked="#showHomeContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/home.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Home">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <HBox id="nav-item" fx:id="coursesCategory" alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" onMouseClicked="#showCoursesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/courses.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Courses">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="80.0" onMouseClicked="#showClassesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/class.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Classes">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="140.0" onMouseClicked="#showStudentsContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/student.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Students">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="200.0" onMouseClicked="#showArchiveContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/archive.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Archive">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <AnchorPane fx:id="content" prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: #FFF;" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </AnchorPane>
+   </center>
+</BorderPane>

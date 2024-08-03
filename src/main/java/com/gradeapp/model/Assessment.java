@@ -29,19 +29,26 @@ public class Assessment {
         this.childAssessments = new ArrayList<>();
     }
 
-    public void createNestedAssessment(Assessment parentAssessment, Assessment childAssessment) {
+    // Methods for managing nested assessments
+    public static void createNestedAssessment(Assessment parentAssessment, Assessment childAssessment) {
         parentAssessment.addChildAssessment(childAssessment);
     }
 
+    public void addChildAssessment(Assessment child) {
+        childAssessments.add(child);
+        child.parentAssessment = this;
+    }
+
+    // Methods for managing the grade book
+    public GradeBook getGradeBook() {
+        return gradeBook;
+    }
 
     public void setGradeBook(GradeBook gradeBook) {
         this.gradeBook = gradeBook;
     }
 
-    public GradeBook getGradeBook() {
-        return this.gradeBook;
-    }
-
+    // Methods for generating reports
     public Map<String, Object> generateDetailedReport() {
         Map<String, Object> report = new HashMap<>();
         report.put("name", name);
@@ -49,19 +56,45 @@ public class Assessment {
         report.put("weight", weight);
         report.put("maxScore", maxScore);
         report.put("taskCount", tasks.size());
+        report.put("tasks", tasks.stream().map(Task::getName).toList());
         report.put("outcomeCount", outcomes.size());
+        report.put("outcomes", outcomes.stream().map(Outcomes::getName).toList());
         report.put("childAssessmentCount", childAssessments.size());
-
-        // Add more detailed information as needed
-        // For example, you could include lists of task names, outcome names, etc.
+        report.put("childAssessments", childAssessments.stream().map(Assessment::getName).toList());
 
         return report;
     }
 
+    // Methods for calculating values
     public double calculateTotalWeight() {
         return weight + childAssessments.stream()
                 .mapToDouble(Assessment::calculateTotalWeight)
                 .sum();
+    }
+
+    public double calculateGrade(List<Grade> grades) {
+        return grades.stream()
+                .filter(grade -> grade.getAssessment().equals(this))
+                .mapToDouble(Grade::getScore)
+                .sum();
+    }
+
+    // Methods for managing tasks
+    public void addTask(Task task) {
+        tasks.add(task);
+    }
+
+    public void removeTask(Task task) {
+        tasks.remove(task);
+    }
+
+    // Methods for managing outcomes
+    public void addOutcome(Outcomes outcome) {
+        outcomes.add(outcome);
+    }
+
+    public void removeOutcome(Outcomes outcome) {
+        outcomes.remove(outcome);
     }
 
     // Getters and Setters
@@ -71,6 +104,14 @@ public class Assessment {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public double getWeight() {
@@ -96,48 +137,15 @@ public class Assessment {
         return tasks;
     }
 
-    public void addTask(Task task) {
-        tasks.add(task);
-    }
-
-    public void removeTask(Task task) {
-        tasks.remove(task);
-    }
-
     public List<Outcomes> getOutcomes() {
         return outcomes;
     }
 
-    public void addOutcome(Outcomes outcome) {
-        outcomes.add(outcome);
+    public List<Assessment> getChildAssessments() {
+        return childAssessments;
     }
 
-    public void removeOutcome(Outcomes outcome) {
-        outcomes.remove(outcome);
+    public Assessment getParentAssessment() {
+        return parentAssessment;
     }
-
-    // Grading Calculation
-    public double calculateGrade(List<Grade> grades) {
-        double totalScore = 0;
-        for (Grade grade : grades) {
-            if (grade.getAssessment().equals(this)) {
-                totalScore += grade.getScore();
-            }
-        }
-        return totalScore; //could modify this further to calculate based on weights if needed
-    }
-
-    // Other functionalities can be added as needed
-
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public void addChildAssessment(Assessment child) {
-        childAssessments.add(child);
-        child.parentAssessment = this;
-    }
-
-    public List<Assessment> getChildAssessments() { return childAssessments; }
-
-    public Assessment getParentAssessment() { return parentAssessment; }
 }

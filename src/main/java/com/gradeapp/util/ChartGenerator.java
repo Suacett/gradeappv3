@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ChartGenerator {
+    private final Calculator calculator;
+
+    public ChartGenerator() {
+        this.calculator = new Calculator(); // Create an instance of Calculator
+    }
 
     public BarChart<String, Number> createGradeDistributionChart(List<Grade> grades) {
         CategoryAxis xAxis = new CategoryAxis();
@@ -23,7 +28,7 @@ public class ChartGenerator {
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Grades");
 
-        Map<String, Integer> distribution = Calculator.calculateGradeDistribution(grades);
+        Map<String, Integer> distribution = calculator.calculateGradeDistribution(grades);
         for (Map.Entry<String, Integer> entry : distribution.entrySet()) {
             series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
         }

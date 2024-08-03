@@ -14,19 +14,13 @@ public class Student {
         this.grades = new ArrayList<>();
     }
 
-    public String getName() { return name; }
-    public String getStudentId() { return studentId; }
-    public Course getCourse() { return course; }
-    public void setCourse(Course course) { this.course = course; }
-    public GradeBook getGradeBook() { 
-        return course != null ? course.getGradeBook() : null; 
-    }
-
+    // Methods for managing grades
     public void addGrade(Assessment assessment, double score, String feedback) {
         StudentGrade grade = new StudentGrade(this, assessment, score, feedback);
         grades.add(grade);
-        if (getGradeBook() != null) {
-            getGradeBook().addGrade(grade);
+        GradeBook gradeBook = getGradeBook();
+        if (gradeBook != null) {
+            gradeBook.addGrade(grade);
         }
     }
 
@@ -41,9 +35,35 @@ public class Student {
         return new ArrayList<>(grades);
     }
 
+    // Methods for calculating performance
     public double calculateOverallPerformance() {
-        return grades.stream()
+        double totalWeightedScore = grades.stream()
                 .mapToDouble(grade -> grade.getScore() * grade.getAssessment().getWeight())
-                .sum() / grades.stream().mapToDouble(grade -> grade.getAssessment().getWeight()).sum();
+                .sum();
+        double totalWeight = grades.stream()
+                .mapToDouble(grade -> grade.getAssessment().getWeight())
+                .sum();
+        return totalWeight > 0 ? totalWeightedScore / totalWeight : 0.0;
+    }
+
+    // Getters and Setters
+    public String getName() {
+        return name;
+    }
+
+    public String getStudentId() {
+        return studentId;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
+    }
+
+    public GradeBook getGradeBook() {
+        return course != null ? course.getGradeBook() : null;
     }
 }

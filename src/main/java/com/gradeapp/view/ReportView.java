@@ -1,3 +1,5 @@
+/**
+
 package com.gradeapp.view;
 
 import com.gradeapp.controller.ReportController;
@@ -13,9 +15,9 @@ import javafx.scene.layout.VBox;
 
 import java.util.Map;
 
-/**
+
  * Presents an interface for generating and viewing various reports with interactive charts.
- */
+
 public class ReportView {
     private VBox root;
     private ComboBox<String> reportTypeComboBox;
@@ -70,7 +72,7 @@ public class ReportView {
         // Generate and display charts
         generateCharts(reportData);
     }
-*/
+
     private void generateCharts(Map<String, Object> reportData) {
         chartContainer.getChildren().clear();
 
@@ -91,3 +93,4 @@ public class ReportView {
         return root;
     }
 }
+*/

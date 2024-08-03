@@ -18,6 +18,7 @@ public class GradingController {
         this.calculator = new WeightedAverageGradeCalculator();
     }
 
+    // Methods for calculating grades and achievements
     public double calculateOverallGrade(Student student, Assessment assessment) {
         return calculator.calculateWeightedAverage(student.getGrades(), assessment);
     }
@@ -31,6 +32,11 @@ public class GradingController {
         return achievements;
     }
 
+    public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
+        return calculator.calculateWeightedAverage(grades, assessment);
+    }
+
+    // Methods for managing grades
     public StudentGrade addGrade(Student student, Assessment assessment, double score, String feedback) {
         StudentGrade grade = new StudentGrade(student.getName(), assessment.getName(), score);
         grade.setFeedback(feedback);
@@ -43,12 +49,8 @@ public class GradingController {
         return student.getGrades();
     }
 
-    public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
-        return calculator.calculateWeightedAverage(grades, assessment);
-    }
-
     public void saveGrades(List<StudentGrade> grades) {
         // Implementation for saving grades
-        // This method should update the grades in the database or persistent storage
+        // This method should update the grades in the database or persistent storage(?)
     }
 }

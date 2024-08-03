@@ -1,4 +1,4 @@
-package com.gradeapp.view;
+/** package com.gradeapp.view;
 
 import com.gradeapp.controller.DataImportExportController;
 import com.gradeapp.controller.GradingController;
@@ -16,7 +16,7 @@ import java.io.File;
 
 /**
  * Provides the main user interface for the application, integrating all other views and menu functionality.
- */
+
 public class MainView {
     private Stage stage;
     private BorderPane root;
@@ -135,3 +135,5 @@ public class MainView {
         return stage;
     }
 }
+
+ */

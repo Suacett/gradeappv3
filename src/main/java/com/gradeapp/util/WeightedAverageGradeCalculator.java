@@ -6,9 +6,11 @@ import com.gradeapp.model.Outcomes;
 import com.gradeapp.model.Student;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WeightedAverageGradeCalculator {
 
+    // Method to calculate weighted average grade
     public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
         double totalWeightedScore = 0;
         double totalWeight = 0;
@@ -24,10 +26,11 @@ public class WeightedAverageGradeCalculator {
         return totalWeight > 0 ? totalWeightedScore / totalWeight : 0;
     }
 
+    // Method to calculate outcome achievement for a student
     public double calculateOutcomeAchievement(Student student, Outcomes outcome) {
         List<? extends Grade> relevantGrades = student.getGrades().stream()
                 .filter(grade -> grade.getAssessment().getOutcomes().contains(outcome))
-                .toList();
+                .collect(Collectors.toList());
 
         double totalScore = 0;
         double totalMaxScore = 0;

@@ -10,16 +10,10 @@ public class GradeBook {
         this.grades = new HashMap<>();
     }
 
+    // Methods for adding and removing grades
     public void addGrade(Grade grade) {
         grades.computeIfAbsent(grade.getStudent(), k -> new HashMap<>())
                 .put(grade.getAssessment(), grade);
-    }
-
-    private GradeBook gradeBook;
-
-
-    public GradeBook getGradeBook() {
-        return this.gradeBook;
     }
 
     public void removeGrade(Grade grade) {
@@ -29,6 +23,7 @@ public class GradeBook {
         }
     }
 
+    // Methods for retrieving grades
     public Grade getGrade(Student student, Assessment assessment) {
         return grades.getOrDefault(student, Collections.emptyMap()).get(assessment);
     }
@@ -43,6 +38,14 @@ public class GradeBook {
                 .collect(Collectors.toList());
     }
 
+    public List<Grade> getGradesForAssessment(Assessment assessment) {
+        return grades.values().stream()
+                .map(m -> m.get(assessment))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    // Methods for calculating averages
     public double getAverageGradeForStudent(Student student) {
         Map<Assessment, Grade> studentGrades = grades.get(student);
         if (studentGrades == null || studentGrades.isEmpty()) {
@@ -63,12 +66,5 @@ public class GradeBook {
                                 .average()
                                 .orElse(0.0)
                 ));
-    }
-
-    public List<Grade> getGradesForAssessment(Assessment assessment) {
-        return grades.values().stream()
-                .map(m -> m.get(assessment))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 }

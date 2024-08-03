@@ -4,8 +4,8 @@ import com.gradeapp.controller.ReportController.ReportFormat;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.*;
 import java.util.Map;
 
 public class ReportExporter {
@@ -43,11 +43,17 @@ public class ReportExporter {
 
     private void exportToPdf(Map<String, Object> report, String filePath) {
         // Implement PDF export logic here
-        // This might require additional libraries like iText or Apache PDFBox
+
     }
 
     private void exportToCsv(Map<String, Object> report, String filePath) {
-        // Implement CSV export logic here
-        // You can use Java's built-in CSV writing capabilities or libraries like OpenCSV
+        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
+            for (Map.Entry<String, Object> entry : report.entrySet()) {
+                writer.write(entry.getKey() + "," + entry.getValue().toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
