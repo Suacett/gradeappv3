@@ -10,7 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import com.gradeapp.database.database;
+import com.gradeapp.database.Database;
 
 // CoursesController manages the Courses category dynamic content.
 public class CoursesController {
@@ -29,13 +29,13 @@ public class CoursesController {
 
     private List<Course> coursesList = new ArrayList<>();
 
-    private database db = new database();
+    private Database db = new Database();
 
-    // Initialize the CoursesController
+    // Initialise the CoursesController
     @FXML
     private void initialize() {
         displayCurrentCourses();
-        db.initializeDatabase();
+        db.initialiseDatabase();
     }
 
     // Method to handle 'Add Course' button click
@@ -88,14 +88,14 @@ public class CoursesController {
         VBox courseCard = new VBox();
         courseCard.setPadding(new Insets(10));
         courseCard.setSpacing(10);
-        courseCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px;");
+        courseCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px; -fx-border-radius: 5px;");
 
         Label courseNameLabel = new Label(course.getName());
         Label courseDescriptionLabel = new Label(course.getDescription());
 
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(event -> {
-            db.deleteCourse(course.getName()); // Implement delete in database class
+            db.delete("courses", "name", course.getName()); // Delete course from database
             displayCurrentCourses(); // Refresh the course list
         });
 
