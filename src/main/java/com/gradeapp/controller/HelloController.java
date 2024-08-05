@@ -11,26 +11,27 @@ public class HelloController {
     @FXML
     private AnchorPane content;
 
+// Home category click event
     @FXML
     public void showHomeContent() {
         loadContent("/org/example/demo3/home-view.fxml", "home-view.fxml");
     }
-
+// Courses category click event
     @FXML
     public void showCoursesContent() {
         loadContent("/org/example/demo3/courses-view.fxml", "courses-view.fxml");
     }
-
+// Classes category click event
     @FXML
     public void showClassesContent() {
         loadContent("/org/example/demo3/classes-view.fxml", "classes-view.fxml");
     }
-
+// Students category click event
     @FXML
     public void showStudentsContent() {
         loadContent("/org/example/demo3/students-view.fxml", "students-view.fxml");
     }
-
+// Archive category click event
     @FXML
     public void showArchiveContent() {
         loadContent("/org/example/demo3/archive-view.fxml", "archive-view.fxml");
