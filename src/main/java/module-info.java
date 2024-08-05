@@ -23,6 +23,8 @@ module org.example.demo {
     requires org.apache.poi.ooxml;
     requires java.logging;
 
+    requires java.sql;
+
     opens org.example.demo3 to javafx.fxml;
     exports org.example.demo3;
 
