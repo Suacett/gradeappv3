@@ -1,6 +1,7 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.model.Course;
+import com.gradeapp.database.Database;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import com.gradeapp.database.Database;
 
 // CoursesController manages the Courses category dynamic content.
 public class CoursesController {
@@ -83,7 +83,6 @@ public class CoursesController {
         }
     }
 
-
     private VBox createCourseCard(Course course) {
         VBox courseCard = new VBox();
         courseCard.setPadding(new Insets(10));
@@ -102,7 +101,6 @@ public class CoursesController {
         courseCard.getChildren().addAll(courseNameLabel, courseDescriptionLabel, deleteButton);
         return courseCard;
     }
-
 
     // Display current courses
     private void displayCurrentCourses() {
@@ -123,5 +121,4 @@ public class CoursesController {
             }
         }
     }
-
 }
