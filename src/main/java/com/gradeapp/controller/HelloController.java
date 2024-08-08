@@ -3,14 +3,17 @@ package com.gradeapp.controller;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
 public class HelloController {
 
     @FXML
-    private AnchorPane content;
+    private VBox content;
+    public VBox getContent() {
+        return content;
+    }
 
+// Categories navigation
 // Home category click event
     @FXML
     public void showHomeContent() {
@@ -37,15 +40,18 @@ public class HelloController {
         loadContent("/org/example/demo3/archive-view.fxml", "archive-view.fxml");
     }
 
+
+// Loads fxml content
     private void loadContent(String fxmlPath, String viewName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             VBox view = loader.load();
-            System.out.println("Loaded " + viewName + " successfully.");
+            System.out.println("Loaded " + viewName + " successfully...");
             content.getChildren().setAll(view);
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Error loading " + viewName + ": " + e.getMessage());
+            System.out.println("Error :" + viewName + e.getMessage());
         }
     }
+    
 }

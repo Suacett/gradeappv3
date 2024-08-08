@@ -1,6 +1,5 @@
 
 
-
 /* SIDE NAVIGATION BAR */
 /* Navigation item states */
 .nav-item {
@@ -15,3 +14,11 @@
     -fx-background-color: #E0E0E0;
     -fx-background-radius: 5;
 }
+
+/* Button {
+    -fx-border-color: gray;
+    -fx-text-fill: #29DA9B;
+    -fx-background-color: #FFF;
+    -fx-border-width: 1px 1px 1px 1px;
+    -fx-border-radius: 50px;
+} */
