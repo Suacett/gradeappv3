@@ -25,7 +25,7 @@ public class CoursesController {
     private VBox newCourseInputContainer;
 
     @FXML
-    private VBox currentCoursesContainer;
+    private VBox currentCourseContainer;
 
     private List<Course> coursesList = new ArrayList<>();
 
@@ -34,8 +34,8 @@ public class CoursesController {
     // Initialise the CoursesController
     @FXML
     private void initialize() {
-        displayCurrentCourses();
         db.initialiseDatabase();
+        displayCurrentCourses();
     }
 
     // Method to handle 'Add Course' button click
@@ -104,7 +104,7 @@ public class CoursesController {
 
     // Display current courses
     private void displayCurrentCourses() {
-        currentCoursesContainer.getChildren().clear();
+        currentCourseContainer.getChildren().clear();
 
         // Retrieve courses from the database
         List<Course> coursesFromDb = db.getAllCourses();
@@ -112,12 +112,12 @@ public class CoursesController {
         // If there are no courses, show a message
         if (coursesFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current Courses");
-            currentCoursesContainer.getChildren().add(emptyLabel);
+            currentCourseContainer.getChildren().add(emptyLabel);
         } else {
             // Display courses from the database
             for (Course course : coursesFromDb) {
                 VBox courseCard = createCourseCard(course);
-                currentCoursesContainer.getChildren().add(courseCard);
+                currentCourseContainer.getChildren().add(courseCard);
             }
         }
     }
