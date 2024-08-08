@@ -1,5 +1,6 @@
 package com.gradeapp.database;
 
+import com.gradeapp.model.Classes;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Student;
 
@@ -12,46 +13,54 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Database {
-    private static final String URL = "jdbc:sqlite:com.gradeapp.db"; // URL path for the database
+    private static final String URL = "jdbc:sqlite:com.gradeapp.db"; // URL path for db
 
-    // Initialise database and create tables
-    public void initialiseDatabase() {
+    // Initialise db, tables
+    public void initialiseDatabase() { // Courses table
         String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
                 + "description TEXT NOT NULL"
                 + ");";
-
-        String createStudentsTable = "CREATE TABLE IF NOT EXISTS students ("
+        String createStudentsTable = "CREATE TABLE IF NOT EXISTS students (" // Students table
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
-                + "description TEXT NOT NULL"
+                + "studentId TEXT NOT NULL"
                 + ");";
-
+        String createClassesTable = "CREATE TABLE IF NOT EXISTS classes (" // Classes table
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "name TEXT NOT NULL,"
+                + "classId TEXT NOT NULL"
+                + ");";
+        // Connect to db, create tables
         try (Connection conn = this.connect();
              PreparedStatement stmtCourses = conn.prepareStatement(createCoursesTable);
-             PreparedStatement stmtStudents = conn.prepareStatement(createStudentsTable)) {
+             PreparedStatement stmtStudents = conn.prepareStatement(createStudentsTable);
+             PreparedStatement stmtClasses = conn.prepareStatement(createClassesTable)) {
             stmtCourses.execute();
             stmtStudents.execute();
-            System.out.println("Database and tables initialized successfully.");
+            stmtClasses.execute();
+            System.out.println("Db/tables working...");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error :" + e.getMessage());
         }
     }
 
-    // Connect to the database
+    // Db connection
     private Connection connect() {
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(URL);
-            System.out.println("Successfully connected to SQLite");
+            System.out.println("SQLite working...");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return conn;
     }
 
-    // ADD a course to the database
+// Methods
+    // COURSES
+    // ADD course to db
     public void addCourse(String name, String description) {
         String sql = "INSERT INTO courses(name, description) VALUES(?, ?)";
         try (Connection conn = this.connect();
@@ -59,13 +68,12 @@ public class Database {
             pstmt.setString(1, name);
             pstmt.setString(2, description);
             pstmt.executeUpdate();
-            System.out.println("Course added successfully.");
+            System.out.println("Course added...");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
-
-    // GET all courses
+    // GET courses from db
     public List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT * FROM courses";
@@ -83,34 +91,34 @@ public class Database {
         return courses;
     }
 
-    // DELETE method for courses or students
+    // DELETE courses, students, classes from db
     public void delete(String table, String column, String value) {
         String sql = "DELETE FROM " + table + " WHERE " + column + " = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, value);
             pstmt.executeUpdate();
-            System.out.println("Record deleted successfully.");
+            System.out.println("Record deleted...");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    // ADD a student
-    public void addStudent(String name, String id) {
-        String sql = "INSERT INTO students(name, description) VALUES(?, ?)";
+    // STUDENTS
+    // ADD student
+    public void addStudent(String name, String studentId) {
+        String sql = "INSERT INTO students(name, studentId) VALUES(?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
-            pstmt.setString(2, id);
+            pstmt.setString(2, studentId);
             pstmt.executeUpdate();
-            System.out.println("Student added successfully.");
+            System.out.println("Student added...");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
-
-    // GET all students
+    // GET students from db
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
@@ -119,12 +127,45 @@ public class Database {
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString("name");
-                String description = rs.getString("description");
-                students.add(new Student(name, description));
+                String studentId = rs.getString("studentId");
+                students.add(new Student(name, studentId));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return students;
     }
+
+    // CLASSES
+    // ADD class to db
+    public void addClass(String name, String classId) {
+        String sql = "INSERT INTO classes(name, classId) VALUES(?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.setString(2, classId);
+            pstmt.executeUpdate();
+            System.out.println("Class added...");
+        } catch (SQLException e) {
+            System.out.println("Class not added..." + e.getMessage());
+        }
+    }
+    // GET classes from db
+    public List<Classes> getAllClasses() {
+        List<Classes> classes = new ArrayList<>();
+        String sql = "SELECT * FROM classes";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String classId = rs.getString("ID");
+                classes.add(new Classes(name, classId));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return classes;
+    }
+
 }

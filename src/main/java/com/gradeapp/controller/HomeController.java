@@ -11,8 +11,10 @@ import javafx.scene.layout.VBox;
 import java.util.List;
 
 
-
 // HomeController manages the Home category dynamic content.
+
+// Currently home content is nonfunctional, for static display to client only.
+
 public class HomeController {
 
     @FXML
@@ -20,6 +22,9 @@ public class HomeController {
 
     private Database db;
 
+    public void initialize() {
+
+    }
 
 
 }
