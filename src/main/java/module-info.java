@@ -31,12 +31,12 @@ module org.example.demo {
     opens com.gradeapp.controller to javafx.fxml;
     opens com.gradeapp.model to javafx.base;
     opens com.gradeapp.util to javafx.base;
-    opens com.gradeapp.view to javafx.fxml;
+
 
     exports com.gradeapp.controller;
     exports com.gradeapp.model;
     exports com.gradeapp.util;
-    exports com.gradeapp.view;
+
 
 
 }
