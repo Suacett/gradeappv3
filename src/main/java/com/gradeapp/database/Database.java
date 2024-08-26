@@ -58,7 +58,8 @@ public class Database {
         return conn;
     }
 
-// Methods
+    // Methods
+
     // COURSES
     // ADD course to db
     public void addCourse(String name, String description) {
@@ -73,6 +74,22 @@ public class Database {
             System.out.println(e.getMessage());
         }
     }
+
+    // UPDATE course details
+    public void updateCourse(String oldCourseName, String newName, String newDescription) {
+        String sql = "UPDATE courses SET name = ?, description = ? WHERE name = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newName);
+            pstmt.setString(2, newDescription);
+            pstmt.setString(3, oldCourseName);
+            pstmt.executeUpdate();
+            System.out.println("Course updated...");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
     // GET courses from db
     public List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>();
@@ -94,7 +111,7 @@ public class Database {
     // DELETE courses, students, classes from db
     public void delete(String table, String column, String value) {
         String sql = "DELETE FROM " + table + " WHERE " + column + " = ?";
-        try (Connection conn = connect();
+        try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, value);
             pstmt.executeUpdate();
@@ -118,6 +135,22 @@ public class Database {
             System.out.println(e.getMessage());
         }
     }
+
+    // UPDATE student details
+    public void updateStudent(String oldStudentId, String newName, String newStudentId) {
+        String sql = "UPDATE students SET name = ?, studentId = ? WHERE studentId = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newName);
+            pstmt.setString(2, newStudentId);
+            pstmt.setString(3, oldStudentId);
+            pstmt.executeUpdate();
+            System.out.println("Student updated...");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     // GET students from db
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
@@ -150,16 +183,33 @@ public class Database {
             System.out.println("Class not added..." + e.getMessage());
         }
     }
+
+    // UPDATE class details
+    public void updateClass(String oldClassId, String newName, String newClassId) {
+        String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newName);
+            pstmt.setString(2, newClassId);
+            pstmt.setString(3, oldClassId);
+            pstmt.executeUpdate();
+            System.out.println("Class updated...");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+
     // GET classes from db
     public List<Classes> getAllClasses() {
         List<Classes> classes = new ArrayList<>();
-        String sql = "SELECT * FROM classes";
+        String sql = "SELECT name, classId FROM classes"; // Fetch name and classId specifically
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString("name");
-                String classId = rs.getString("ID");
+                String classId = rs.getString("classId");
                 classes.add(new Classes(name, classId));
             }
         } catch (SQLException e) {
@@ -167,5 +217,7 @@ public class Database {
         }
         return classes;
     }
+
+
 
 }

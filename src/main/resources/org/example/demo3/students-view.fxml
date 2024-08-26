@@ -4,11 +4,14 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 <VBox fx:id="studentsContainer" prefHeight="509.0" prefWidth="566.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentController">
+
+    <!-- Section for displaying current students -->
     <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
         <children>
             <Label text="Current students">
@@ -16,17 +19,21 @@
                     <Font size="18.0" />
                 </font>
             </Label>
-            <VBox fx:id="currentStudentContainer" prefHeight="100.0" prefWidth="200.0" />
+            <ScrollPane fitToWidth="true" fitToHeight="true" VBox.vgrow="ALWAYS">
+                <VBox fx:id="currentStudentContainer" prefHeight="100.0" prefWidth="200.0" />
+            </ScrollPane>
         </children>
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>
     </VBox>
+
     <Separator prefWidth="200.0">
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
         </padding>
     </Separator>
+
     <!-- Add new student section -->
     <HBox prefHeight="65.0" prefWidth="519.0" spacing="10.0" HBox.hgrow="ALWAYS">
         <children>
@@ -35,13 +42,13 @@
                     <Font size="16.0" />
                 </font>
             </Label>
-            <Button mnemonicParsing="false" onMouseClicked="#handleAddStudentButtonAction" text="+ Add Student" />
-         <Label layoutX="30.0" layoutY="30.0" text="Add Student from file">
-            <font>
-               <Font size="16.0" />
-            </font>
-         </Label>
-         <Button layoutX="167.0" layoutY="30.0" mnemonicParsing="false" text="+ Add Student file" />
+            <Button fx:id="addStudentButton" mnemonicParsing="false" onMouseClicked="#handleAddStudentButtonAction" text="+ Add Student" />
+            <Label layoutX="30.0" layoutY="30.0" text="Add Student from file">
+                <font>
+                    <Font size="16.0" />
+                </font>
+            </Label>
+            <Button layoutX="167.0" layoutY="30.0" mnemonicParsing="false" onMouseClicked="#handleImportStudentsFromFile" text="+ Add Student file" />
         </children>
         <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

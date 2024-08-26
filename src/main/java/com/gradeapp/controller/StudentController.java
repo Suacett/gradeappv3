@@ -7,24 +7,26 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 
 // StudentController manages the Student category dynamic content.
 public class StudentController {
 
-// FXML ids
+    // FXML ids
     @FXML
     private VBox studentContainer;
-    @FXML
-    private Button addstudentButton;
     @FXML
     private VBox newStudentInputContainer;
     @FXML
     private VBox currentStudentContainer;
+    @FXML
+    private Button addStudentButton;
 
     private List<Student> studentList = new ArrayList<>();
 
@@ -52,7 +54,6 @@ public class StudentController {
         Label studentNameLabel = new Label("Student Name:");
         TextField studentNameField = new TextField();
         studentNameField.setPromptText("Student name");
-        //Label studentDescriptionLabel = new Label("Student Id:");
         TextField studentIdField = new TextField();
         studentIdField.setPromptText("Student Id");
         Button submitButton = new Button("+ Add Student"); // Submit button
@@ -79,19 +80,71 @@ public class StudentController {
 
     // Student card, displays current students
     private VBox createStudentCard(Student student) {
-        VBox studentCard = new VBox(); // Add VBox
+        VBox studentCard = new VBox();
         studentCard.setPadding(new Insets(10));
         studentCard.setSpacing(10);
         studentCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px; -fx-border-radius: 5px;");
-        Label studentNameLabel = new Label(student.getName());
+
+        Label studentNameLabel = new Label(student.getName());  // Display the full name as it is
         Label studentIdLabel = new Label(student.getStudentId());
+
+        // Create HBox to hold the buttons
+        HBox buttonContainer = new HBox();
+        buttonContainer.setSpacing(10);
+
+        Button editButton = new Button("Edit");
+        editButton.setOnAction(event -> handleEditButtonAction(student));
+
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(event -> {
-            db.delete("students", "name", student.getName()); // Delete from db
-            displayCurrentStudent(); // Display current courses
+            db.delete("students", "studentId", student.getStudentId()); // Ensure deletion is based on studentId
+            displayCurrentStudent();  // Refresh the student list after deletion
         });
-        studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, deleteButton);
+
+        buttonContainer.getChildren().addAll(editButton, deleteButton);
+        studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, buttonContainer);
         return studentCard;
+    }
+
+    // Edit button action
+    private void handleEditButtonAction(Student student) {
+        // Display an input form with the current student's details filled in
+        TextField studentNameField = new TextField(student.getName());
+        TextField studentIdField = new TextField(student.getStudentId());
+        Button saveButton = new Button("Save");
+
+        saveButton.setOnAction(event -> {
+            String newName = studentNameField.getText();
+            String newId = studentIdField.getText();
+            if (!newName.isEmpty() && !newId.isEmpty()) {
+                // Update student information in the database
+                db.updateStudent(student.getStudentId(), newName, newId);
+                displayCurrentStudent(); // Refresh the display
+            } else {
+                System.out.println("The form is incomplete...");
+            }
+        });
+
+        VBox editStudentBox = new VBox(10, new Label("Edit Student"), studentNameField, studentIdField, saveButton);
+        currentStudentContainer.getChildren().clear();
+        currentStudentContainer.getChildren().add(editStudentBox);
+    }
+
+    @FXML
+    private void handleImportStudentsFromFile() {
+        // Logic to handle file import
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+        File file = fileChooser.showOpenDialog(addStudentButton.getScene().getWindow());
+
+        if (file != null) {
+            // Assuming you have a DataImportExportController set up
+            DataImportExportController dataImportExportController = new DataImportExportController();
+            dataImportExportController.importData(file.getAbsolutePath());
+
+            // Refresh the student list after importing
+            displayCurrentStudent();
+        }
     }
 
     // Display current students
@@ -108,5 +161,4 @@ public class StudentController {
             }
         }
     }
-
 }
