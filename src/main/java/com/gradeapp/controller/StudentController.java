@@ -52,12 +52,12 @@ public class StudentController {
         Label studentNameLabel = new Label("Student Name:");
         TextField studentNameField = new TextField();
         studentNameField.setPromptText("Student name");
-        Label studentDescriptionLabel = new Label("Student Id:");
+        //Label studentDescriptionLabel = new Label("Student Id:");
         TextField studentIdField = new TextField();
         studentIdField.setPromptText("Student Id");
         Button submitButton = new Button("+ Add Student"); // Submit button
         submitButton.setOnAction(event -> handleSubmitButtonAction(studentNameField, studentIdField));
-        studentInputBox.getChildren().addAll(studentNameLabel, studentNameField, studentDescriptionLabel, studentIdField, submitButton);
+        studentInputBox.getChildren().addAll(studentNameLabel, studentNameField, studentIdField, submitButton);
         return studentInputBox;
     }
 
