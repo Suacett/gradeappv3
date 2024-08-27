@@ -78,33 +78,30 @@ public class StudentController {
         }
     }
 
-    // Student card, displays current students
-    private VBox createStudentCard(Student student) {
-        VBox studentCard = new VBox();
-        studentCard.setPadding(new Insets(10));
-        studentCard.setSpacing(10);
-        studentCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px; -fx-border-radius: 5px;");
-
-        Label studentNameLabel = new Label(student.getName());  // Display the full name as it is
-        Label studentIdLabel = new Label(student.getStudentId());
-
-        // Create HBox to hold the buttons
-        HBox buttonContainer = new HBox();
-        buttonContainer.setSpacing(10);
-
-        Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> handleEditButtonAction(student));
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.setOnAction(event -> {
-            db.delete("students", "studentId", student.getStudentId()); // Ensure deletion is based on studentId
-            displayCurrentStudent();  // Refresh the student list after deletion
-        });
-
-        buttonContainer.getChildren().addAll(editButton, deleteButton);
-        studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, buttonContainer);
-        return studentCard;
-    }
+// Student card, displays current students
+private VBox createStudentCard(Student student) {
+    VBox studentCard = new VBox();
+    studentCard.getStyleClass().add("student-card");
+    studentCard.setPadding(new Insets(10));
+    studentCard.setSpacing(10);
+    Label studentNameLabel = new Label(student.getName());  // Display the full name as it is
+    Label studentIdLabel = new Label(student.getStudentId());
+    HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
+    buttonContainer.setSpacing(10);
+    Button editButton = new Button("Edit");
+    editButton.setOnAction(event -> handleEditButtonAction(student));
+    Button deleteButton = new Button("Delete");
+    deleteButton.getStyleClass().add("delete-button");
+    deleteButton.setOnAction(event -> {
+        db.delete("students", "studentId", student.getStudentId()); // Ensure deletion is based on studentId
+        displayCurrentStudent();  // Refresh the student list after deletion
+    });
+    buttonContainer.getChildren().addAll(editButton, deleteButton);
+    studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, buttonContainer);
+    // Set bottom margin
+    VBox.setMargin(studentCard, new Insets(0, 0, 10, 0));  // Top, Right, Bottom, Left
+    return studentCard;
+}
 
     // Edit button action
     private void handleEditButtonAction(Student student) {

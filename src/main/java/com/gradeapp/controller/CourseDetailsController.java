@@ -1,33 +1,36 @@
 package com.gradeapp.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.gradeapp.database.Database;
+import com.gradeapp.controller.HelloController;
 import com.gradeapp.model.Course;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 public class CourseDetailsController {
 
-    // Currently CourseDetailsController for testing purposes only.
+    // CourseDetailsController manages the Add New Course form.
 
-// FXML ids
+    // FXML ids
     @FXML
-    private Label courseNameLabel;
+    private TextField courseName;
+
     @FXML
-    private Label courseDescriptionLabel;
+    private TextField courseId;
 
-    private Course course;
+    private Database db = new Database();
+    private List<Course> coursesList = new ArrayList<>();
 
-    // Display details
-    public void setCourse(Course course) {
-        this.course = course;
-        displayCourseDetails();
+    @FXML
+    private void addCourseToDb() {
+        String name = courseName.getText();
+        String description = courseId.getText();
+        coursesList.add(new Course(name, description));
+        db.addCourse(name, description);
     }
 
-    // Display course details
-    private void displayCourseDetails() {
-        if (course != null) {
-            courseNameLabel.setText(course.getName());
-            courseDescriptionLabel.setText(course.getDescription());
 
-        }
-    }
 }
