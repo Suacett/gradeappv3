@@ -1,22 +1,23 @@
 package com.gradeapp.database;
 
+import com.gradeapp.model.Assessment;
 import com.gradeapp.model.Classes;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Student;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Database {
     private static final String URL = "jdbc:sqlite:com.gradeapp.db"; // URL path for db
 
     // Initialise db, tables
-    public void initialiseDatabase() { // Courses table
+    public void initialiseDatabase() {
         String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
@@ -32,14 +33,23 @@ public class Database {
                 + "name TEXT NOT NULL,"
                 + "classId TEXT NOT NULL"
                 + ");";
+        String createAssessmentsTable = "CREATE TABLE IF NOT EXISTS assessments (" // Assessments table
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "name TEXT NOT NULL,"
+                + "description TEXT NOT NULL,"
+                + "weight REAL NOT NULL,"
+                + "maxScore REAL NOT NULL"
+                + ");";
         // Connect to db, create tables
         try (Connection conn = this.connect();
              PreparedStatement stmtCourses = conn.prepareStatement(createCoursesTable);
              PreparedStatement stmtStudents = conn.prepareStatement(createStudentsTable);
-             PreparedStatement stmtClasses = conn.prepareStatement(createClassesTable)) {
+             PreparedStatement stmtClasses = conn.prepareStatement(createClassesTable);
+             PreparedStatement stmtAssessments = conn.prepareStatement(createAssessmentsTable)) {
             stmtCourses.execute();
             stmtStudents.execute();
             stmtClasses.execute();
+            stmtAssessments.execute();
             System.out.println("Db/tables working...");
         } catch (SQLException e) {
             System.out.println("Error :" + e.getMessage());
@@ -61,7 +71,6 @@ public class Database {
     // Methods
 
     // COURSES
-    // ADD course to db
     public void addCourse(String name, String description) {
         String sql = "INSERT INTO courses(name, description) VALUES(?, ?)";
         try (Connection conn = this.connect();
@@ -75,7 +84,6 @@ public class Database {
         }
     }
 
-    // UPDATE course details
     public void updateCourse(String oldCourseName, String newName, String newDescription) {
         String sql = "UPDATE courses SET name = ?, description = ? WHERE name = ?";
         try (Connection conn = this.connect();
@@ -89,8 +97,7 @@ public class Database {
             System.out.println(e.getMessage());
         }
     }
-    
-    // GET courses from db
+
     public List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT * FROM courses";
@@ -108,7 +115,7 @@ public class Database {
         return courses;
     }
 
-    // DELETE courses, students, classes from db
+    // DELETE courses, students, classes, assessments from db
     public void delete(String table, String column, String value) {
         String sql = "DELETE FROM " + table + " WHERE " + column + " = ?";
         try (Connection conn = this.connect();
@@ -122,7 +129,6 @@ public class Database {
     }
 
     // STUDENTS
-    // ADD student
     public void addStudent(String name, String studentId) {
         String sql = "INSERT INTO students(name, studentId) VALUES(?, ?)";
         try (Connection conn = this.connect();
@@ -136,7 +142,6 @@ public class Database {
         }
     }
 
-    // UPDATE student details
     public void updateStudent(String oldStudentId, String newName, String newStudentId) {
         String sql = "UPDATE students SET name = ?, studentId = ? WHERE studentId = ?";
         try (Connection conn = this.connect();
@@ -151,7 +156,6 @@ public class Database {
         }
     }
 
-    // GET students from db
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
@@ -170,7 +174,6 @@ public class Database {
     }
 
     // CLASSES
-    // ADD class to db
     public void addClass(String name, String classId) {
         String sql = "INSERT INTO classes(name, classId) VALUES(?, ?)";
         try (Connection conn = this.connect();
@@ -184,7 +187,6 @@ public class Database {
         }
     }
 
-    // UPDATE class details
     public void updateClass(String oldClassId, String newName, String newClassId) {
         String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
         try (Connection conn = this.connect();
@@ -199,8 +201,6 @@ public class Database {
         }
     }
 
-
-    // GET classes from db
     public List<Classes> getAllClasses() {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT name, classId FROM classes"; // Fetch name and classId specifically
@@ -218,6 +218,74 @@ public class Database {
         return classes;
     }
 
+    // ASSESSMENTS
 
+    // ADD assessment to db
+    public void addAssessment(Assessment assessment) {
+        String sql = "INSERT INTO assessments(name, description, weight, maxScore) VALUES(?, ?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, assessment.getName());
+            pstmt.setString(2, assessment.getDescription());
+            pstmt.setDouble(3, assessment.getWeight());
+            pstmt.setDouble(4, assessment.getMaxScore());
+            pstmt.executeUpdate();
+            System.out.println("Assessment added...");
+        } catch (SQLException e) {
+            System.out.println("Assessment not added..." + e.getMessage());
+        }
+    }
 
+    // UPDATE assessment details
+    public void updateAssessment(Assessment assessment) {
+        String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, assessment.getName());
+            pstmt.setString(2, assessment.getDescription());
+            pstmt.setDouble(3, assessment.getWeight());
+            pstmt.setDouble(4, assessment.getMaxScore());
+            pstmt.setInt(5, getAssessmentIdByName(assessment.getName())); // Assuming the name is unique
+            pstmt.executeUpdate();
+            System.out.println("Assessment updated...");
+        } catch (SQLException e) {
+            System.out.println("Assessment not updated..." + e.getMessage());
+        }
+    }
+
+    // GET assessments from db
+    public List<Assessment> getAllAssessments() {
+        List<Assessment> assessments = new ArrayList<>();
+        String sql = "SELECT * FROM assessments";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                double weight = rs.getDouble("weight");
+                double maxScore = rs.getDouble("maxScore");
+                assessments.add(new Assessment(name, description, weight, maxScore));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return assessments;
+    }
+
+    // Get the assessment ID by name (assuming name is unique)
+    private int getAssessmentIdByName(String name) throws SQLException {
+        String sql = "SELECT id FROM assessments WHERE name = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("id");
+                } else {
+                    throw new SQLException("Assessment not found: " + name);
+                }
+            }
+        }
+    }
 }

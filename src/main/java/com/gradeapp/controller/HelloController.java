@@ -9,39 +9,48 @@ public class HelloController {
 
     @FXML
     private VBox content;
+
     public VBox getContent() {
         return content;
     }
 
-// Categories navigation
-// Home category click event
+    // Home category click event
     @FXML
     public void showHomeContent() {
         loadContent("/org/example/demo3/home-view.fxml", "home-view.fxml");
     }
-// Courses category click event
+
+    // Courses category click event
     @FXML
     public void showCoursesContent() {
         loadContent("/org/example/demo3/courses-view.fxml", "courses-view.fxml");
     }
-// Classes category click event
+
+    // Classes category click event
     @FXML
     public void showClassesContent() {
         loadContent("/org/example/demo3/classes-view.fxml", "classes-view.fxml");
     }
-// Students category click event
+
+    // Students category click event
     @FXML
     public void showStudentsContent() {
         loadContent("/org/example/demo3/students-view.fxml", "students-view.fxml");
     }
-// Archive category click event
+
+    // Archive category click event
     @FXML
     public void showArchiveContent() {
         loadContent("/org/example/demo3/archive-view.fxml", "archive-view.fxml");
     }
 
+    // Assessments category click event
+    @FXML
+    public void showAssessmentsContent() {
+        loadContent("/org/example/demo3/assessment-view.fxml", "assessment-view.fxml");
+    }
 
-// Loads fxml content
+    // Loads FXML content into the center content area
     private void loadContent(String fxmlPath, String viewName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -50,8 +59,7 @@ public class HelloController {
             content.getChildren().setAll(view);
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Error :" + viewName + e.getMessage());
+            System.out.println("Error loading " + viewName + ": " + e.getMessage());
         }
     }
-    
 }

@@ -9,6 +9,7 @@ import java.util.Map;
  * Represents an assessment structure, including its name, weight, max score, and associated tasks and outcomes.
  */
 public class Assessment {
+    private int id;  // Unique identifier
     private String name;
     private String description;
     private double weight;
@@ -19,6 +20,19 @@ public class Assessment {
     private Assessment parentAssessment;
     private GradeBook gradeBook;
 
+    // Constructor with id
+    public Assessment(int id, String name, String description, double weight, double maxScore) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        setWeight(weight);
+        this.maxScore = maxScore;
+        this.outcomes = new ArrayList<>();
+        this.tasks = new ArrayList<>();
+        this.childAssessments = new ArrayList<>();
+    }
+
+    // Constructor without id
     public Assessment(String name, String description, double weight, double maxScore) {
         this.name = name;
         this.description = description;
@@ -27,6 +41,15 @@ public class Assessment {
         this.outcomes = new ArrayList<>();
         this.tasks = new ArrayList<>();
         this.childAssessments = new ArrayList<>();
+    }
+
+    // Getters and setters for id
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     // Methods for managing nested assessments
@@ -51,6 +74,7 @@ public class Assessment {
     // Methods for generating reports
     public Map<String, Object> generateDetailedReport() {
         Map<String, Object> report = new HashMap<>();
+        report.put("id", id);
         report.put("name", name);
         report.put("description", description);
         report.put("weight", weight);
@@ -97,7 +121,7 @@ public class Assessment {
         outcomes.remove(outcome);
     }
 
-    // Getters and Setters
+    // Getters and Setters for other fields
     public String getName() {
         return name;
     }

@@ -4,7 +4,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -51,7 +50,7 @@
                   <Insets left="10.0" right="10.0" />
                </padding>
             </HBox>
-            <HBox id="nav-item" fx:id="coursesCategory" alignment="CENTER_LEFT" layoutX="20.0" layoutY="20.0" onMouseClicked="#showCoursesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="260.0" onMouseClicked="#showCoursesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
                <children>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -71,7 +70,7 @@
                   <Insets left="10.0" right="10.0" />
                </padding>
             </HBox>
-            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="80.0" onMouseClicked="#showClassesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="260.0" onMouseClicked="#showClassesContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
                <children>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -91,7 +90,7 @@
                   <Insets left="10.0" right="10.0" />
                </padding>
             </HBox>
-            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="140.0" onMouseClicked="#showStudentsContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="260.0" onMouseClicked="#showStudentsContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
                <children>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -111,14 +110,34 @@
                   <Insets left="10.0" right="10.0" />
                </padding>
             </HBox>
-            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="200.0" onMouseClicked="#showArchiveContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="260.0" onMouseClicked="#showArchiveContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
                <children>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@icons/archive.png" />
                      </image>
                   </ImageView>
-                  <Label text="Archived">
+                  <Label text="Archive">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="10.0" right="10.0" />
+               </padding>
+            </HBox>
+            <HBox id="nav-item" alignment="CENTER_LEFT" layoutX="20.0" layoutY="260.0" onMouseClicked="#showAssessmentsContent" prefHeight="50.0" prefWidth="200.0" spacing="10.0" styleClass="nav-item">
+               <children>
+                  <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@icons/assessmentTEMP_FILE_PLEASE_REPLACE.png" />
+                     </image>
+                  </ImageView>
+                  <Label text="Assessments">
                      <font>
                         <Font size="18.0" />
                      </font>
