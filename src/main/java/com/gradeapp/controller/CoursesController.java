@@ -1,6 +1,7 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.model.Course;
+import com.gradeapp.model.Outcome;
 import com.gradeapp.database.Database;
 
 import java.io.IOException;
@@ -9,9 +10,7 @@ import java.util.List;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 public class CoursesController {
@@ -23,59 +22,100 @@ public class CoursesController {
     private VBox newCourseInputContainer;
 
     @FXML
-    private VBox content; // Reference to the main content area
+    private VBox content;
 
     private Database db = new Database();
 
-    // Initialise the CoursesController
     @FXML
     private void initialize() {
         db.initialiseDatabase();
         displayCurrentCourses();
     }
 
-    // Method to handle 'Add Course' button click
     @FXML
     private void handleAddCourseButtonAction() {
         VBox courseInputBox = createCourseInputBox();
         newCourseInputContainer.getChildren().add(courseInputBox);
     }
 
-    // Create a new course input box
     private VBox createCourseInputBox() {
         VBox courseInputBox = new VBox();
-        courseInputBox.setPadding(new Insets(20, 20, 20, 20));
+        courseInputBox.setPadding(new Insets(20));
         courseInputBox.setSpacing(10);
 
-        Label courseNameLabel = new Label("Course Name:");
         TextField courseNameField = new TextField();
         courseNameField.setPromptText("Course name");
 
-        Label courseDescriptionLabel = new Label("Course Description:");
         TextField courseDescriptionField = new TextField();
         courseDescriptionField.setPromptText("Course description");
 
-        Button submitButton = new Button("+ Add Course");
-        submitButton.setOnAction(event -> handleSubmitButtonAction(courseNameField, courseDescriptionField));
+        TableView<Outcome> outcomesTable = new TableView<>();
+        setupOutcomesTable(outcomesTable);
 
-        courseInputBox.getChildren().addAll(courseNameLabel, courseNameField, courseDescriptionLabel, courseDescriptionField, submitButton);
+        Button addOutcomeButton = new Button("Add Outcome");
+        addOutcomeButton.setOnAction(e -> addOutcome(outcomesTable));
+
+        Button submitButton = new Button("+ Add Course");
+        submitButton.setOnAction(event -> handleSubmitButtonAction(courseNameField, courseDescriptionField, outcomesTable));
+
+        courseInputBox.getChildren().addAll(
+                new Label("Course Name:"), courseNameField,
+                new Label("Course Description:"), courseDescriptionField,
+                new Label("Outcomes:"), outcomesTable,
+                addOutcomeButton, submitButton
+        );
         return courseInputBox;
     }
 
-    // Method to handle 'Submit' new course button click
-    private void handleSubmitButtonAction(TextField courseNameField, TextField courseDescriptionField) {
+    private void setupOutcomesTable(TableView<Outcome> table) {
+        TableColumn<Outcome, String> idColumn = new TableColumn<>("Identifier");
+        idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty());
+
+        TableColumn<Outcome, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+
+        TableColumn<Outcome, String> descriptionColumn = new TableColumn<>("Description");
+        descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
+
+        TableColumn<Outcome, Double> weightColumn = new TableColumn<>("Weight");
+        weightColumn.setCellValueFactory(cellData -> cellData.getValue().weightProperty().asObject());
+
+        table.getColumns().addAll(idColumn, nameColumn, descriptionColumn, weightColumn);
+        table.setEditable(true);
+    }
+
+    private void addOutcome(TableView<Outcome> table) {
+        Outcome newOutcome = new Outcome("", "", "", 0.0);
+        table.getItems().add(newOutcome);
+    }
+
+    private void handleSubmitButtonAction(TextField courseNameField, TextField courseDescriptionField, TableView<Outcome> outcomesTable) {
         String courseName = courseNameField.getText();
         String courseDescription = courseDescriptionField.getText();
         if (!courseName.isEmpty() && !courseDescription.isEmpty()) {
             Course newCourse = new Course(courseName, courseDescription);
+
+            for (Outcome outcome : outcomesTable.getItems()) {
+                newCourse.addOutcome(outcome);
+            }
+
             db.addCourse(newCourse);
 
             courseNameField.clear();
             courseDescriptionField.clear();
+            outcomesTable.getItems().clear();
             displayCurrentCourses();
         } else {
-            System.out.println("Please finish the form");
+            showAlert();
         }
+    }
+
+    private void showAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText(null);
+        alert.setContentText("Please finish the form");
+        alert.showAndWait();
     }
 
     private VBox createCourseCard(Course course) {
