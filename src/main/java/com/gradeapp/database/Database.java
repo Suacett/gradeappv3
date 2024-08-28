@@ -9,7 +9,7 @@ public class Database {
     private static final String URL = "jdbc:sqlite:com.gradeapp.db";
 
     public void initialiseDatabase() {
-        String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
+       String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
                 + "id TEXT PRIMARY KEY,"
                 + "name TEXT NOT NULL,"
                 + "description TEXT NOT NULL"
@@ -40,7 +40,7 @@ public class Database {
                 + "weight REAL NOT NULL,"
                 + "FOREIGN KEY (course_id) REFERENCES courses(id)"
                 + ");";
-
+                
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement()) {
             stmt.execute(createCoursesTable);
@@ -82,22 +82,42 @@ public class Database {
         }
     }
 
-    public void updateCourse(Course course) {
-        String sql = "UPDATE courses SET name = ?, description = ? WHERE id = ?";
+    public void saveCourse(Course course) {
+        String sql = "INSERT OR REPLACE INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, course.getName());
-            pstmt.setString(2, course.getDescription());
-            pstmt.setString(3, course.getId());
-            pstmt.executeUpdate();
+            pstmt.setString(1, course.getId());
+            pstmt.setString(2, course.getName());
+            pstmt.setString(3, course.getDescription());
+            int affectedRows = pstmt.executeUpdate();
+            System.out.println("Rows affected in courses table: " + affectedRows); // Debug print
 
-            // Update outcomes
-            deleteOutcomes(course.getId());
-            addOutcomes(course.getId(), course.getOutcomes());
+            // Delete existing outcomes for this course
+            sql = "DELETE FROM outcomes WHERE course_id = ?";
+            try (PreparedStatement deleteStmt = conn.prepareStatement(sql)) {
+                deleteStmt.setString(1, course.getId());
+                int deletedRows = deleteStmt.executeUpdate();
+                System.out.println("Deleted outcomes: " + deletedRows); // Debug print
+            }
 
-            System.out.println("Course updated successfully.");
+            // Save new outcomes
+            sql = "INSERT INTO outcomes(course_id, id, name, description, weight) VALUES(?, ?, ?, ?, ?)";
+            try (PreparedStatement outcomeStmt = conn.prepareStatement(sql)) {
+                for (Outcome outcome : course.getOutcomes()) {
+                    outcomeStmt.setString(1, course.getId());
+                    outcomeStmt.setString(2, outcome.getId());
+                    outcomeStmt.setString(3, outcome.getName());
+                    outcomeStmt.setString(4, outcome.getDescription());
+                    outcomeStmt.setDouble(5, outcome.getWeight());
+                    int insertedRows = outcomeStmt.executeUpdate();
+                    System.out.println("Inserted outcome: " + outcome.getName() + ", Rows affected: " + insertedRows); // Debug print
+                }
+            }
+
+            System.out.println("Course and outcomes saved successfully.");
         } catch (SQLException e) {
-            System.out.println("Error updating course: " + e.getMessage());
+            System.out.println("Error saving course: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -114,6 +134,7 @@ public class Database {
                 Course course = new Course(id, name, description);
                 course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
+                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); // Debug print
             }
         } catch (SQLException e) {
             System.out.println("Error getting courses: " + e.getMessage());
@@ -149,22 +170,26 @@ public class Database {
     }
 
     private void addOutcomes(String courseId, List<Outcome> outcomes) {
-        String sql = "INSERT INTO outcomes(course_id, identifier, name, description, weight) VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO outcomes(course_id, weight, description, name) VALUES(?, ?, ?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (Outcome outcome : outcomes) {
                 pstmt.setString(1, courseId);
-                pstmt.setString(2, outcome.getId());
-                pstmt.setString(3, outcome.getName());
-                pstmt.setString(4, outcome.getDescription());
-                pstmt.setDouble(5, outcome.getWeight());
+                pstmt.setInt(2, (int) outcome.getWeight()); // Assuming weight is stored as an integer
+                pstmt.setString(3, outcome.getDescription());
+                pstmt.setString(4, outcome.getName());
+                
+                System.out.println("Inserting outcome: " + outcome.getName() + ", " + outcome.getDescription() + ", " + outcome.getWeight());
+                
                 pstmt.executeUpdate();
             }
         } catch (SQLException e) {
             System.out.println("Error adding outcomes: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
+    
     private List<Outcome> getOutcomesForCourse(String courseId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT * FROM outcomes WHERE course_id = ?";
@@ -173,7 +198,7 @@ public class Database {
             pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    String id = rs.getString("identifier");
+                    String id = rs.getString("id");
                     String name = rs.getString("name");
                     String description = rs.getString("description");
                     double weight = rs.getDouble("weight");
@@ -181,11 +206,12 @@ public class Database {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error getting outcomes: " + e.getMessage());
+            System.out.println("Error getting outcomes for course " + courseId + ": " + e.getMessage());
         }
+        System.out.println("Retrieved " + outcomes.size() + " outcomes for course " + courseId); // Debug print
         return outcomes;
     }
-
+    
     private int getCourseId(String courseName) throws SQLException {
         String sql = "SELECT id FROM courses WHERE name = ?";
         try (Connection conn = this.connect();

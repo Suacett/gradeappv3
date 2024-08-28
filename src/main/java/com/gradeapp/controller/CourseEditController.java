@@ -2,6 +2,9 @@ package com.gradeapp.controller;
 
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
+
+import java.util.ArrayList;
+
 import com.gradeapp.database.Database;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -29,10 +32,11 @@ public class CourseEditController {
 
     @FXML
     private void initialize() {
+        outcomes = FXCollections.observableArrayList();
         setupOutcomesTable();
         updateTotalWeight();
+        System.out.println("CourseEditController initialized"); // Debug print
     }
-
     private void setupOutcomesTable() {
         outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -43,27 +47,31 @@ public class CourseEditController {
         outcomeNameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         outcomeDescriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         outcomeWeightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-
-        outcomeIdentifierColumn.setOnEditCommit(event -> {
-            event.getRowValue().setId(event.getNewValue());
-            updateTotalWeight();
-        });
         outcomeNameColumn.setOnEditCommit(event -> {
-            event.getRowValue().setName(event.getNewValue());
-            updateTotalWeight();
+            Outcome outcome = event.getRowValue();
+            outcome.setName(event.getNewValue());
+            outcomesTable.refresh();
         });
         outcomeDescriptionColumn.setOnEditCommit(event -> {
-            event.getRowValue().setDescription(event.getNewValue());
-            updateTotalWeight();
+            Outcome outcome = event.getRowValue();
+            outcome.setDescription(event.getNewValue());
+            outcomesTable.refresh();
         });
         outcomeWeightColumn.setOnEditCommit(event -> {
-            event.getRowValue().setWeight(event.getNewValue());
+            Outcome outcome = event.getRowValue();
+            outcome.setWeight(event.getNewValue());
+            outcomesTable.refresh();
             updateTotalWeight();
         });
-
+        outcomeIdentifierColumn.setOnEditCommit(event -> {
+            Outcome outcome = event.getRowValue();
+            outcome.setId(event.getNewValue());
+            outcomesTable.refresh();
+        });
         outcomesTable.setItems(outcomes);
         outcomesTable.setEditable(true);
     }
+
 
     public void setCourse(Course course) {
         this.course = course;
@@ -72,15 +80,24 @@ public class CourseEditController {
             courseNameField.setText(course.getName());
             courseDescriptionField.setText(course.getDescription());
             outcomes.setAll(course.getOutcomes());
+            System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size()); // Debug print
+        } else {
+            courseIdField.clear();
+            courseNameField.clear();
+            courseDescriptionField.clear();
+            outcomes.clear();
+            System.out.println("Creating new course"); // Debug print
         }
         updateTotalWeight();
     }
 
-    @FXML
+     @FXML
     private void addOutcome() {
-        Outcome newOutcome = new Outcome("", "", "", 0.0);
+        Outcome newOutcome = new Outcome("New Outcome", "Name", "Description", 0.0);
         outcomes.add(newOutcome);
+        outcomesTable.refresh();
         updateTotalWeight();
+        System.out.println("Outcome added. Total outcomes: " + outcomes.size()); // Debug print
     }
 
     @FXML
@@ -103,16 +120,21 @@ public class CourseEditController {
         if (validateCourse()) {
             if (course == null) {
                 course = new Course(courseIdField.getText(), courseNameField.getText(), courseDescriptionField.getText());
+                System.out.println("New course created"); // Debug print
             } else {
                 course.setId(courseIdField.getText());
                 course.setName(courseNameField.getText());
                 course.setDescription(courseDescriptionField.getText());
+                System.out.println("Existing course updated"); // Debug print
             }
-            course.setOutcomes(outcomes);
-            db.updateCourse(course);
+            course.setOutcomes(new ArrayList<>(outcomes));
+            db.saveCourse(course);
+            System.out.println("Course saved: " + course.getName() + " (ID: " + course.getId() + ")");
+            System.out.println("Number of outcomes saved: " + outcomes.size());
             closeWindow();
         }
     }
+
 
     @FXML
     private void cancel() {

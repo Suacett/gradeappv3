@@ -1,5 +1,7 @@
 package com.gradeapp.controller;
 
+import java.util.ArrayList;
+
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
@@ -26,6 +28,7 @@ public class CourseDetailsController {
     private Database db = new Database();
     private Node previousView;
     private VBox content;
+    private ObservableList<Outcome> outcomes;
 
     @FXML
     private void initialize() {
@@ -41,12 +44,23 @@ public class CourseDetailsController {
         descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         weightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
 
-        identifierColumn.setOnEditCommit(event -> event.getRowValue().setId(event.getNewValue()));
-        descriptionColumn.setOnEditCommit(event -> event.getRowValue().setDescription(event.getNewValue()));
-        weightColumn.setOnEditCommit(event -> event.getRowValue().setWeight(event.getNewValue()));
+        identifierColumn.setOnEditCommit(event -> {
+            event.getRowValue().setId(event.getNewValue());
+            outcomesTable.refresh();
+        });
+        descriptionColumn.setOnEditCommit(event -> {
+            event.getRowValue().setDescription(event.getNewValue());
+            outcomesTable.refresh();
+        });
+        weightColumn.setOnEditCommit(event -> {
+            event.getRowValue().setWeight(event.getNewValue());
+            outcomesTable.refresh();
+        });
 
         outcomesTable.setEditable(true);
     }
+
+
 
     public void setCourse(Course course, Node previousView, VBox content) {
         this.course = course;
@@ -54,7 +68,8 @@ public class CourseDetailsController {
         this.content = content;
         courseNameField.setText(course.getName());
         courseDescriptionField.setText(course.getDescription());
-        updateOutcomesTable();
+        outcomes = FXCollections.observableArrayList(course.getOutcomes());
+        outcomesTable.setItems(outcomes);
     }
 
     private void updateOutcomesTable() {
@@ -69,14 +84,10 @@ public class CourseDetailsController {
 
         course.setName(updatedName);
         course.setDescription(updatedDescription);
+        course.setOutcomes(new ArrayList<>(outcomes));
 
-        // Update outcomes from the table
-        course.getOutcomes().clear();
-        course.getOutcomes().addAll(outcomesTable.getItems());
+        db.saveCourse(course);
 
-        db.updateCourse(course);
-
-        // Navigate back to the course list view
         content.getChildren().setAll(previousView);
     }
 
@@ -87,15 +98,15 @@ public class CourseDetailsController {
 
     @FXML
     private void addOutcome() {
-        Outcome newOutcome = new Outcome("New Outcome", "New Outcome", "Description", 0.0);
-        outcomesTable.getItems().add(newOutcome);
+        Outcome newOutcome = new Outcome("", "New Outcome", "Description", 0.0);
+        outcomes.add(newOutcome);
     }
-
+    
     @FXML
     private void removeSelectedOutcome() {
         Outcome selectedOutcome = outcomesTable.getSelectionModel().getSelectedItem();
         if (selectedOutcome != null) {
-            outcomesTable.getItems().remove(selectedOutcome);
+            outcomes.remove(selectedOutcome);
         }
     }
 }

@@ -2,16 +2,14 @@ package com.gradeapp.controller;
 
 import com.gradeapp.model.Course;
 import com.gradeapp.database.Database;
-
-import java.io.IOException;
-import java.util.List;
-
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.io.IOException;
+import java.util.List;
 
 public class CoursesController {
 
@@ -22,7 +20,6 @@ public class CoursesController {
 
     @FXML
     private void initialize() {
-        db.initialiseDatabase();
         displayCurrentCourses();
     }
 
@@ -59,6 +56,7 @@ public class CoursesController {
         currentCourseContainer.getChildren().clear();
 
         List<Course> coursesFromDb = db.getAllCourses();
+        System.out.println("Courses fetched from DB: " + coursesFromDb.size()); // Debug print
 
         if (coursesFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current Courses");
@@ -67,6 +65,7 @@ public class CoursesController {
             for (Course course : coursesFromDb) {
                 VBox courseCard = createCourseCard(course);
                 currentCourseContainer.getChildren().add(courseCard);
+                System.out.println("Added course card: " + course.getName()); // Debug print
             }
         }
     }
@@ -79,6 +78,9 @@ public class CoursesController {
         Label idLabel = new Label("ID: " + course.getId());
         Label descriptionLabel = new Label("Description: " + course.getDescription());
 
+        Button viewDetailsButton = new Button("View Details");
+        viewDetailsButton.setOnAction(event -> openCourseDetailsWindow(course));
+
         Button editButton = new Button("Edit");
         editButton.setOnAction(event -> openCourseEditWindow(course));
 
@@ -88,7 +90,26 @@ public class CoursesController {
             displayCurrentCourses();
         });
 
-        courseCard.getChildren().addAll(nameLabel, idLabel, descriptionLabel, editButton, deleteButton);
+        courseCard.getChildren().addAll(nameLabel, idLabel, descriptionLabel, viewDetailsButton, editButton, deleteButton);
         return courseCard;
+
     }
+    
+    private void openCourseDetailsWindow(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
+            VBox courseDetailsView = loader.load();
+
+            CourseDetailsController controller = loader.getController();
+            controller.setCourse(course, currentCourseContainer, content);
+
+            content.getChildren().setAll(courseDetailsView);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error loading course-details.fxml: " + e.getMessage());
+        }
+    }
+
+
+
 }
