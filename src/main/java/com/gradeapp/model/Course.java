@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
+    private String id;
     private String name;
     private String description;
     private List<Outcome> outcomes;
@@ -11,13 +12,22 @@ public class Course {
     private List<Student> students;
     private List<Assessment> assessments;
 
-    public Course(String name, String description) {
+    public Course(String id, String name, String description) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.outcomes = new ArrayList<>();
         this.gradeBook = new GradeBook();
         this.students = new ArrayList<>();
         this.assessments = new ArrayList<>();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

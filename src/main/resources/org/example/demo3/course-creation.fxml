@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox spacing="20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Course Details">
+        <font>
+            <Font size="18.0" />
+        </font>
+    </Label>
+
+    <GridPane vgap="10" hgap="10">
+        <Label text="Course Name:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Course ID:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="courseIdField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextArea fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    </GridPane>
+
+    <Label text="Course Outcomes">
+        <font>
+            <Font size="16.0" />
+        </font>
+    </Label>
+
+    <TableView fx:id="outcomesTable" editable="true" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="outcomeIdentifierColumn" text="Identifier"/>
+            <TableColumn fx:id="outcomeNameColumn" text="Name"/>
+            <TableColumn fx:id="outcomeDescriptionColumn" text="Description"/>
+            <TableColumn fx:id="outcomeWeightColumn" text="Weight (%)"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button text="Add Outcome" onAction="#addOutcome"/>
+        <Button text="Remove Selected Outcome" onAction="#removeSelectedOutcome"/>
+    </HBox>
+
+    <Label fx:id="totalWeightLabel" text="Total Weight: 0%"/>
+
+    <HBox spacing="10">
+        <Button text="Save" onAction="#saveCourse"/>
+        <Button text="Cancel" onAction="#cancel"/>
+    </HBox>
+</VBox>

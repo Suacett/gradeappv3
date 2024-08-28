@@ -1,11 +1,6 @@
 package com.gradeapp.database;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Classes;
-import com.gradeapp.model.Course;
-import com.gradeapp.model.Student;
-import com.gradeapp.model.Outcome;
-
+import com.gradeapp.model.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +10,7 @@ public class Database {
 
     public void initialiseDatabase() {
         String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "id TEXT PRIMARY KEY,"
                 + "name TEXT NOT NULL,"
                 + "description TEXT NOT NULL"
                 + ");";
@@ -38,8 +33,9 @@ public class Database {
                 + ");";
         String createOutcomesTable = "CREATE TABLE IF NOT EXISTS outcomes ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + "course_id INTEGER,"
+                + "course_id TEXT,"
                 + "identifier TEXT NOT NULL,"
+                + "name TEXT NOT NULL,"
                 + "description TEXT NOT NULL,"
                 + "weight REAL NOT NULL,"
                 + "FOREIGN KEY (course_id) REFERENCES courses(id)"
@@ -71,19 +67,15 @@ public class Database {
 
     // COURSES
     public void addCourse(Course course) {
-        String sql = "INSERT INTO courses(name, description) VALUES(?, ?)";
+        String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, course.getName());
-            pstmt.setString(2, course.getDescription());
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, course.getId());
+            pstmt.setString(2, course.getName());
+            pstmt.setString(3, course.getDescription());
             pstmt.executeUpdate();
             
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int courseId = generatedKeys.getInt(1);
-                    addOutcomes(courseId, course.getOutcomes());
-                }
-            }
+            addOutcomes(course.getId(), course.getOutcomes());
             System.out.println("Course added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding course: " + e.getMessage());
@@ -91,18 +83,17 @@ public class Database {
     }
 
     public void updateCourse(Course course) {
-        String sql = "UPDATE courses SET name = ?, description = ? WHERE name = ?";
+        String sql = "UPDATE courses SET name = ?, description = ? WHERE id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, course.getName());
             pstmt.setString(2, course.getDescription());
-            pstmt.setString(3, course.getName());
+            pstmt.setString(3, course.getId());
             pstmt.executeUpdate();
 
             // Update outcomes
-            int courseId = getCourseId(course.getName());
-            deleteOutcomes(courseId);
-            addOutcomes(courseId, course.getOutcomes());
+            deleteOutcomes(course.getId());
+            addOutcomes(course.getId(), course.getOutcomes());
 
             System.out.println("Course updated successfully.");
         } catch (SQLException e) {
@@ -117,10 +108,11 @@ public class Database {
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
+                String id = rs.getString("id");
                 String name = rs.getString("name");
                 String description = rs.getString("description");
-                Course course = new Course(name, description);
-                course.setOutcomes(getOutcomesForCourse(rs.getInt("id")));
+                Course course = new Course(id, name, description);
+                course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
             }
         } catch (SQLException e) {
@@ -129,14 +121,13 @@ public class Database {
         return courses;
     }
 
-    public void deleteCourse(String courseName) {
+    public void deleteCourse(String courseId) {
         try (Connection conn = this.connect()) {
-            int courseId = getCourseId(courseName);
             deleteOutcomes(courseId);
 
-            String sql = "DELETE FROM courses WHERE name = ?";
+            String sql = "DELETE FROM courses WHERE id = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, courseName);
+                pstmt.setString(1, courseId);
                 pstmt.executeUpdate();
                 System.out.println("Course deleted successfully.");
             }
@@ -146,23 +137,23 @@ public class Database {
     }
 
 
-    private void deleteOutcomes(int courseId) {
+    private void deleteOutcomes(String courseId) {
         String sql = "DELETE FROM outcomes WHERE course_id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, courseId);
+            pstmt.setString(1, courseId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error deleting outcomes: " + e.getMessage());
         }
     }
 
-    private void addOutcomes(int courseId, List<Outcome> outcomes) {
-        String sql = "INSERT INTO outcomes(course_id, id, name, description, weight) VALUES(?, ?, ?, ?, ?)";
+    private void addOutcomes(String courseId, List<Outcome> outcomes) {
+        String sql = "INSERT INTO outcomes(course_id, identifier, name, description, weight) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (Outcome outcome : outcomes) {
-                pstmt.setInt(1, courseId);
+                pstmt.setString(1, courseId);
                 pstmt.setString(2, outcome.getId());
                 pstmt.setString(3, outcome.getName());
                 pstmt.setString(4, outcome.getDescription());
@@ -174,15 +165,15 @@ public class Database {
         }
     }
 
-    private List<Outcome> getOutcomesForCourse(int courseId) {
+    private List<Outcome> getOutcomesForCourse(String courseId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT * FROM outcomes WHERE course_id = ?";
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, courseId);
+            pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    String id = rs.getString("id");
+                    String id = rs.getString("identifier");
                     String name = rs.getString("name");
                     String description = rs.getString("description");
                     double weight = rs.getDouble("weight");
