@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -9,16 +10,20 @@
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-   <children>
-      <Label text="Welcome to MarkBook+">
-         <font>
-            <Font size="20.0" />
-         </font>
-         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding>
-      </Label>
-   </children>
-
-
+    <children>
+        <Label text="Welcome to MarkBook+">
+            <font>
+                <Font size="20.0" />
+            </font>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+        </Label>
+        <Label text="Recent Activities">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Label>
+        <ListView fx:id="recentActivitiesList" prefHeight="200.0" prefWidth="300.0" />
+    </children>
 </VBox>

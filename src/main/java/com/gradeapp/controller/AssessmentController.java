@@ -14,6 +14,7 @@ import java.util.List;
 
 public class AssessmentController {
 
+    public VBox assessmentContainer;
     @FXML
     private VBox currentAssessmentContainer;
     @FXML

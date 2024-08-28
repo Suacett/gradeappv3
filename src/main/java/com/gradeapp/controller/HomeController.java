@@ -1,30 +1,35 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.Course;
 import com.gradeapp.database.Database;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.VBox;
 
 import java.util.List;
 
-
-// HomeController manages the Home category dynamic content.
-
-// Currently home content is nonfunctional, for static display to client only.
-
 public class HomeController {
 
     @FXML
-    private VBox courseContainer;
+    private ListView<String> recentActivitiesList;
 
-    private Database db;
+    private Database db = new Database();
 
+    @FXML
     public void initialize() {
-
+        populateRecentActivities();
     }
 
+    // Method to populate recent activities in the ListView
+    private void populateRecentActivities() {
+        List<String> recentActivities = fetchRecentActivities();
+        recentActivitiesList.getItems().addAll(recentActivities);
+    }
 
+    // Dummy method to fetch recent activities from the database
+    private List<String> fetchRecentActivities() {
+        // This is a placeholder. Replace with actual database logic.
+        return List.of(
+                
+        );
+    }
 }

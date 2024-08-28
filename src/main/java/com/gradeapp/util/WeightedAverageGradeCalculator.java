@@ -1,9 +1,6 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Grade;
-import com.gradeapp.model.Outcomes;
-import com.gradeapp.model.Student;
+import com.gradeapp.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +24,7 @@ public class WeightedAverageGradeCalculator {
     }
 
     // Method to calculate outcome achievement for a student
-    public double calculateOutcomeAchievement(Student student, Outcomes outcome) {
+    public double calculateOutcomeAchievement(Student student, Outcome outcome) {
         List<? extends Grade> relevantGrades = student.getGrades().stream()
                 .filter(grade -> grade.getAssessment().getOutcomes().contains(outcome))
                 .collect(Collectors.toList());

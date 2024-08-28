@@ -2,36 +2,28 @@ package com.gradeapp.controller;
 
 import com.gradeapp.model.Course;
 import com.gradeapp.database.Database;
-import java.util.ArrayList;
+
+import java.io.IOException;
 import java.util.List;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 
-// CoursesController manages the Courses category dynamic content.
 public class CoursesController {
 
     @FXML
-    private VBox coursesContainer;
-
-    @FXML
-    private Button addCourseButton;
+    private VBox currentCourseContainer;
 
     @FXML
     private VBox newCourseInputContainer;
 
     @FXML
-    private VBox currentCourseContainer;
-    
-    @FXML
-    private VBox newCoursePage;
-    
-
-    private List<Course> coursesList = new ArrayList<>();
+    private VBox content; // Reference to the main content area
 
     private Database db = new Database();
 
@@ -75,14 +67,13 @@ public class CoursesController {
         String courseName = courseNameField.getText();
         String courseDescription = courseDescriptionField.getText();
         if (!courseName.isEmpty() && !courseDescription.isEmpty()) {
-            Course newCourse = new Course(courseName, courseDescription); // Create a new Course object
-            coursesList.add(newCourse); // Add new course to coursesList
-            db.addCourse(courseName, courseDescription); // Add coursesList to database
+            Course newCourse = new Course(courseName, courseDescription);
+            db.addCourse(newCourse);
 
-            courseNameField.clear(); // Clear name input field
-            courseDescriptionField.clear(); // Clear description input field
-            displayCurrentCourses(); // Update current courses field
-        } else { // Handle empty fields
+            courseNameField.clear();
+            courseDescriptionField.clear();
+            displayCurrentCourses();
+        } else {
             System.out.println("Please finish the form");
         }
     }
@@ -96,29 +87,49 @@ public class CoursesController {
         Label courseNameLabel = new Label(course.getName());
         Label courseDescriptionLabel = new Label(course.getDescription());
 
+        Button editButton = new Button("Edit");
+        editButton.setOnAction(event -> openCourseDetails(course));
+
         Button deleteButton = new Button("Delete");
         deleteButton.setOnAction(event -> {
-            db.delete("courses", "name", course.getName()); // Delete course from database
-            displayCurrentCourses(); // Refresh the course list
+            db.delete("courses", "name", course.getName());
+            displayCurrentCourses();
         });
 
-        courseCard.getChildren().addAll(courseNameLabel, courseDescriptionLabel, deleteButton);
+        courseCard.getChildren().addAll(courseNameLabel, courseDescriptionLabel, editButton, deleteButton);
         return courseCard;
+    }
+
+    // Navigate to CourseDetails
+    private void openCourseDetails(Course course) {
+        try {
+            // Load the FXML file using the correct path
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
+            VBox courseDetailsView = loader.load();
+
+            // Get the controller associated with the FXML
+            CourseDetailsController controller = loader.getController();
+            controller.setCourse(course, currentCourseContainer, content);
+
+            // Set the loaded view to the content area
+            content.getChildren().setAll(courseDetailsView);
+
+        } catch (IOException e) {
+            // Print stack trace for debugging
+            e.printStackTrace();
+        }
     }
 
     // Display current courses
     private void displayCurrentCourses() {
         currentCourseContainer.getChildren().clear();
 
-        // Retrieve courses from the database
         List<Course> coursesFromDb = db.getAllCourses();
 
-        // If there are no courses, show a message
         if (coursesFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current Courses");
             currentCourseContainer.getChildren().add(emptyLabel);
         } else {
-            // Display courses from the database
             for (Course course : coursesFromDb) {
                 VBox courseCard = createCourseCard(course);
                 currentCourseContainer.getChildren().add(courseCard);

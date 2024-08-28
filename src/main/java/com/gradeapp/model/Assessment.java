@@ -14,7 +14,7 @@ public class Assessment {
     private String description;
     private double weight;
     private double maxScore;
-    private List<Outcomes> outcomes;
+    private List<Outcome> outcomes;
     private List<Task> tasks;
     private List<Assessment> childAssessments;
     private Assessment parentAssessment;
@@ -82,7 +82,7 @@ public class Assessment {
         report.put("taskCount", tasks.size());
         report.put("tasks", tasks.stream().map(Task::getName).toList());
         report.put("outcomeCount", outcomes.size());
-        report.put("outcomes", outcomes.stream().map(Outcomes::getName).toList());
+        report.put("outcomes", outcomes.stream().map(Outcome::getName).toList());
         report.put("childAssessmentCount", childAssessments.size());
         report.put("childAssessments", childAssessments.stream().map(Assessment::getName).toList());
 
@@ -113,12 +113,16 @@ public class Assessment {
     }
 
     // Methods for managing outcomes
-    public void addOutcome(Outcomes outcome) {
+    public void addOutcome(Outcome outcome) {
         outcomes.add(outcome);
     }
 
-    public void removeOutcome(Outcomes outcome) {
+    public void removeOutcome(Outcome outcome) {
         outcomes.remove(outcome);
+    }
+
+    public List<Outcome> getOutcomes() {
+        return outcomes;
     }
 
     // Getters and Setters for other fields
@@ -159,10 +163,6 @@ public class Assessment {
 
     public List<Task> getTasks() {
         return tasks;
-    }
-
-    public List<Outcomes> getOutcomes() {
-        return outcomes;
     }
 
     public List<Assessment> getChildAssessments() {

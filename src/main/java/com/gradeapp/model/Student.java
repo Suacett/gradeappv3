@@ -6,7 +6,7 @@ public class Student {
     private String name;
     private String studentId;
     private Course course;
-    private List<StudentGrade> grades;
+    private List<Grade> grades;
 
     public Student(String name, String studentId) {
         this.name = name;
@@ -16,22 +16,21 @@ public class Student {
 
     // Methods for managing grades
     public void addGrade(Assessment assessment, double score, String feedback) {
-        StudentGrade grade = new StudentGrade(this, assessment, score, feedback);
+        Grade grade = new Grade(this, assessment, score, feedback);
         grades.add(grade);
-        GradeBook gradeBook = getGradeBook();
-        if (gradeBook != null) {
-            gradeBook.addGrade(grade);
+        if (course != null && course.getGradeBook() != null) {
+            course.getGradeBook().addGrade(grade);
         }
     }
 
-    public void removeGrade(StudentGrade grade) {
+    public void removeGrade(Grade grade) {
         grades.remove(grade);
-        if (course != null) {
+        if (course != null && course.getGradeBook() != null) {
             course.getGradeBook().removeGrade(grade);
         }
     }
 
-    public List<StudentGrade> getGrades() {
+    public List<Grade> getGrades() {
         return new ArrayList<>(grades);
     }
 

@@ -1,6 +1,7 @@
 package com.gradeapp.util;
 
 import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Grade;
 import com.gradeapp.model.Student;
 import com.gradeapp.model.StudentGrade;
 import org.apache.poi.ss.usermodel.*;
@@ -230,7 +231,7 @@ public class FileHandler {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
             writer.write("Student ID,Name,Grade\n");
             for (Student student : students) {
-                for (StudentGrade grade : student.getGrades()) {
+                for (Grade grade : student.getGrades()) {
                     writer.write(String.format("%s,%s,%f\n",
                             student.getStudentId(), student.getName(), grade.getScore()));
                 }
@@ -238,6 +239,7 @@ public class FileHandler {
         }
     }
 
+    // Updated exportGrades method
     public void exportGrades(List<Student> students, String filePath, FileFormat format) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Grades");
@@ -249,7 +251,7 @@ public class FileHandler {
 
             int rowNum = 1;
             for (Student student : students) {
-                for (StudentGrade grade : student.getGrades()) {
+                for (Grade grade : student.getGrades()) {
                     Row row = sheet.createRow(rowNum++);
                     row.createCell(0).setCellValue(student.getName());
                     row.createCell(1).setCellValue(student.getStudentId() != null ? student.getStudentId() : "");

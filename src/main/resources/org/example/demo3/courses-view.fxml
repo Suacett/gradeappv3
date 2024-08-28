@@ -8,39 +8,49 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="courseContainer" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
+<VBox fx:id="content" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
+    <!-- Padding around the VBox -->
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Current Courses Section -->
     <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
         <children>
-            <Label text="Current courses">
+            <Label text="Current Courses">
                 <font>
-                    <Font size="18.0" />
+                    <Font size="18.0"/>
                 </font>
             </Label>
-            <VBox fx:id="currentCourseContainer" prefHeight="100.0" prefWidth="200.0" />
+            <VBox fx:id="currentCourseContainer" prefHeight="100.0" prefWidth="200.0"/>
         </children>
         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
     </VBox>
+
+    <!-- Separator between sections -->
     <Separator prefWidth="200.0">
         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
     </Separator>
-    <!-- Add new course section -->
+
+    <!-- Add New Course Section -->
     <HBox prefHeight="65.0" prefWidth="519.0" spacing="10.0" HBox.hgrow="ALWAYS">
         <children>
             <Label text="Add a new Course">
                 <font>
-                    <Font size="16.0" />
+                    <Font size="16.0"/>
                 </font>
             </Label>
-            <Button mnemonicParsing="false" onMouseClicked="#handleAddCourseButtonAction" text="+ Add Course" />
+            <Button mnemonicParsing="false" onMouseClicked="#handleAddCourseButtonAction" text="+ Add Course"/>
         </children>
         <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
         </padding>
     </HBox>
 
-    <VBox fx:id="newCourseInputContainer" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+    <!-- Container for New Course Input Form -->
+    <VBox fx:id="newCourseInputContainer" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS"/>
 </VBox>

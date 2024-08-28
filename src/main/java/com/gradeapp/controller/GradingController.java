@@ -1,10 +1,6 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Grade;
-import com.gradeapp.model.Outcomes;
-import com.gradeapp.model.Student;
-import com.gradeapp.model.StudentGrade;
+import com.gradeapp.model.*;
 import com.gradeapp.util.WeightedAverageGradeCalculator;
 
 import java.util.HashMap;
@@ -23,34 +19,48 @@ public class GradingController {
         return calculator.calculateWeightedAverage(student.getGrades(), assessment);
     }
 
-    public Map<Outcomes, Double> calculateOutcomeAchievement(Student student) {
-        Map<Outcomes, Double> achievements = new HashMap<>();
-        for (Outcomes outcome : student.getCourse().getOutcomes()) {
+    public Map<Outcome, Double> calculateOutcomeAchievement(Student student) {
+        Map<Outcome, Double> achievements = new HashMap<>();
+        for (Outcome outcome : student.getCourse().getOutcomes()) {
             double achievement = calculator.calculateOutcomeAchievement(student, outcome);
             achievements.put(outcome, achievement);
         }
         return achievements;
     }
 
-    public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
+    public double calculateWeightedAverage(List<Grade> grades, Assessment assessment) {
         return calculator.calculateWeightedAverage(grades, assessment);
     }
 
     // Methods for managing grades
-    public StudentGrade addGrade(Student student, Assessment assessment, double score, String feedback) {
-        StudentGrade grade = new StudentGrade(student.getName(), assessment.getName(), score);
-        grade.setFeedback(feedback);
+    public void addGrade(Student student, Assessment assessment, double score, String feedback) {
         student.addGrade(assessment, score, feedback);
-        student.getCourse().getGradeBook().addGrade(grade);
-        return grade;
     }
 
-    public List<StudentGrade> getStudentGrades(Student student) {
+    public void removeGrade(Student student, Grade grade) {
+        student.removeGrade(grade);
+    }
+
+    public List<Grade> getStudentGrades(Student student) {
         return student.getGrades();
     }
 
-    public void saveGrades(List<StudentGrade> grades) {
-        // Implementation for saving grades
-        // This method should update the grades in the database or persistent storage(?)
+    public Grade getGrade(Student student, Assessment assessment) {
+        return student.getGrades().stream()
+                .filter(grade -> grade.getAssessment().equals(assessment))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public double getAverageGradeForStudent(Student student) {
+        return student.calculateOverallPerformance();
+    }
+
+    public Map<Student, Double> getAllStudentAverages(Course course) {
+        Map<Student, Double> averages = new HashMap<>();
+        for (Student student : course.getStudents()) {
+            averages.put(student, student.calculateOverallPerformance());
+        }
+        return averages;
     }
 }

@@ -3,10 +3,12 @@ package com.gradeapp.controller;
 import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class HelloController {
 
+    public HBox homeButton;
     @FXML
     private VBox content;
 

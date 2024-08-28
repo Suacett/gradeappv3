@@ -18,6 +18,7 @@ import java.util.List;
 // StudentController manages the Student category dynamic content.
 public class StudentController {
 
+    public VBox studentsContainer;
     // FXML ids
     @FXML
     private VBox studentContainer;

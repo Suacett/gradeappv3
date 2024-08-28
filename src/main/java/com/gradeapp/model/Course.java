@@ -1,69 +1,92 @@
 package com.gradeapp.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Course {
     private String name;
     private String description;
-    private List<Student> students;
+    private List<Outcome> outcomes;
     private GradeBook gradeBook;
+    private List<Student> students;
     private List<Assessment> assessments;
-    private Set<Outcomes> outcomes;
 
     public Course(String name, String description) {
         this.name = name;
         this.description = description;
-        this.students = new ArrayList<>();
+        this.outcomes = new ArrayList<>();
         this.gradeBook = new GradeBook();
+        this.students = new ArrayList<>();
         this.assessments = new ArrayList<>();
-        this.outcomes = new HashSet<>();
     }
 
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    public List<Student> getStudents() {
-        return students;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<Outcome> getOutcomes() {
+        return new ArrayList<>(outcomes);
+    }
+
+    public void setOutcomes(List<Outcome> outcomes) {
+        this.outcomes = new ArrayList<>(outcomes);
+    }
+
+    public void addOutcome(Outcome outcome) {
+        this.outcomes.add(outcome);
+    }
+
+    public void removeOutcome(Outcome outcome) {
+        this.outcomes.remove(outcome);
     }
 
     public GradeBook getGradeBook() {
         return gradeBook;
     }
 
-    public List<Assessment> getAssessments() {
-        return Collections.unmodifiableList(assessments);
+    public void setGradeBook(GradeBook gradeBook) {
+        this.gradeBook = gradeBook;
     }
 
-    public void addAssessment(Assessment assessment) {
-        assessments.add(assessment);
-    }
-
-    public Set<Outcomes> getOutcomes() {
-        return Collections.unmodifiableSet(outcomes);
-    }
-
-    public void addOutcome(Outcomes outcome) {
-        outcomes.add(outcome);
+    public List<Student> getStudents() {
+        return new ArrayList<>(students);
     }
 
     public void addStudent(Student student) {
-        students.add(student);
+        this.students.add(student);
         student.setCourse(this);
     }
 
+    public void removeStudent(Student student) {
+        this.students.remove(student);
+        student.setCourse(null);
+    }
+
     public List<Grade> getAllGrades() {
-        return students.stream()
-                .flatMap(student -> student.getGrades().stream())
-                .collect(Collectors.toList());
+        return this.gradeBook.getAllGrades();
+    }
+
+    public List<Assessment> getAssessments() {
+        return new ArrayList<>(assessments);
+    }
+
+    public void addAssessment(Assessment assessment) {
+        this.assessments.add(assessment);
+    }
+
+    public void removeAssessment(Assessment assessment) {
+        this.assessments.remove(assessment);
     }
 }

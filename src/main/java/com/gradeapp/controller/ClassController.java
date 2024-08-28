@@ -14,6 +14,7 @@ import java.util.List;
 
 public class ClassController {
 
+    public VBox classContainer;
     @FXML
     private VBox currentClassContainer;
     @FXML

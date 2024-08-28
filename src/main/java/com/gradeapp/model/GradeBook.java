@@ -67,4 +67,12 @@ public class GradeBook {
                                 .orElse(0.0)
                 ));
     }
+
+    public Map<Student, Map<Assessment, Grade>> getGrades() {
+        return grades;
+    }
+
+    public void setGrades(Map<Student, Map<Assessment, Grade>> grades) {
+        this.grades = grades;
+    }
 }

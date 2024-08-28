@@ -11,7 +11,7 @@ public class Classes {
     private String classId;
     private List<Classes> classes;
     private List<Assessment> assessments;
-    private Set<Outcomes> outcomes;
+    private Set<Outcome> outcomes;
 
     public Classes(String name, String classId) {
         this.name = name;
@@ -41,13 +41,12 @@ public class Classes {
         assessments.add(assessment);
     }
 
-    public Set<Outcomes> getOutcomes() {
+    public Set<Outcome> getOutcomes() {
         return Collections.unmodifiableSet(outcomes);
     }
 
-    public void addOutcome(Outcomes outcome) {
+    public void addOutcome(Outcome outcome) {
         outcomes.add(outcome);
     }
-
 
 }

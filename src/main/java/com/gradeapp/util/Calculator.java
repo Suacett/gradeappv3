@@ -69,17 +69,17 @@ public class Calculator {
         return "F";
     }
 
-    public Map<Outcomes, Double> calculateOutcomeAchievement(Student student) {
-        Map<Outcomes, Double> achievements = new HashMap<>();
-        for (Outcomes outcome : student.getCourse().getOutcomes()) {
+    public Map<Outcome, Double> calculateOutcomeAchievement(Student student) {
+        Map<Outcome, Double> achievements = new HashMap<>();
+        for (Outcome outcome : student.getCourse().getOutcomes()) {
             double achievement = calculateOutcomeAchievement(student, outcome);
             achievements.put(outcome, achievement);
         }
         return achievements;
     }
 
-    private double calculateOutcomeAchievement(Student student, Outcomes outcome) {
-        List<? extends Grade> relevantGrades = student.getGrades().stream()
+    private double calculateOutcomeAchievement(Student student, Outcome outcome) {
+        List<Grade> relevantGrades = student.getGrades().stream()
                 .filter(g -> g.getAssessment().getOutcomes().contains(outcome))
                 .collect(Collectors.toList());
         return calculateWeightedAverage(relevantGrades, null);
