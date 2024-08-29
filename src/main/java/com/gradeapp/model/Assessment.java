@@ -1,24 +1,23 @@
 package com.gradeapp.model;
 
-import java.util.ArrayList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Represents an assessment structure, including its name, weight, max score, and associated tasks and outcomes.
- */
+
 public class Assessment {
-    private int id;  // Unique identifier
+    private int id;
     private String name;
     private String description;
     private double weight;
     private double maxScore;
-    private List<Outcome> outcomes;
-    private List<Task> tasks;
-    private List<Assessment> childAssessments;
+    private ObservableList<AssessmentPart> parts;
+    private ObservableMap<Outcome, Double> outcomeWeights;
+    private ObservableList<Assessment> childAssessments;
     private Assessment parentAssessment;
-    private GradeBook gradeBook;
 
     // Constructor with id
     public Assessment(int id, String name, String description, double weight, double maxScore) {
@@ -27,20 +26,15 @@ public class Assessment {
         this.description = description;
         setWeight(weight);
         this.maxScore = maxScore;
-        this.outcomes = new ArrayList<>();
-        this.tasks = new ArrayList<>();
-        this.childAssessments = new ArrayList<>();
+        this.parts = FXCollections.observableArrayList();
+        this.outcomeWeights = FXCollections.observableHashMap();
+        this.childAssessments = FXCollections.observableArrayList();
     }
 
     // Constructor without id
     public Assessment(String name, String description, double weight, double maxScore) {
-        this.name = name;
-        this.description = description;
-        setWeight(weight);
-        this.maxScore = maxScore;
-        this.outcomes = new ArrayList<>();
-        this.tasks = new ArrayList<>();
-        this.childAssessments = new ArrayList<>();
+        this(-1, name, description, weight, maxScore); // Use -1 as a temporary id
+        this.outcomeWeights = FXCollections.observableHashMap();
     }
 
     // Getters and setters for id
@@ -62,14 +56,6 @@ public class Assessment {
         child.parentAssessment = this;
     }
 
-    // Methods for managing the grade book
-    public GradeBook getGradeBook() {
-        return gradeBook;
-    }
-
-    public void setGradeBook(GradeBook gradeBook) {
-        this.gradeBook = gradeBook;
-    }
 
     // Methods for generating reports
     public Map<String, Object> generateDetailedReport() {
@@ -79,13 +65,12 @@ public class Assessment {
         report.put("description", description);
         report.put("weight", weight);
         report.put("maxScore", maxScore);
-        report.put("taskCount", tasks.size());
-        report.put("tasks", tasks.stream().map(Task::getName).toList());
-        report.put("outcomeCount", outcomes.size());
-        report.put("outcomes", outcomes.stream().map(Outcome::getName).toList());
+        report.put("partsCount", parts.size());
+        report.put("parts", parts.stream().map(AssessmentPart::getName).toList());
+        report.put("outcomeCount", outcomeWeights.size());
+        report.put("outcomes", outcomeWeights.keySet().stream().map(Outcome::getName).toList());
         report.put("childAssessmentCount", childAssessments.size());
         report.put("childAssessments", childAssessments.stream().map(Assessment::getName).toList());
-
         return report;
     }
 
@@ -104,25 +89,16 @@ public class Assessment {
     }
 
     // Methods for managing tasks
-    public void addTask(Task task) {
-        tasks.add(task);
+    public void addTask(AssessmentPart task) {
+        this.parts.add(task);
     }
 
-    public void removeTask(Task task) {
-        tasks.remove(task);
+    public void removeTask(AssessmentPart task) {
+        this.parts.remove(task);
     }
 
-    // Methods for managing outcomes
-    public void addOutcome(Outcome outcome) {
-        outcomes.add(outcome);
-    }
-
-    public void removeOutcome(Outcome outcome) {
-        outcomes.remove(outcome);
-    }
-
-    public List<Outcome> getOutcomes() {
-        return outcomes;
+    public Map<Outcome, Double> getOutcomes() {
+        return new HashMap<>(outcomeWeights);
     }
 
     // Getters and Setters for other fields
@@ -161,15 +137,92 @@ public class Assessment {
         this.maxScore = maxScore;
     }
 
-    public List<Task> getTasks() {
-        return tasks;
+    public ObservableList<AssessmentPart> getTasks() {
+        return parts;
     }
 
-    public List<Assessment> getChildAssessments() {
+
+    public ObservableList<AssessmentPart> getParts() {
+        return parts;
+    }
+
+    public void addPart(AssessmentPart part) {
+        this.parts.add(part);
+    }
+
+    public void removePart(AssessmentPart part) {
+        this.parts.remove(part);
+    }
+
+    public void setOutcomeWeight(Outcome outcome, double weight) {
+        this.outcomeWeights.put(outcome, weight);
+    }
+
+    public ObservableList<Assessment> getChildAssessments() {
         return childAssessments;
+    }
+
+    
+    public void removeChildAssessment(Assessment child) {
+        this.childAssessments.remove(child);
+        child.setParentAssessment(null);
     }
 
     public Assessment getParentAssessment() {
         return parentAssessment;
     }
+
+    public void setParentAssessment(Assessment parentAssessment) {
+        this.parentAssessment = parentAssessment;
+    }
+
+    public void addOutcome(Outcome outcome, double weight) {
+        this.outcomeWeights.put(outcome, weight);
+    }
+
+    public void removeOutcome(Outcome outcome) {
+        this.outcomeWeights.remove(outcome);
+    }
+
+    public void updateOutcomeWeight(Outcome outcome, double weight) {
+        this.outcomeWeights.put(outcome, weight);
+    }
+
+    public double getOutcomeWeight(Outcome outcome) {
+        return this.outcomeWeights.getOrDefault(outcome, 0.0);
+    }
+
+    public Map<Outcome, Double> getOutcomeWeights() {
+        return new HashMap<>(outcomeWeights);
+    }
+
+    // Method to calculate total score
+    public double calculateTotalScore() {
+        return parts.stream().mapToDouble(part -> part.getWeight() * part.getMaxScore()).sum();
+    }
+
+    // Method to calculate grade based on part scores
+    public double calculateGrade(ObservableMap<AssessmentPart, Double> partScores) {
+        return parts.stream()
+                .mapToDouble(part -> (partScores.getOrDefault(part, 0.0) / part.getMaxScore()) * part.getWeight())
+                .sum();
+    }
+
+    public double calculateOutcomeGrade(Outcome outcome, Map<AssessmentPart, Double> partScores) {
+        double totalScore = 0.0;
+        double maxPossibleScore = 0.0;
+
+        for (AssessmentPart part : parts) {
+            double partScore = partScores.getOrDefault(part, 0.0);
+            double partWeight = part.getWeight() / 100.0; // Convert weight to decimal
+            double outcomeWeight = outcomeWeights.getOrDefault(outcome, 0.0) / 100.0; // Convert weight to decimal
+
+            totalScore += partScore * partWeight * outcomeWeight;
+            maxPossibleScore += part.getMaxScore() * partWeight * outcomeWeight;
+        }
+
+        return maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+    }
+
 }
+

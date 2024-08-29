@@ -26,9 +26,9 @@ public class WeightedAverageGradeCalculator {
     // Method to calculate outcome achievement for a student
     public double calculateOutcomeAchievement(Student student, Outcome outcome) {
         List<? extends Grade> relevantGrades = student.getGrades().stream()
-                .filter(grade -> grade.getAssessment().getOutcomes().contains(outcome))
+                .filter(grade -> grade.getAssessment().getOutcomeWeights().containsKey(outcome))
                 .collect(Collectors.toList());
-
+                
         double totalScore = 0;
         double totalMaxScore = 0;
 

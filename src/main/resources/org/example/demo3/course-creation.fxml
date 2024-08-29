@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<VBox spacing="20" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"  fx:controller="com.gradeapp.controller.CourseEditController">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>

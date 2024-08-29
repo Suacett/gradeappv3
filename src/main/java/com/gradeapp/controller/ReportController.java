@@ -44,19 +44,19 @@ public class ReportController {
         return report;
     }
 
-    public HashMap<String, Object> generateAssessmentReport(Assessment assessment) {
+    public HashMap<String, Object> generateAssessmentReport(Assessment assessment, GradeBook gradeBook) {
         HashMap<String, Object> report = new HashMap<>();
-        List<Grade> assessmentGrades = assessment.getGradeBook().getGradesForAssessment(assessment);
-
+        List<Grade> assessmentGrades = gradeBook.getGradesForAssessment(assessment);
+    
         report.put("assessmentName", assessment.getName());
         report.put("statistics", calculator.calculateStatistics(assessmentGrades));
         report.put("taskCompletionRates", calculator.calculateTaskCompletionRates(assessment));
         report.put("gradeDistribution", calculator.calculateGradeDistribution(assessmentGrades));
         report.put("gradeDistributionChart", (BarChart<String, Number>) chartGenerator.createGradeDistributionChart(assessmentGrades));
-
+    
         return report;
     }
-
+    
     // Method for exporting reports
     public void exportReport(HashMap<String, Object> report, String filePath, ReportFormat format) {
         reportExporter.exportReport(report, filePath, format);

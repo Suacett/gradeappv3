@@ -80,7 +80,7 @@ public class Calculator {
 
     private double calculateOutcomeAchievement(Student student, Outcome outcome) {
         List<Grade> relevantGrades = student.getGrades().stream()
-                .filter(g -> g.getAssessment().getOutcomes().contains(outcome))
+                .filter(g -> g.getAssessment().getOutcomes().containsKey(outcome))
                 .collect(Collectors.toList());
         return calculateWeightedAverage(relevantGrades, null);
     }
@@ -91,12 +91,12 @@ public class Calculator {
     }
 
     public double calculateTaskCompletionRate(Assessment assessment) {
-        List<Task> tasks = assessment.getTasks();
-        long completedTasks = tasks.stream().filter(Task::isCompleted).count();
-        return (double) completedTasks / tasks.size();
+        List<AssessmentPart> parts = assessment.getParts();
+        long completedParts = parts.stream().filter(AssessmentPart::isCompleted).count();
+        return (double) completedParts / parts.size();
     }
 
-    public Map<Task, Double> calculateTaskCompletionRates(Assessment assessment) {
+    public Map<Object, Object> calculateTaskCompletionRates(Assessment assessment) {
         return assessment.getTasks().stream()
                 .collect(Collectors.toMap(
                         task -> task,

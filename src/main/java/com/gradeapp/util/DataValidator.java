@@ -13,10 +13,10 @@ public class DataValidator {
     }
 
     public static boolean isValidAssessment(Assessment assessment) {
-        double totalWeight = assessment.getTasks().stream().mapToDouble(Task::getWeight).sum();
+        double totalWeight = assessment.getParts().stream().mapToDouble(AssessmentPart::getWeight).sum();
         return Math.abs(totalWeight - 100) < 0.001; // Allow for floating-point imprecision
     }
-
+    
     public static List<String> validateImportData(List<Student> students) {
         List<String> errors = new ArrayList<>();
         for (Student student : students) {
