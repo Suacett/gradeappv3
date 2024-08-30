@@ -16,13 +16,15 @@
 }
 
 /* STUDENT section */
-.student-card {
+.card {
     -fx-background-color: #FFF;
-    -fx-border-color: rgb(227, 227, 227);
+    -fx-border-color: #a4a4a4;
     -fx-border-width: 1px; 
     -fx-padding: 10px; 
     -fx-border-radius: 5px;
 }
+
+/* Category sections */
 .section-style {
     -fx-background-color: #FFF;
     -fx-border-color: #a4a4a4;

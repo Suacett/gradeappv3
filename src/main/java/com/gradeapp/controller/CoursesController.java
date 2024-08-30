@@ -4,8 +4,10 @@ import com.gradeapp.model.Course;
 import com.gradeapp.database.Database;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -15,6 +17,7 @@ public class CoursesController {
 
     @FXML private VBox currentCourseContainer;
     @FXML private VBox content;
+    @FXML private HBox buttons;
 
     private Database db = new Database();
 
@@ -73,6 +76,7 @@ public class CoursesController {
 
     private VBox createCourseCard(Course course) {
         VBox courseCard = new VBox(10);
+        HBox buttons = new HBox(10);
         courseCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px;");
 
         Label nameLabel = new Label("Name: " + course.getName());
@@ -86,12 +90,15 @@ public class CoursesController {
         editButton.setOnAction(event -> openCourseEditWindow(course));
 
         Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.deleteCourse(course.getId());
             displayCurrentCourses();
         });
+        buttons.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
 
-        courseCard.getChildren().addAll(nameLabel, idLabel, descriptionLabel, viewDetailsButton, editButton, deleteButton);
+        courseCard.getChildren().addAll(nameLabel, idLabel, descriptionLabel, buttons);
+        VBox.setMargin(courseCard, new Insets(0, 0, 10, 0));
         return courseCard;
 
     }

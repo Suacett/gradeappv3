@@ -82,7 +82,7 @@ public class StudentController {
 // Student card, displays current students
 private VBox createStudentCard(Student student) {
     VBox studentCard = new VBox();
-    studentCard.getStyleClass().add("student-card");
+    studentCard.getStyleClass().add("card");
     studentCard.setPadding(new Insets(10));
     studentCard.setSpacing(10);
     Label studentNameLabel = new Label(student.getName());  // Display the full name as it is
