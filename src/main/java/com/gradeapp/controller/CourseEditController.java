@@ -3,7 +3,11 @@ package com.gradeapp.controller;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import com.gradeapp.database.Database;
 import javafx.fxml.FXML;
@@ -73,6 +77,12 @@ public class CourseEditController {
     }
 
 
+
+    private boolean isValidCourseId(String id) {
+        return id.matches("^[A-Z]{2,4}[0-9]{1,4}$");
+    }
+
+
     public void setCourse(Course course) {
         this.course = course;
         if (course != null) {
@@ -88,17 +98,32 @@ public class CourseEditController {
             outcomes.clear();
             System.out.println("Creating new course"); // Debug print
         }
+        outcomesTable.setItems(outcomes);
         updateTotalWeight();
     }
 
-     @FXML
-    private void addOutcome() {
-        Outcome newOutcome = new Outcome("New Outcome", "Name", "Description", 0.0);
-        outcomes.add(newOutcome);
-        outcomesTable.refresh();
-        updateTotalWeight();
-        System.out.println("Outcome added. Total outcomes: " + outcomes.size()); // Debug print
+@FXML
+private void addOutcome() {
+    String newId = ""; // This will be filled by user input
+    TextInputDialog dialog = new TextInputDialog("");
+    dialog.setTitle("New Outcome");
+    dialog.setHeaderText("Enter Outcome ID");
+    dialog.setContentText("Please enter the outcome ID:");
+
+    Optional<String> result = dialog.showAndWait();
+    if (result.isPresent()) {
+        newId = result.get();
+    } else {
+        return; // User cancelled the dialog
     }
+
+    Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
+    outcomes.add(newOutcome);
+    outcomesTable.refresh();
+    updateTotalWeight();
+    System.out.println("Outcome added: " + newOutcome);
+}
+
 
     @FXML
     private void removeSelectedOutcome() {
@@ -118,20 +143,23 @@ public class CourseEditController {
     @FXML
     private void saveCourse() {
         if (validateCourse()) {
+            String courseId = courseIdField.getText();
             if (course == null) {
-                course = new Course(courseIdField.getText(), courseNameField.getText(), courseDescriptionField.getText());
-                System.out.println("New course created"); // Debug print
+                course = new Course(courseId, courseNameField.getText(), courseDescriptionField.getText());
             } else {
-                course.setId(courseIdField.getText());
+                course.setId(courseId);
                 course.setName(courseNameField.getText());
                 course.setDescription(courseDescriptionField.getText());
-                System.out.println("Existing course updated"); // Debug print
             }
             course.setOutcomes(new ArrayList<>(outcomes));
-            db.saveCourse(course);
-            System.out.println("Course saved: " + course.getName() + " (ID: " + course.getId() + ")");
-            System.out.println("Number of outcomes saved: " + outcomes.size());
-            closeWindow();
+            try {
+                db.saveCourse(course);
+                System.out.println("Course saved: " + course.getName() + " (ID: " + course.getId() + ")");
+                System.out.println("Number of outcomes saved: " + outcomes.size());
+                closeWindow();
+            } catch (IllegalArgumentException e) {
+                showAlert("Invalid Course ID", e.getMessage());
+            }
         }
     }
 
@@ -143,18 +171,18 @@ public class CourseEditController {
 
     private boolean validateCourse() {
         if (courseNameField.getText().isEmpty() || courseIdField.getText().isEmpty()) {
-            showAlert("Course name and ID are required.");
+            showAlert("Course name and ID are required.", null);
             return false;
         }
         double totalWeight = outcomes.stream().mapToDouble(Outcome::getWeight).sum();
         if (Math.abs(totalWeight - 100) > 0.01) {
-            showAlert("Total outcome weight must equal 100%.");
+            showAlert("Total outcome weight must equal 100%.", null);
             return false;
         }
         return true;
     }
 
-    private void showAlert(String message) {
+    private void showAlert(String message, String string) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Validation Error");
         alert.setHeaderText(null);

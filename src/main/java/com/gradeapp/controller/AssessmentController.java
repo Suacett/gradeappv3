@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+
 import java.util.List;
 
 public class AssessmentController {
@@ -305,7 +306,9 @@ public class AssessmentController {
     
             Outcome outcome = new Outcome(id, name, description, weight);
             selectedAssessment.addOutcome(outcome, weight);
-            db.addOutcome(outcome, selectedAssessment.getId()); // Using the correct method
+            
+            db.addOutcome(outcome, String.valueOf(selectedAssessment.getId()));
+            
             updateOutcomeTable(selectedAssessment);
         } catch (NumberFormatException e) {
             showAlert("Invalid weight. Please enter a number between 0 and 100.");

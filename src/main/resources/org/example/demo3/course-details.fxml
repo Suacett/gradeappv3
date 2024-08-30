@@ -17,11 +17,14 @@
     </Label>
 
     <GridPane vgap="10" hgap="10">
-        <Label text="Course Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+    <Label text="Course ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+    <TextField fx:id="courseIdField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-        <Label text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-        <TextField fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+    <Label text="Course Name:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+    <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+    <Label text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+    <TextField fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
     </GridPane>
 
     <Label text="Course Outcomes">

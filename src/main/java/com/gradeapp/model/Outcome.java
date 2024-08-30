@@ -65,4 +65,10 @@ public class Outcome {
     public DoubleProperty weightProperty() {
         return weight;
     }
+
+    @Override
+    public String toString() {
+        return String.format("Outcome{id='%s', name='%s', description='%s', weight=%f}", 
+                             getId(), getName(), getDescription(), getWeight());
+    }
 }

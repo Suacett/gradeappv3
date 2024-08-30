@@ -32,11 +32,12 @@ public class CoursesController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-creation.fxml"));
             VBox courseEditView = loader.load();
-
-            CourseEditController controller = loader.getController();
             
+            CourseEditController controller = loader.getController();
             if (course != null) {
                 controller.setCourse(course);
+            } else {
+                controller.setCourse(new Course("", "", ""));
             }
 
             Stage stage = new Stage();
