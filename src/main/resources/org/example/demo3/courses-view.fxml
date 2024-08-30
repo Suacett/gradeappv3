@@ -3,54 +3,53 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="content" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
-    <!-- Padding around the VBox -->
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-
-    <!-- Current Courses Section -->
-    <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
-        <children>
-            <Label text="Current Courses">
-                <font>
-                    <Font size="18.0"/>
-                </font>
-            </Label>
-            <VBox fx:id="currentCourseContainer" prefHeight="100.0" prefWidth="200.0"/>
-        </children>
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-    </VBox>
-
-    <!-- Separator between sections -->
-    <Separator prefWidth="200.0">
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
-    </Separator>
+<VBox fx:id="content" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
+   <Label text="Add new course">
+      <font>
+         <Font size="18.0" />
+      </font>
+      <padding>
+         <Insets bottom="10.0" />
+      </padding>
+   </Label>
 
     <!-- Add New Course Section -->
-    <HBox prefHeight="65.0" prefWidth="519.0" spacing="10.0" HBox.hgrow="ALWAYS">
+    <HBox prefHeight="16.0" prefWidth="519.0" spacing="10.0" styleClass="section-style" HBox.hgrow="ALWAYS">
         <children>
             <Label text="Add a new Course">
                 <font>
-                    <Font size="16.0"/>
+                    <Font size="16.0" />
                 </font>
             </Label>
-            <Button mnemonicParsing="false" onMouseClicked="#handleAddCourseButtonAction" text="+ Add Course"/>
+            <Button mnemonicParsing="false" onMouseClicked="#handleAddCourseButtonAction" text="+ Add Course" />
         </children>
-        <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-        </padding>
+      <VBox.margin>
+         <Insets />
+      </VBox.margin>
     </HBox>
+      <Label text="Current Courses">
+          <font>
+              <Font size="18.0" />
+          </font>
+      <VBox.margin>
+         <Insets bottom="10.0" top="20.0" />
+      </VBox.margin>
+      </Label>
+
+    <!-- Current Courses Section -->
+    <VBox prefHeight="200.0" prefWidth="100.0" styleClass="section-style" VBox.vgrow="ALWAYS">
+        <children>
+            <VBox fx:id="currentCourseContainer" prefHeight="100.0" prefWidth="200.0" />
+        </children>
+    </VBox>
 
     <!-- Container for New Course Input Form -->
-    <VBox fx:id="newCourseInputContainer" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS"/>
+    <VBox fx:id="newCourseInputContainer" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+   <padding>
+      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+   </padding>
 </VBox>

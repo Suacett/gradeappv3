@@ -14,9 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox spacing="20" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21" fx:controller="com.gradeapp.controller.CourseEditController">
+<VBox spacing="10.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
     </padding>
 
     <Label text="Course Details">
@@ -47,7 +47,7 @@
 
     <Label text="Course Outcomes">
         <font>
-            <Font size="16.0" />
+            <Font size="18.0" />
         </font>
     </Label>
 
@@ -62,10 +62,14 @@
 
     <HBox spacing="10">
         <Button onAction="#addOutcome" text="Add Outcome" />
-        <Button onAction="#removeSelectedOutcome" text="Remove Selected Outcome" />
+        <Button onAction="#removeSelectedOutcome" styleClass="delete-button" text="Remove Selected Outcome" />
+      <HBox alignment="TOP_RIGHT" prefHeight="29.0" prefWidth="300.0">
+         <children>
+         
+                      <Label fx:id="totalWeightLabel" contentDisplay="RIGHT" text="Total Weight: 0%" />
+         </children>
+      </HBox>
     </HBox>
-
-    <Label fx:id="totalWeightLabel" text="Total Weight: 0%" />
 
     <HBox spacing="10">
         <Button onAction="#saveCourse" text="Save" />
