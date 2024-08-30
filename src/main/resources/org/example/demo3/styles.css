@@ -23,8 +23,37 @@
     -fx-padding: 10px; 
     -fx-border-radius: 5px;
 }
-.delete-button {
-    -fx-background-color: #ff0f0fe1;
-    -fx-text-fill: #FFF;
+.section-style {
+    -fx-background-color: #FFF;
+    -fx-border-color: #a4a4a4;
+    -fx-border-width: 1px; 
+    -fx-padding: 10px; 
     -fx-border-radius: 5px;
+}
+
+/* Elements */
+Button {
+    -fx-background-color: #FFF;
+    -fx-background-radius: 25px;
+    -fx-border-color: #0071E3;
+    -fx-border-width: 1px;
+    -fx-border-radius: 25px;
+    -fx-padding: 5px 20px;
+    -fx-text-fill: #0071E3;
+}
+Button:hover {
+    -fx-background-color: #0071E3;
+    -fx-text-fill: #FFF;
+}
+
+.delete-button {
+    -fx-border-color: #ff0f0fe1;
+    -fx-background-radius: 25px;
+    -fx-border-width: 1px; 
+    -fx-text-fill: #ff0f0fe1;
+    -fx-border-radius: 25px;
+}
+.delete-button:hover {
+    -fx-background-color: #ff0f0fe1; 
+    -fx-text-fill: #fff;
 }

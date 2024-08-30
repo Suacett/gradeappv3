@@ -13,9 +13,9 @@
    <top>
       <HBox prefHeight="35.0" prefWidth="600.0" style="-fx-border-color: #D9D9D9; -fx-border-width: 0 0 1 0; -fx-background-color: #FFF;" BorderPane.alignment="CENTER">
          <children>
-            <Label text="MarkBook+" textFill="#0D8359">
+            <Label text="MarkBook+" textFill="#28C841">
                <font>
-                  <Font name="System Bold" size="28.0" />
+                  <Font name="System Bold" size="26.0" />
                </font>
             </Label>
          </children>
@@ -134,7 +134,7 @@
                <children>
                   <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@icons/assessmentTEMP_FILE_PLEASE_REPLACE.png" />
+                        <Image url="@icons/assessments.png"/>
                      </image>
                   </ImageView>
                   <Label text="Assessments">
