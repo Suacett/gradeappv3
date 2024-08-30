@@ -85,7 +85,7 @@ private VBox createStudentCard(Student student) {
     studentCard.getStyleClass().add("card");
     studentCard.setPadding(new Insets(10));
     studentCard.setSpacing(10);
-    Label studentNameLabel = new Label(student.getName());  // Display the full name as it is
+    Label studentNameLabel = new Label(student.getName());  // Display the full name
     Label studentIdLabel = new Label(student.getStudentId());
     HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
     buttonContainer.setSpacing(10);
@@ -100,7 +100,7 @@ private VBox createStudentCard(Student student) {
     buttonContainer.getChildren().addAll(editButton, deleteButton);
     studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, buttonContainer);
     // Set bottom margin
-    VBox.setMargin(studentCard, new Insets(0, 0, 10, 0));  // Top, Right, Bottom, Left
+    VBox.setMargin(studentCard, new Insets(0, 0, 10, 0));
     return studentCard;
 }
 

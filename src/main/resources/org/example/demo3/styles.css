@@ -1,7 +1,4 @@
-
-
-/* SIDE NAVIGATION BAR */
-/* Navigation item states */
+/* Navigation items */
 .nav-item {
     -fx-background-color: transparent;
     -fx-background-radius: 5;
@@ -15,15 +12,6 @@
     -fx-background-radius: 5;
 }
 
-/* STUDENT section */
-.card {
-    -fx-background-color: #FFF;
-    -fx-border-color: #a4a4a4;
-    -fx-border-width: 1px; 
-    -fx-padding: 10px; 
-    -fx-border-radius: 5px;
-}
-
 /* Category sections */
 .section-style {
     -fx-background-color: #FFF;
@@ -33,7 +21,7 @@
     -fx-border-radius: 5px;
 }
 
-/* Elements */
+/* Buttons */
 Button {
     -fx-background-color: #FFF;
     -fx-background-radius: 25px;
@@ -47,7 +35,6 @@ Button:hover {
     -fx-background-color: #0071E3;
     -fx-text-fill: #FFF;
 }
-
 .delete-button {
     -fx-border-color: #ff0f0fe1;
     -fx-background-radius: 25px;
@@ -58,4 +45,13 @@ Button:hover {
 .delete-button:hover {
     -fx-background-color: #ff0f0fe1; 
     -fx-text-fill: #fff;
+}
+
+/* STUDENT section */
+.card {
+    -fx-background-color: #FFF;
+    -fx-border-color: #a4a4a4;
+    -fx-border-width: 1px; 
+    -fx-padding: 10px; 
+    -fx-border-radius: 5px;
 }

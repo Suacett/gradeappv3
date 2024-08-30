@@ -129,6 +129,7 @@ public class AssessmentController {
         editButton.setOnAction(event -> handleEditAssessmentButtonAction(assessment));
 
         Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.delete("assessments", "id", String.valueOf(assessment.getId())); // Ensure assessmentId is unique
             displayCurrentAssessments();
