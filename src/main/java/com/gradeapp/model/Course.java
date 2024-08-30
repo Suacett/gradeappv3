@@ -93,7 +93,15 @@ public class Course {
     }
 
     public void addAssessment(Assessment assessment) {
+        double totalWeight = getTotalAssessmentWeight();
+        if (totalWeight + assessment.getWeight() > 100) {
+            throw new IllegalArgumentException("Total assessment weight cannot exceed 100%");
+        }
         this.assessments.add(assessment);
+    }
+
+    public double getTotalAssessmentWeight() {
+        return assessments.stream().mapToDouble(Assessment::getWeight).sum();
     }
 
     public void removeAssessment(Assessment assessment) {

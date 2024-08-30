@@ -7,6 +7,14 @@ import java.util.List;
 
 public class Database {
     private static final String URL = "jdbc:sqlite:com.gradeapp.db";
+    private static boolean isInitialized = false;
+
+    public Database() {
+        if (!isInitialized) {
+            initialiseDatabase();
+            isInitialized = true;
+        }
+    }
 
     public void initialiseDatabase() {
         String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
@@ -26,10 +34,12 @@ public class Database {
                 + ");";
         String createAssessmentsTable = "CREATE TABLE IF NOT EXISTS assessments ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "course_id TEXT NOT NULL,"
                 + "name TEXT NOT NULL,"
                 + "description TEXT NOT NULL,"
                 + "weight REAL NOT NULL,"
-                + "maxScore REAL NOT NULL"
+                + "maxScore REAL NOT NULL,"
+                + "FOREIGN KEY (course_id) REFERENCES courses(id)"
                 + ");";
         String createOutcomesTable = "CREATE TABLE IF NOT EXISTS outcomes ("
                 + "id TEXT,"
@@ -40,6 +50,15 @@ public class Database {
                 + "PRIMARY KEY (id, course_id),"
                 + "FOREIGN KEY (course_id) REFERENCES courses(id)"
                 + ");";
+        String createAssessmentOutcomesTable = "CREATE TABLE IF NOT EXISTS assessment_outcomes ("
+                + "assessment_id INTEGER,"
+                + "outcome_id TEXT,"
+                + "weight REAL NOT NULL,"
+                + "PRIMARY KEY (assessment_id, outcome_id),"
+                + "FOREIGN KEY (assessment_id) REFERENCES assessments(id),"
+                + "FOREIGN KEY (outcome_id) REFERENCES outcomes(id)"
+                + ");";
+        
 
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement()) {
@@ -48,6 +67,8 @@ public class Database {
             stmt.execute(createClassesTable);
             stmt.execute(createAssessmentsTable);
             stmt.execute(createOutcomesTable);
+            stmt.execute(createAssessmentsTable);
+            stmt.execute(createAssessmentOutcomesTable);
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
@@ -348,15 +369,93 @@ public class Database {
     }
 
     // ASSESSMENTS
-    public void addAssessment(Assessment assessment) {
-        String sql = "INSERT INTO assessments(name, description, weight, maxScore) VALUES(?, ?, ?, ?)";
+
+    public void deleteAssessment(int assessmentId) {
+        try (Connection conn = this.connect()) {
+            conn.setAutoCommit(false);
+            try {
+                // First, delete all outcome links for this assessment
+                String deleteLinksSQL = "DELETE FROM assessment_outcomes WHERE assessment_id = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(deleteLinksSQL)) {
+                    pstmt.setInt(1, assessmentId);
+                    pstmt.executeUpdate();
+                }
+
+                // Then, delete the assessment itself
+                String deleteAssessmentSQL = "DELETE FROM assessments WHERE id = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(deleteAssessmentSQL)) {
+                    pstmt.setInt(1, assessmentId);
+                    pstmt.executeUpdate();
+                }
+
+                conn.commit();
+                System.out.println("Assessment and its outcome links deleted successfully.");
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error deleting assessment: " + e.getMessage());
+        }
+    }
+
+    public List<Assessment> getAssessmentsForCourse(String courseId) {
+        List<Assessment> assessments = new ArrayList<>();
+        String sql = "SELECT * FROM assessments WHERE course_id = ?";
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    String name = rs.getString("name");
+                    String description = rs.getString("description");
+                    double weight = rs.getDouble("weight");
+                    double maxScore = rs.getDouble("maxScore");
+                    Assessment assessment = new Assessment(id, name, description, weight, maxScore);
+                    assessments.add(assessment);
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting assessments for course " + courseId + ": " + e.getMessage());
+        }
+        return assessments;
+    }
+
+    public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
+        String sql = "INSERT OR REPLACE INTO assessment_outcomes(assessment_id, outcome_id, weight) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, assessment.getName());
-            pstmt.setString(2, assessment.getDescription());
-            pstmt.setDouble(3, assessment.getWeight());
-            pstmt.setDouble(4, assessment.getMaxScore());
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, outcomeId);
+            pstmt.setDouble(3, weight);
             pstmt.executeUpdate();
+            System.out.println("Outcome linked to assessment successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error linking outcome to assessment: " + e.getMessage());
+        }
+    }
+
+    public void addAssessment(Assessment assessment, String courseId) {
+        String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseId);
+            pstmt.setString(2, assessment.getName());
+            pstmt.setString(3, assessment.getDescription());
+            pstmt.setDouble(4, assessment.getWeight());
+            pstmt.setDouble(5, assessment.getMaxScore());
+            pstmt.executeUpdate();
+    
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+                if (rs.next()) {
+                    assessment.setId(rs.getInt(1));
+                }
+            }
+    
             System.out.println("Assessment added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding assessment: " + e.getMessage());
@@ -364,14 +463,14 @@ public class Database {
     }
 
     public void updateAssessment(Assessment assessment) {
-        String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE name = ?";
+        String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, assessment.getName());
             pstmt.setString(2, assessment.getDescription());
             pstmt.setDouble(3, assessment.getWeight());
             pstmt.setDouble(4, assessment.getMaxScore());
-            pstmt.setString(5, assessment.getName());
+            pstmt.setInt(5, assessment.getId());
             pstmt.executeUpdate();
             System.out.println("Assessment updated successfully.");
         } catch (SQLException e) {
@@ -379,6 +478,8 @@ public class Database {
         }
     }
 
+
+    
     public List<Assessment> getAllAssessments() {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments";
