@@ -7,8 +7,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="content" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
-   <Label text="Add new course">
+<VBox fx:id="content" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CoursesController">
+   <Label text="Add a new course">
       <font>
          <Font size="18.0" />
       </font>
@@ -18,9 +18,9 @@
    </Label>
 
     <!-- Add New Course Section -->
-    <HBox prefHeight="16.0" prefWidth="519.0" spacing="10.0" styleClass="section-style" HBox.hgrow="ALWAYS">
+    <HBox alignment="CENTER_LEFT" prefHeight="16.0" prefWidth="519.0" spacing="10.0" styleClass="section-style" HBox.hgrow="ALWAYS">
         <children>
-            <Label text="Add a new Course">
+            <Label text="Add new Course">
                 <font>
                     <Font size="16.0" />
                 </font>
@@ -31,7 +31,7 @@
          <Insets />
       </VBox.margin>
     </HBox>
-      <Label text="Current Courses">
+      <Label text="Current courses">
           <font>
               <Font size="18.0" />
           </font>

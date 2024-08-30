@@ -68,9 +68,9 @@ public class ClassController {
     // Class card, displays current classes
     private VBox createClassCard(Classes classes) {
         VBox classCard = new VBox();
+        classCard.getStyleClass().add("card");
         classCard.setPadding(new Insets(10));
         classCard.setSpacing(10);
-        classCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px; -fx-border-radius: 5px;");
 
         Label classNameLabel = new Label(classes.getName());  // Display the full name as it is
         Label classIdLabel = new Label(classes.getClassId());
@@ -83,6 +83,7 @@ public class ClassController {
         editButton.setOnAction(event -> handleEditClassButtonAction(classes));
 
         Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.delete("classes", "classId", classes.getClassId()); // Ensure deletion is based on classId
             displayCurrentClasses();  // Refresh the class list after deletion
@@ -90,6 +91,7 @@ public class ClassController {
 
         buttonContainer.getChildren().addAll(editButton, deleteButton);
         classCard.getChildren().addAll(classNameLabel, classIdLabel, buttonContainer);
+        VBox.setMargin(classCard, new Insets(0, 0, 10, 0));
         return classCard;
     }
 
