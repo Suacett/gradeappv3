@@ -429,10 +429,11 @@ public class AssessmentController {
         outcomeTable.getColumns().addAll(idColumn, nameColumn, descriptionColumn, weightColumn);
     }
 
-    // Method to update parts table when an assessment is selected
     private void updatePartsTable(Assessment selectedAssessment) {
         if (selectedAssessment != null) {
-            ObservableList<AssessmentPart> parts = selectedAssessment.getParts();
+            ObservableList<AssessmentPart> parts = FXCollections.observableArrayList(
+                db.getAssessmentParts(selectedAssessment.getId())
+            );
             partsTable.setItems(parts);
         } else {
             partsTable.getItems().clear();
@@ -521,7 +522,9 @@ public class AssessmentController {
                     String name = nameField.getText();
                     double weight = Double.parseDouble(weightField.getText());
                     double maxScore = Double.parseDouble(maxScoreField.getText());
-                    return new AssessmentPart(-1, name, weight, maxScore); // Using -1 as a temporary ID
+                    AssessmentPart newPart = new AssessmentPart(-1, name, weight, maxScore);
+                    db.addAssessmentPart(newPart, selectedAssessment.getId());
+                    return newPart;
                 } catch (NumberFormatException e) {
                     showAlert("Invalid input. Please enter valid numbers for weight and max score.");
                     return null;
@@ -531,7 +534,6 @@ public class AssessmentController {
         });
 
         dialog.showAndWait().ifPresent(part -> {
-            selectedAssessment.addPart(part);
             updatePartsTable(selectedAssessment);
         });
     }

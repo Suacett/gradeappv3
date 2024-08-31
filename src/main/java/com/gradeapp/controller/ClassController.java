@@ -1,37 +1,143 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.database.Database;
-import com.gradeapp.model.Classes;
+import com.gradeapp.model.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.sql.SQLException;
 import java.util.List;
-
 public class ClassController {
 
-    public VBox classContainer;
-    @FXML
-    private VBox currentClassContainer;
-    @FXML
-    private VBox newClassInputContainer;
+    @FXML private VBox classContainer;
+    @FXML private VBox currentClassContainer;
+    @FXML private VBox newClassInputContainer;
+    @FXML private ComboBox<Course> courseSelector;
+    @FXML private ListView<Student> studentListView;
+    @FXML private Label classStatisticsLabel;
 
+    
     private Database db = new Database();
-
+    private Classes selectedClass;
+    
     @FXML
     private void initialize() {
+        setupCourseSelector();
         displayCurrentClasses();
+    }
+
+
+    private void setupCourseSelector() {
+        ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
+        courseSelector.setItems(courses);
+        courseSelector.setOnAction(e -> updateClassList());
+    }
+
+    private void updateClassList() {
+        Course selectedCourse = courseSelector.getValue();
+        if (selectedCourse != null) {
+            ObservableList<Classes> classes = FXCollections.observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
+        }
     }
 
     // Add Class click event
     @FXML
-    private void handleAddClassButtonAction() {
-        VBox classInputBox = createClassInputBox();
-        newClassInputContainer.getChildren().add(classInputBox);
+    private void handleAddClassButtonAction() throws SQLException {
+        Dialog<Classes> dialog = new Dialog<>();
+        dialog.setTitle("Add New Class");
+
+        TextField nameField = new TextField();
+        TextField idField = new TextField();
+        ComboBox<Course> courseComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllCourses()));
+
+        dialog.getDialogPane().setContent(new VBox(10, 
+            new Label("Class Name:"), nameField,
+            new Label("Class ID:"), idField,
+            new Label("Course:"), courseComboBox
+        ));
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                String name = nameField.getText();
+                String id = idField.getText();
+                Course course = courseComboBox.getValue();
+                if (name.isEmpty() || id.isEmpty() || course == null) {
+                    showError("Please fill in all fields and select a course.");
+                    return null;
+                }
+                Classes newClass = new Classes(name, id);
+                try {
+                    db.addClass(newClass, course.getId());
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                return newClass;
+            }
+            return null;
+        });
+        dialog.showAndWait().ifPresent(result -> displayCurrentClasses());
+    }
+
+    @FXML
+    public void handleViewClassDetailsAction(Classes classObj) {
+        selectedClass = classObj;
+        updateClassDetailsView();
+    }
+
+    private void updateClassDetailsView() {
+        if (selectedClass != null) {
+            classStatisticsLabel.setText("Class Statistics: " + calculateClassStatistics());
+            updateStudentListView();
+        }
+    }
+
+    private String calculateClassStatistics() {
+        // Implement logic to calculate class statistics
+        return "Average Grade: X, Passing Rate: Y%";
+    }
+
+    private void updateStudentListView() {
+        ObservableList<Student> students = FXCollections.observableArrayList(db.getStudentsInClass(selectedClass.getClassId()));
+        studentListView.setItems(students);
+    }
+
+    @FXML
+    public void handleAddStudentToClassAction() throws SQLException {
+        if (selectedClass == null) {
+            showError("Please select a class first.");
+            return;
+        }
+
+        Dialog<Student> dialog = new Dialog<>();
+        dialog.setTitle("Add Student to Class");
+
+        ComboBox<Student> studentComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllStudents()));
+
+        dialog.getDialogPane().setContent(new VBox(10, 
+            new Label("Select Student:"), studentComboBox
+        ));
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                Student student = studentComboBox.getValue();
+                if (student != null) {
+                    db.addStudentToClass(student.getStudentId(), selectedClass.getClassId());
+                    return student;
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(result -> updateStudentListView());
     }
 
     // New class inputs, appear on Add Class button click
@@ -79,6 +185,11 @@ public class ClassController {
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
 
+        
+        Button viewDetailsButton = new Button("View Details");
+        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classes));
+
+        buttonContainer.getChildren().add(viewDetailsButton);
         Button editButton = new Button("Edit");
         editButton.setOnAction(event -> handleEditClassButtonAction(classes));
 
@@ -125,15 +236,27 @@ public class ClassController {
     // Display current classes
     private void displayCurrentClasses() {
         currentClassContainer.getChildren().clear();
-        List<Classes> classesFromDb = db.getAllClasses(); // Get classes from db
-        if (classesFromDb.isEmpty()) { // Display message if db empty
-            Label emptyLabel = new Label("You have no current classes");
-            currentClassContainer.getChildren().add(emptyLabel);
-        } else {
-            for (Classes classes : classesFromDb) {
-                VBox classCard = createClassCard(classes);
-                currentClassContainer.getChildren().add(classCard);
-            }
+        List<Classes> classes = db.getAllClasses();
+        for (Classes classObj : classes) {
+            VBox classCard = createClassCard(classObj);
+            currentClassContainer.getChildren().add(classCard);
         }
+    }
+
+    @FXML
+    public void handleRemoveStudentFromClassAction() {
+        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        if (selectedStudent != null && selectedClass != null) {
+            db.removeStudentFromClass(selectedStudent.getStudentId(), selectedClass.getClassId());
+            updateStudentListView();
+        }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

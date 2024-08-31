@@ -34,18 +34,27 @@
         <VBox>
             <Label text="Assessments"/>
             <TableView fx:id="assessmentTable"/>
-            <Button text="Add Assessment" onAction="#handleAddAssessmentButtonAction"/>
-            <Button text="Add Child Assessment" onAction="#handleAddChildAssessmentButtonAction"/>
+            <HBox spacing="10">
+                <Button text="Add Assessment" onAction="#handleAddAssessmentButtonAction"/>
+                <Button text="Add Child Assessment" onAction="#handleAddChildAssessmentButtonAction"/>
+                <Button fx:id="deleteAssessmentButton" text="Delete Assessment"/>
+            </HBox>
         </VBox>
         <VBox>
             <Label text="Assessment Parts"/>
             <TableView fx:id="partsTable"/>
-            <Button text="Add Part" onAction="#handleAddPartButtonAction"/>
+            <HBox spacing="10">
+                <Button text="Add Part" onAction="#handleAddPartButtonAction"/>
+                <Button fx:id="deletePartButton" text="Delete Part"/>
+            </HBox>
         </VBox>
         <VBox>
             <Label text="Linked Outcomes"/>
             <TableView fx:id="outcomeTable"/>
-            <Button text="Link Outcome" onAction="#handleLinkOutcomeButtonAction"/>
+            <HBox spacing="10">
+                <Button text="Link Outcome" onAction="#handleLinkOutcomeButtonAction"/>
+                <Button fx:id="unlinkOutcomeButton" text="Unlink Outcome"/>
+            </HBox>
         </VBox>
     </HBox>
     <VBox fx:id="outcomeInputContainer" spacing="10">

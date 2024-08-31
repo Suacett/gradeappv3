@@ -30,7 +30,9 @@ public class Database {
         String createClassesTable = "CREATE TABLE IF NOT EXISTS classes ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
-                + "classId TEXT NOT NULL"
+                + "classId TEXT NOT NULL,"
+                + "course_id TEXT,"
+                + "FOREIGN KEY (course_id) REFERENCES courses(id)"
                 + ");";
         String createAssessmentsTable = "CREATE TABLE IF NOT EXISTS assessments ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -58,8 +60,21 @@ public class Database {
                 + "FOREIGN KEY (assessment_id) REFERENCES assessments(id),"
                 + "FOREIGN KEY (outcome_id) REFERENCES outcomes(id)"
                 + ");";
-        
-
+        String createAssessmentPartsTable = "CREATE TABLE IF NOT EXISTS assessment_parts ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "assessment_id INTEGER NOT NULL,"
+                + "name TEXT NOT NULL,"
+                + "weight REAL NOT NULL,"
+                + "max_score REAL NOT NULL,"
+                + "FOREIGN KEY (assessment_id) REFERENCES assessments(id)"
+                + ");";
+        String createClassStudentsTable = "CREATE TABLE IF NOT EXISTS class_students ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "class_id INTEGER,"
+                + "student_id INTEGER,"
+                + "FOREIGN KEY (class_id) REFERENCES classes(id),"
+                + "FOREIGN KEY (student_id) REFERENCES students(id)"
+                + ");";
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement()) {
             stmt.execute(createCoursesTable);
@@ -69,6 +84,10 @@ public class Database {
             stmt.execute(createOutcomesTable);
             stmt.execute(createAssessmentsTable);
             stmt.execute(createAssessmentOutcomesTable);
+            stmt.execute(createAssessmentPartsTable);
+            stmt.execute(createClassStudentsTable);
+            stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
+            
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
@@ -86,6 +105,44 @@ public class Database {
         }
     }
 
+    // ASSESSMENT PARTS
+
+    public void addAssessmentPart(AssessmentPart part, int assessmentId) {
+        String sql = "INSERT INTO assessment_parts(assessment_id, name, weight, max_score) VALUES(?, ?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, part.getName());
+            pstmt.setDouble(3, part.getWeight());
+            pstmt.setDouble(4, part.getMaxScore());
+            pstmt.executeUpdate();
+            System.out.println("Assessment part added successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error adding assessment part: " + e.getMessage());
+        }
+    }
+
+    public List<AssessmentPart> getAssessmentParts(int assessmentId) {
+        List<AssessmentPart> parts = new ArrayList<>();
+        String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                double weight = rs.getDouble("weight");
+                double maxScore = rs.getDouble("max_score");
+                parts.add(new AssessmentPart(id, name, weight, maxScore));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting assessment parts: " + e.getMessage());
+        }
+        return parts;
+    }
+
+    
     // COURSES
     public void addCourse(Course course) {
         String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
@@ -337,6 +394,39 @@ public class Database {
         }
     }
 
+    public void addClass(Classes classObj, String courseId) throws SQLException {
+        String sql = "INSERT INTO classes(name, classId, course_id) VALUES(?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classObj.getName());
+            pstmt.setString(2, classObj.getClassId());
+            pstmt.setString(3, courseId);
+            pstmt.executeUpdate();
+            System.out.println("Class added successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error adding class: " + e.getMessage());
+            throw e; // Rethrow the exception for the controller to handle
+        }
+    }
+
+    public List<Classes> getClassesForCourse(String courseId) {
+        List<Classes> classes = new ArrayList<>();
+        String sql = "SELECT * FROM classes WHERE course_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String classId = rs.getString("classId");
+                classes.add(new Classes(name, classId));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting classes for course: " + e.getMessage());
+        }
+        return classes;
+    }
+
     public void updateClass(String oldClassId, String newName, String newClassId) {
         String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
         try (Connection conn = this.connect();
@@ -368,7 +458,76 @@ public class Database {
         return classes;
     }
 
+    public void addStudentToClass(String studentId, String classId) {
+        String sql = "INSERT INTO class_students(student_id, class_id) VALUES(?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, classId);
+            pstmt.executeUpdate();
+            System.out.println("Student added to class successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error adding student to class: " + e.getMessage());
+        }
+    }
+
+    public void removeStudentFromClass(String studentId, String classId) {
+        String sql = "DELETE FROM class_students WHERE student_id = ? AND class_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, classId);
+            pstmt.executeUpdate();
+            System.out.println("Student removed from class successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error removing student from class: " + e.getMessage());
+        }
+    }
+
+    public List<Student> getStudentsInClass(String classId) {
+        List<Student> students = new ArrayList<>();
+        String sql = "SELECT s.* FROM students s JOIN class_students cs ON s.studentId = cs.student_id WHERE cs.class_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String studentId = rs.getString("studentId");
+                students.add(new Student(name, studentId));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting students in class: " + e.getMessage());
+        }
+        return students;
+    }
+
     // ASSESSMENTS
+
+    public void deleteAssessmentPart(int partId) {
+        String sql = "DELETE FROM assessment_parts WHERE id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, partId);
+            pstmt.executeUpdate();
+            System.out.println("Assessment part deleted successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error deleting assessment part: " + e.getMessage());
+        }
+    }
+
+    public void unlinkOutcomeFromAssessment(int assessmentId, String outcomeId) {
+        String sql = "DELETE FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, outcomeId);
+            pstmt.executeUpdate();
+            System.out.println("Outcome unlinked from assessment successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error unlinking outcome from assessment: " + e.getMessage());
+        }
+    }
 
     public void deleteAssessment(int assessmentId) {
         try (Connection conn = this.connect()) {

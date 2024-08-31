@@ -101,7 +101,8 @@ public class AssessmentCreationController {
             }
 
             newAssessment = new Assessment(name, description, weight, maxScore);
-
+            db.addAssessment(newAssessment, selectedCourse.getId());
+            
             for (Map.Entry<Outcome, TextField> entry : outcomeWeightFields.entrySet()) {
                 CheckBox cb = (CheckBox) outcomeCheckboxContainer.getChildren().get(
                         outcomeCheckboxContainer.getChildren().indexOf(entry.getValue()) - 1);
@@ -112,8 +113,9 @@ public class AssessmentCreationController {
             }
 
             for (AssessmentPart part : parts) {
-                newAssessment.addPart(part);
+                db.addAssessmentPart(part, newAssessment.getId());
             }
+            
 
             selectedCourse.addAssessment(newAssessment);
             db.addAssessment(newAssessment, selectedCourse.getId());

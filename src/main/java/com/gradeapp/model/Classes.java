@@ -1,10 +1,6 @@
 package com.gradeapp.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Classes {
     private String name;
@@ -12,6 +8,7 @@ public class Classes {
     private List<Classes> classes;
     private List<Assessment> assessments;
     private Set<Outcome> outcomes;
+    private Set<Student> students;
 
     public Classes(String name, String classId) {
         this.name = name;
@@ -19,6 +16,7 @@ public class Classes {
         this.classes = new ArrayList<>();
         this.assessments = new ArrayList<>();
         this.outcomes = new HashSet<>();
+        this.students = new HashSet<>();
     }
 
     public String getName() {
@@ -47,6 +45,26 @@ public class Classes {
 
     public void addOutcome(Outcome outcome) {
         outcomes.add(outcome);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setClassId(String classId) {
+        this.classId = classId;
+    }
+
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+
+    public void removeStudent(Student student) {
+        students.remove(student);
+    }
+
+    public Set<Student> getStudents() {
+        return Collections.unmodifiableSet(students);
     }
 
 }
