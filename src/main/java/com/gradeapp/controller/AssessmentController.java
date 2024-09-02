@@ -1,10 +1,7 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.database.Database;
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.AssessmentPart;
-import com.gradeapp.model.Course;
-import com.gradeapp.model.Outcome;
+import com.gradeapp.model.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -15,11 +12,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.util.List;
+import javafx.scene.control.ListCell;
+
 
 public class AssessmentController {
 
@@ -63,65 +63,38 @@ public class AssessmentController {
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-    }
-
-
-
-    // Handle add assessment click event
-    /* 
-    @FXML
-    private void handleAddAssessmentButtonAction() {
-        if (selectedCourse == null) {
-            showAlert("Please select a course first.");
-            return;
-        }
-
-        Dialog<Assessment> dialog = new Dialog<>();
-        dialog.setTitle("Add Assessment");
-        dialog.setHeaderText("Create a new assessment for " + selectedCourse.getName());
-
-        TextField nameField = new TextField();
-        TextField descriptionField = new TextField();
-        TextField weightField = new TextField();
-        TextField maxScoreField = new TextField();
-
-        dialog.getDialogPane().setContent(new VBox(10,
-                new Label("Name:"), nameField,
-                new Label("Description:"), descriptionField,
-                new Label("Weight:"), weightField,
-                new Label("Max Score:"), maxScoreField
-        ));
-
-        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButtonType) {
-                try {
-                    String name = nameField.getText();
-                    String description = descriptionField.getText();
-                    double weight = Double.parseDouble(weightField.getText());
-                    double maxScore = Double.parseDouble(maxScoreField.getText());
-                    Assessment assessment = new Assessment(name, description, weight, maxScore);
-                    db.addAssessment(assessment, selectedCourse.getId());
-                    return assessment;
-                } catch (NumberFormatException e) {
-                    showAlert("Invalid input. Please enter valid numbers for weight and max score.");
-                    return null;
-                } catch (IllegalArgumentException e) {
-                    showAlert(e.getMessage());
-                    return null;
+        courseSelector.setCellFactory(lv -> new ListCell<Course>() {
+            @Override
+            protected void updateItem(Course course, boolean empty) {
+                super.updateItem(course, empty);
+                if (empty || course == null) {
+                    setText(null);
+                } else {
+                    setText(course.getName() + " (" + course.getId() + ")");
                 }
             }
-            return null;
         });
-
-        dialog.showAndWait().ifPresent(assessment -> {
-            updateAssessmentTable();
+    
+        courseSelector.setConverter(new StringConverter<Course>() {
+            @Override
+            public String toString(Course course) {
+                return course == null ? "" : course.getName() + " (" + course.getId() + ")";
+            }
+    
+            @Override
+            public Course fromString(String string) {
+                return null; // Not needed for this use case
+            }
+        });
+    
+        courseSelector.setOnAction(e -> {
+            if (courseSelector.getValue() != null) {
+                selectedCourse = courseSelector.getValue();
+                updateAssessmentTable();
+                updateOutcomeTable();
+            }
         });
     }
-
-    */
 
     @FXML
     private void handleAddAssessmentButtonAction() {

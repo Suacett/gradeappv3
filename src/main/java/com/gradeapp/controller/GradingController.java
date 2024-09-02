@@ -1,5 +1,6 @@
 package com.gradeapp.controller;
 
+import com.gradeapp.database.Database;
 import com.gradeapp.model.*;
 import com.gradeapp.util.WeightedAverageGradeCalculator;
 
@@ -9,9 +10,11 @@ import java.util.Map;
 
 public class GradingController {
     private WeightedAverageGradeCalculator calculator;
+    private Database db;
 
     public GradingController() {
         this.calculator = new WeightedAverageGradeCalculator();
+        this.db = new Database();
     }
 
     // Methods for calculating grades and achievements
@@ -33,16 +36,8 @@ public class GradingController {
     }
 
     // Methods for managing grades
-    public void addGrade(Student student, Assessment assessment, double score, String feedback) {
-        student.addGrade(assessment, score, feedback);
-    }
-
     public void removeGrade(Student student, Grade grade) {
         student.removeGrade(grade);
-    }
-
-    public List<Grade> getStudentGrades(Student student) {
-        return student.getGrades();
     }
 
     public Grade getGrade(Student student, Assessment assessment) {
@@ -50,6 +45,15 @@ public class GradingController {
                 .filter(grade -> grade.getAssessment().equals(assessment))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public void addGrade(Student student, Assessment assessment, double score, String feedback) {
+        Grade grade = new Grade(student, assessment, score, feedback);
+        db.saveGrade(grade);
+    }
+
+    public List<Grade> getStudentGrades(Student student) {
+        return db.getGradesForStudent(student.getStudentId());
     }
 
     public double getAverageGradeForStudent(Student student) {
