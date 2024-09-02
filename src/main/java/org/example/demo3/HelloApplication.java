@@ -15,6 +15,7 @@ public class HelloApplication extends Application {
         scene.getStylesheets().add(HelloApplication.class.getResource("styles.css").toExternalForm()); // Add CSS file
         stage.setTitle("MarkBook+"); // Add app title to window frame
         stage.setScene(scene);
+        stage.setMaximized(true); // Maximize window
         stage.show();
     }
 

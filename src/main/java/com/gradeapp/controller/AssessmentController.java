@@ -20,6 +20,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.util.List;
+import javafx.util.StringConverter;
 
 public class AssessmentController {
 
@@ -63,6 +64,16 @@ public class AssessmentController {
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
+        courseSelector.setConverter(new StringConverter<Course>() {
+            @Override
+            public String toString(Course course) {
+                return course != null ? course.getName() : "";
+            }
+            @Override
+            public Course fromString(String string) {
+                return courses.stream().filter(course -> course.getName().equals(string)).findFirst().orElse(null);
+            }
+        });
     }
 
 
