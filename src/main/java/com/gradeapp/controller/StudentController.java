@@ -15,9 +15,13 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -95,49 +99,45 @@ public class StudentController {
         }
     }
 
+
 // Student card, displays current students
 private VBox createStudentCard(Student student) {
     VBox studentCard = new VBox();
     studentCard.getStyleClass().add("card");
-    studentCard.setPadding(new Insets(10));
     studentCard.setSpacing(10);
-    
+    studentCard.setPadding(new Insets(10));
     Label studentNameLabel = new Label(student.getName());
     Label studentIdLabel = new Label(student.getStudentId());
-    
     studentCard.setOnMouseClicked(event -> {
         this.selectedStudent = student;
         displayStudentDetails(student);
     });
-
-    HBox buttonContainer = new HBox();
-    buttonContainer.setSpacing(10);
-    
+    // HBox to hold the student info and buttons
+    HBox studentCardInfo = new HBox();
+    studentCardInfo.setSpacing(10); // Add spacing between student cards
+    Region spacer = new Region(); // Spacer region floats buttons right
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+    HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
+    buttonContainer.setSpacing(10); // Space between buttons
     Button editButton = new Button("Edit");
     editButton.setOnAction(event -> handleEditButtonAction(student));
-    
     Button deleteButton = new Button("Delete");
     deleteButton.getStyleClass().add("delete-button");
     deleteButton.setOnAction(event -> {
         db.delete("students", "studentId", student.getStudentId());
         displayCurrentStudent();
     });
-    
     Button viewDetailsButton = new Button("View Details");
     viewDetailsButton.setOnAction(event -> displayStudentDetails(student));
-
     buttonContainer.getChildren().addAll(editButton, deleteButton, viewDetailsButton);
-    
-    
-    // Clear the button container before adding buttons
-    buttonContainer.getChildren().clear();
-    buttonContainer.getChildren().addAll(editButton, deleteButton, viewDetailsButton);
-    
-    studentCard.getChildren().addAll(studentNameLabel, studentIdLabel, buttonContainer);
-    
+    // Add the labels, spacer, and button container to the studentCardInfo HBox
+    studentCardInfo.getChildren().addAll(studentNameLabel, studentIdLabel, spacer, buttonContainer);
+    // Add the studentCardInfo HBox to the studentCard VBox
+    studentCard.getChildren().add(studentCardInfo);
     VBox.setMargin(studentCard, new Insets(0, 0, 10, 0));
     return studentCard;
 }
+
 
 private void displayStudentDetails(Student student) {
     if (studentDetailsContent == null) {

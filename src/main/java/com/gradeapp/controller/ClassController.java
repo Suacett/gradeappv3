@@ -10,6 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -260,41 +262,42 @@ private void handleAddClassButtonAction() throws SQLException {
             System.out.println("The form is incomplete...");
         }
     }
-
-    // Class card, displays current classes
-    private VBox createClassCard(Classes classes) {
-        VBox classCard = new VBox();
-        classCard.getStyleClass().add("card");
-        classCard.setPadding(new Insets(10));
-        classCard.setSpacing(10);
-
-        Label classNameLabel = new Label(classes.getName());  // Display the full name as it is
-        Label classIdLabel = new Label(classes.getClassId());
-
-        // Create HBox to hold the buttons
-        HBox buttonContainer = new HBox();
-        buttonContainer.setSpacing(10);
-
-        
-        Button viewDetailsButton = new Button("View Details");
-        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classes));
-
-        buttonContainer.getChildren().add(viewDetailsButton);
-        Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> handleEditClassButtonAction(classes));
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setOnAction(event -> {
-            db.delete("classes", "classId", classes.getClassId()); // Ensure deletion is based on classId
-            displayCurrentClasses();  // Refresh the class list after deletion
-        });
-
-        buttonContainer.getChildren().addAll(editButton, deleteButton);
-        classCard.getChildren().addAll(classNameLabel, classIdLabel, buttonContainer);
-        VBox.setMargin(classCard, new Insets(0, 0, 10, 0));
-        return classCard;
-    }
+    
+// Class card, displays current classes
+private VBox createClassCard(Classes classes) {
+    VBox classCard = new VBox();
+    classCard.getStyleClass().add("card");
+    classCard.setPadding(new Insets(10));
+    classCard.setSpacing(10);
+    Label classNameLabel = new Label(classes.getName());  // Display the full name as it is
+    Label classIdLabel = new Label(classes.getClassId());
+    // HBox to hold the class info
+    HBox classCardInfo = new HBox();
+    classCardInfo.setSpacing(10); // Add spacing between elements
+    // Spacer region floats buttons to right
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
+    HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
+    buttonContainer.setSpacing(10);
+    Button viewDetailsButton = new Button("View Details");
+    viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classes));
+    buttonContainer.getChildren().add(viewDetailsButton);
+    Button editButton = new Button("Edit");
+    editButton.setOnAction(event -> handleEditClassButtonAction(classes));
+    Button deleteButton = new Button("Delete");
+    deleteButton.getStyleClass().add("delete-button");
+    deleteButton.setOnAction(event -> {
+        db.delete("classes", "classId", classes.getClassId()); // Ensure deletion is based on classId
+        displayCurrentClasses();  // Refresh the class list after deletion
+    });
+    buttonContainer.getChildren().addAll(editButton, deleteButton);
+    // Add the labels, spacer, and button container to the classCardInfo HBox
+    classCardInfo.getChildren().addAll(classNameLabel, classIdLabel, spacer, buttonContainer);
+    // Add the classCardInfo HBox to the classCard VBox
+    classCard.getChildren().add(classCardInfo);
+    VBox.setMargin(classCard, new Insets(0, 10, 0, 10));
+    return classCard;
+}
 
     // Edit button action for classes
     private void handleEditClassButtonAction(Classes classes) {
