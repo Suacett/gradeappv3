@@ -1,0 +1,16 @@
+"filename", "language", "Java", "XML", "comment", "blank", "total"
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\AssessmentController.java", "Java", 30, 0, -56, 1, -25
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\AssessmentCreationController.java", "Java", 1, 0, 0, 1, 2
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\ClassController.java", "Java", 181, 0, 2, 30, 213
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\GradingController.java", "Java", 41, 0, 0, 10, 51
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\StudentController.java", "Java", 135, 0, 1, 38, 174
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\database\Database.java", "Java", 300, 0, 3, 20, 323
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Assessment.java", "Java", 5, 0, 0, 2, 7
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Classes.java", "Java", 13, 0, 0, 5, 18
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Grade.java", "Java", 15, 0, 0, 5, 20
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Student.java", "Java", 6, 0, 0, 3, 9
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\org\example\demo3\HelloApplication.java", "Java", 1, 0, 0, 0, 1
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\assessment-view.fxml", "XML", 0, 49, 0, 1, 50
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\classes-view.fxml", "XML", 0, -22, 0, 3, -19
+"c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\students-view.fxml", "XML", 0, 18, -1, -1, 16
+"Total", "-", 728, 45, -51, 118, 840

@@ -18,7 +18,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
 import java.util.List;
-import javafx.scene.control.ListCell;
 
 
 public class AssessmentController {
@@ -464,52 +463,53 @@ public class AssessmentController {
         });
     }
 
-    @FXML
-    private void handleAddPartButtonAction() {
-        Assessment selectedAssessment = assessmentTable.getSelectionModel().getSelectedItem();
-        if (selectedAssessment == null) {
-            showAlert("Please select an assessment first.");
-            return;
-        }
-
-        Dialog<AssessmentPart> dialog = new Dialog<>();
-        dialog.setTitle("Add Assessment Part");
-        dialog.setHeaderText("Create a new part for " + selectedAssessment.getName());
-
-        TextField nameField = new TextField();
-        TextField weightField = new TextField();
-        TextField maxScoreField = new TextField();
-
-        dialog.getDialogPane().setContent(new VBox(10,
-                new Label("Name:"), nameField,
-                new Label("Weight:"), weightField,
-                new Label("Max Score:"), maxScoreField
-        ));
-
-        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButtonType) {
-                try {
-                    String name = nameField.getText();
-                    double weight = Double.parseDouble(weightField.getText());
-                    double maxScore = Double.parseDouble(maxScoreField.getText());
-                    AssessmentPart newPart = new AssessmentPart(-1, name, weight, maxScore);
-                    db.addAssessmentPart(newPart, selectedAssessment.getId());
-                    return newPart;
-                } catch (NumberFormatException e) {
-                    showAlert("Invalid input. Please enter valid numbers for weight and max score.");
-                    return null;
-                }
-            }
-            return null;
-        });
-
-        dialog.showAndWait().ifPresent(part -> {
-            updatePartsTable(selectedAssessment);
-        });
+@FXML
+private void handleAddPartButtonAction() {
+    Assessment selectedAssessment = assessmentTable.getSelectionModel().getSelectedItem();
+    if (selectedAssessment == null) {
+        showAlert("Please select an assessment first.");
+        return;
     }
+
+    Dialog<AssessmentPart> dialog = new Dialog<>();
+    dialog.setTitle("Add Assessment Part");
+    dialog.setHeaderText("Create a new part for " + selectedAssessment.getName());
+
+    TextField nameField = new TextField();
+    TextField weightField = new TextField();
+    TextField maxScoreField = new TextField();
+
+    dialog.getDialogPane().setContent(new VBox(10,
+            new Label("Name:"), nameField,
+            new Label("Weight:"), weightField,
+            new Label("Max Score:"), maxScoreField
+    ));
+
+    ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+    dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+    dialog.setResultConverter(dialogButton -> {
+        if (dialogButton == addButtonType) {
+            try {
+                String name = nameField.getText();
+                double weight = Double.parseDouble(weightField.getText());
+                double maxScore = Double.parseDouble(maxScoreField.getText());
+                AssessmentPart newPart = new AssessmentPart(-1, name, weight, maxScore);
+                db.addAssessmentPart(newPart, selectedAssessment.getId());
+                selectedAssessment.addPart(newPart);  // Add this line
+                return newPart;
+            } catch (NumberFormatException e) {
+                showAlert("Invalid input. Please enter valid numbers for weight and max score.");
+                return null;
+            }
+        }
+        return null;
+    });
+
+    dialog.showAndWait().ifPresent(part -> {
+        updatePartsTable(selectedAssessment);
+    });
+}
 
     private void updateOutcomeTable() {
         if (selectedCourse != null) {

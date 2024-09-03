@@ -94,14 +94,17 @@ public class AssessmentCreationController {
             String description = descriptionField.getText();
             double weight = Double.parseDouble(weightField.getText());
             double maxScore = Double.parseDouble(maxScoreField.getText());
-
+    
             if (name.isEmpty() || description.isEmpty()) {
                 showAlert("Please enter a name and description for the assessment.");
                 return;
             }
-
+    
             newAssessment = new Assessment(name, description, weight, maxScore);
-            db.addAssessment(newAssessment, selectedCourse.getId());
+            
+            // Add the assessment to the database and get the generated ID
+            int assessmentId = db.addAssessment(newAssessment, selectedCourse.getId());
+            newAssessment.setId(assessmentId);  // Set the generated ID to the assessment object
             
             for (Map.Entry<Outcome, TextField> entry : outcomeWeightFields.entrySet()) {
                 CheckBox cb = (CheckBox) outcomeCheckboxContainer.getChildren().get(
@@ -109,17 +112,16 @@ public class AssessmentCreationController {
                 if (cb.isSelected() && !entry.getValue().getText().isEmpty()) {
                     double outcomeWeight = Double.parseDouble(entry.getValue().getText());
                     newAssessment.addOutcome(entry.getKey(), outcomeWeight);
+                    db.linkOutcomeToAssessment(assessmentId, entry.getKey().getId(), outcomeWeight);
                 }
             }
-
+    
             for (AssessmentPart part : parts) {
-                db.addAssessmentPart(part, newAssessment.getId());
+                db.addAssessmentPart(part, assessmentId);
             }
-            
-
+    
             selectedCourse.addAssessment(newAssessment);
-            db.addAssessment(newAssessment, selectedCourse.getId());
-
+    
             closeWindow();
         } catch (NumberFormatException e) {
             showAlert("Invalid input. Please enter valid numbers for weight and max score.");

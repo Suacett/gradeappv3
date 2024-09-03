@@ -47,11 +47,6 @@ public class GradingController {
                 .orElse(null);
     }
 
-    public void addGrade(Student student, Assessment assessment, double score, String feedback) {
-        Grade grade = new Grade(student, assessment, score, feedback);
-        db.saveGrade(grade);
-    }
-
     public List<Grade> getStudentGrades(Student student) {
         return db.getGradesForStudent(student.getStudentId());
     }
@@ -67,4 +62,55 @@ public class GradingController {
         }
         return averages;
     }
+
+    public Grade addGrade(Student student, Assessment assessment, AssessmentPart part, double score, String feedback) {
+        Grade grade = new Grade(student, assessment, part, score, feedback);
+        student.addGrade(grade);
+        db.saveGrade(grade);
+        System.out.println("Grade added: " + grade);
+        return grade;
+    }
+
+    public Grade addGrade(Student student, Assessment assessment, double score, String feedback) {
+        return addGrade(student, assessment, null, score, feedback);
+    }
+
+
+    
+    public double calculateAssessmentGrade(Student student, Assessment assessment) {
+        Map<AssessmentPart, Double> partScores = new HashMap<>();
+        for (AssessmentPart part : assessment.getParts()) {
+            Grade partGrade = getGrade(student, part);
+            if (partGrade != null) {
+                partScores.put(part, partGrade.getScore());
+            }
+        }
+        return assessment.calculateGrade(partScores);
+    }
+
+    public Map<Outcome, Double> calculateOutcomeGrades(Student student, Assessment assessment) {
+        Map<Outcome, Double> outcomeGrades = new HashMap<>();
+        Map<AssessmentPart, Double> partScores = new HashMap<>();
+        
+        for (AssessmentPart part : assessment.getParts()) {
+            Grade partGrade = getGrade(student, part);
+            if (partGrade != null) {
+                partScores.put(part, partGrade.getScore());
+            }
+        }
+
+        for (Outcome outcome : assessment.getOutcomeWeights().keySet()) {
+            double outcomeGrade = assessment.calculateOutcomeGrade(outcome, partScores);
+            outcomeGrades.put(outcome, outcomeGrade);
+        }
+
+        return outcomeGrades;
+    }
+
+private Grade getGrade(Student student, AssessmentPart part) {
+    return student.getGrades().stream()
+            .filter(grade -> grade.getAssessment().getParts().contains(part))
+            .findFirst()
+            .orElse(null);
+}
 }

@@ -19,6 +19,7 @@ public class Assessment {
     private ObservableList<Assessment> childAssessments;
     private Assessment parentAssessment;
 
+
     // Constructor with id
     public Assessment(int id, String name, String description, double weight, double maxScore) {
         this.id = id;
@@ -36,6 +37,7 @@ public class Assessment {
         this(-1, name, description, weight, maxScore); // Use -1 as a temporary id
         this.outcomeWeights = FXCollections.observableHashMap();
     }
+
 
     // Getters and setters for id
     public int getId() {
@@ -81,10 +83,12 @@ public class Assessment {
                 .sum();
     }
 
-    public double calculateGrade(List<Grade> grades) {
-        return grades.stream()
-                .filter(grade -> grade.getAssessment().equals(this))
-                .mapToDouble(Grade::getScore)
+    public double calculateGrade(Map<AssessmentPart, Double> partScores) {
+        return parts.stream()
+                .mapToDouble(part -> {
+                    double score = partScores.getOrDefault(part, 0.0);
+                    return (score / part.getMaxScore()) * part.getWeight();
+                })
                 .sum();
     }
 
@@ -147,6 +151,9 @@ public class Assessment {
     }
 
     public void addPart(AssessmentPart part) {
+        if (this.parts == null) {
+            this.parts = FXCollections.observableArrayList();
+        }
         this.parts.add(part);
     }
 

@@ -2,10 +2,13 @@ package com.gradeapp.controller;
 
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
 import com.gradeapp.model.Classes;
 import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
 import com.gradeapp.model.Student;
 
+import java.util.Map;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -165,16 +168,19 @@ private void displayStudentDetails(Student student) {
     VBox gradesBox = new VBox(5);
     gradesBox.getChildren().add(new Label("Grades:"));
     
-    GradingController gradingController = new GradingController();
-    List<Grade> studentGrades = gradingController.getStudentGrades(student);
+    List<Grade> studentGrades = student.getGrades();
     
     if (!studentGrades.isEmpty()) {
         for (Grade grade : studentGrades) {
-            gradesBox.getChildren().add(new Label(String.format("  - %s: %.2f", 
-                grade.getAssessment().getName(), grade.getScore())));
+            Assessment assessment = grade.getAssessment();
+            String gradeInfo = String.format("  - %s: %.2f", assessment.getName(), grade.getScore());
+            if (grade.getPart() != null) {
+                gradeInfo += String.format(" (Part: %s)", grade.getPart().getName());
+            }
+            gradesBox.getChildren().add(new Label(gradeInfo));
         }
         
-        double averageGrade = gradingController.getAverageGradeForStudent(student);
+        double averageGrade = student.calculateOverallPerformance();
         gradesBox.getChildren().add(new Label(String.format("Average Grade: %.2f", averageGrade)));
     } else {
         gradesBox.getChildren().add(new Label("  No grades available."));
@@ -182,7 +188,6 @@ private void displayStudentDetails(Student student) {
 
     studentDetailsContent.getChildren().add(gradesBox);
 }
-
 
 @FXML
 private void handleAddGradeButtonAction() {
@@ -195,47 +200,75 @@ private void handleAddGradeButtonAction() {
     Dialog<Grade> dialog = new Dialog<>();
     dialog.setTitle("Add Grade");
     dialog.setHeaderText("Add a new grade for " + selectedStudent.getName());
-
-    ComboBox<Assessment> assessmentComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllAssessments()));
-    TextField scoreField = new TextField();
-    TextArea feedbackArea = new TextArea();
-
-    dialog.getDialogPane().setContent(new VBox(10,
-        new Label("Assessment:"), assessmentComboBox,
-        new Label("Score:"), scoreField,
-        new Label("Feedback:"), feedbackArea
-    ));
-
-    ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-    dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
-
-    dialog.setResultConverter(dialogButton -> {
-        if (dialogButton == addButtonType) {
-            try {
-                Assessment assessment = assessmentComboBox.getValue();
-                if (assessment == null) {
-                    showAlert("Please select an assessment.");
+    
+        ComboBox<Assessment> assessmentComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllAssessments()));
+        ComboBox<AssessmentPart> partComboBox = new ComboBox<>();
+        TextField scoreField = new TextField();
+        TextArea feedbackArea = new TextArea();
+    
+        assessmentComboBox.setCellFactory(lv -> new ListCell<Assessment>() {
+            @Override
+            protected void updateItem(Assessment item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : item.getName());
+            }
+        });
+        assessmentComboBox.setButtonCell(assessmentComboBox.getCellFactory().call(null));
+    
+        assessmentComboBox.setOnAction(e -> {
+            Assessment selectedAssessment = assessmentComboBox.getValue();
+            if (selectedAssessment != null) {
+                partComboBox.setItems(FXCollections.observableArrayList(selectedAssessment.getParts()));
+                partComboBox.setDisable(selectedAssessment.getParts().isEmpty());
+            }
+        });
+    
+        dialog.getDialogPane().setContent(new VBox(10,
+            new Label("Assessment:"), assessmentComboBox,
+            new Label("Part (optional):"), partComboBox,
+            new Label("Score:"), scoreField,
+            new Label("Feedback:"), feedbackArea
+        ));
+    
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+    
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                try {
+                    Assessment assessment = assessmentComboBox.getValue();
+                    AssessmentPart part = partComboBox.getValue();
+                    if (assessment == null) {
+                        showAlert("Please select an assessment.");
+                        return null;
+                    }
+                    double score = Double.parseDouble(scoreField.getText());
+                    String feedback = feedbackArea.getText();
+                    
+                    Grade grade;
+                    if (part != null) {
+                        grade = new Grade(selectedStudent, assessment, part, score, feedback);
+                    } else {
+                        grade = new Grade(selectedStudent, assessment, score, feedback);
+                    }
+                    
+                    selectedStudent.addGrade(grade);
+                    db.saveGrade(grade);
+                    
+                    return grade;
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter a valid number for the score.");
                     return null;
                 }
-                double score = Double.parseDouble(scoreField.getText());
-                String feedback = feedbackArea.getText();
-                
-                Grade newGrade = new Grade(selectedStudent, assessment, score, feedback);
-                db.saveGrade(newGrade);
-                
-                return newGrade;
-            } catch (NumberFormatException e) {
-                showAlert("Invalid input. Please enter a valid number for the score.");
-                return null;
             }
-        }
-        return null;
-    });
-
-    dialog.showAndWait().ifPresent(grade -> {
-        displayStudentDetails(selectedStudent);
-    });
-}
+            return null;
+        });
+    
+        dialog.showAndWait().ifPresent(grade -> {
+            System.out.println("Grade added: " + grade);
+            displayStudentDetails(selectedStudent);
+        });
+    }
 
 private Student getSelectedStudent() {
     return this.selectedStudent;

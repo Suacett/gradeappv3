@@ -28,6 +28,18 @@ public class Database {
                 + "name TEXT NOT NULL,"
                 + "studentId TEXT NOT NULL"
                 + ");";
+        String createGradesTable = "CREATE TABLE IF NOT EXISTS grades ("
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "student_id TEXT NOT NULL,"
+                + "assessment_id INTEGER NOT NULL,"
+                + "part_id INTEGER,"
+                + "score REAL NOT NULL,"
+                + "feedback TEXT,"
+                + "date DATE NOT NULL,"
+                + "FOREIGN KEY (student_id) REFERENCES students(studentId),"
+                + "FOREIGN KEY (assessment_id) REFERENCES assessments(id)"
+                + "FOREIGN KEY (part_id) REFERENCES assessment_parts(id)"
+                + ");";
         String createClassesTable = "CREATE TABLE IF NOT EXISTS classes ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
@@ -86,6 +98,7 @@ public class Database {
                 stmt.execute(createAssessmentOutcomesTable);
                 stmt.execute(createAssessmentPartsTable);
                 stmt.execute(createClassStudentsTable);
+                stmt.execute(createGradesTable);
                 try {
                     stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
                 } catch (SQLException e) {
@@ -579,17 +592,23 @@ public class Database {
     }
 
     public void saveGrade(Grade grade) {
-        String sql = "INSERT INTO grades (student_id, assessment_id, score, feedback, date) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO grades (student_id, assessment_id, part_id, score, feedback, date) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, grade.getStudent().getStudentId());
             pstmt.setInt(2, grade.getAssessment().getId());
-            pstmt.setDouble(3, grade.getScore());
-            pstmt.setString(4, grade.getFeedback());
-            pstmt.setDate(5, java.sql.Date.valueOf(grade.getDate()));
+            if (grade.getPart() != null) {
+                pstmt.setInt(3, grade.getPart().getId());
+            } else {
+                pstmt.setNull(3, java.sql.Types.INTEGER);
+            }
+            pstmt.setDouble(4, grade.getScore());
+            pstmt.setString(5, grade.getFeedback());
+            pstmt.setDate(6, java.sql.Date.valueOf(grade.getDate()));
             pstmt.executeUpdate();
+            System.out.println("Grade saved to database successfully.");
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error saving grade: " + e.getMessage());
         }
     }
     
@@ -707,11 +726,19 @@ public class Database {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                String name = rs.getString("name");
-                String description = rs.getString("description");
-                double weight = rs.getDouble("weight");
-                double maxScore = rs.getDouble("maxScore");
-                return new Assessment(id, name, description, weight, maxScore);
+                Assessment assessment = new Assessment(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("weight"),
+                    rs.getDouble("maxScore")
+                );
+                // Fetch and add parts
+                List<AssessmentPart> parts = getAssessmentParts(id);
+                for (AssessmentPart part : parts) {
+                    assessment.addPart(part);
+                }
+                return assessment;
             }
         } catch (SQLException e) {
             System.out.println("Error getting assessment by ID: " + e.getMessage());
@@ -719,6 +746,7 @@ public class Database {
         return null;
     }
     
+
     public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_outcomes(assessment_id, outcome_id, weight) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
@@ -733,10 +761,10 @@ public class Database {
         }
     }
 
-    public void addAssessment(Assessment assessment, String courseId) {
+    public int addAssessment(Assessment assessment, String courseId) {
         String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, courseId);
             pstmt.setString(2, assessment.getName());
             pstmt.setString(3, assessment.getDescription());
@@ -744,16 +772,19 @@ public class Database {
             pstmt.setDouble(5, assessment.getMaxScore());
             pstmt.executeUpdate();
     
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
-                if (rs.next()) {
-                    assessment.setId(rs.getInt(1));
+            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int id = generatedKeys.getInt(1);
+                    assessment.setId(id);
+                    System.out.println("Assessment added successfully with ID: " + id);
+                    return id;
+                } else {
+                    throw new SQLException("Creating assessment failed, no ID obtained.");
                 }
             }
-    
-            System.out.println("Assessment added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding assessment: " + e.getMessage());
+            return -1;
         }
     }
 

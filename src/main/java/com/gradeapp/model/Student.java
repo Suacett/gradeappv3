@@ -15,8 +15,16 @@ public class Student {
     }
 
     // Methods for managing grades
+    public void addGrade(Assessment assessment, AssessmentPart part, double score, String feedback) {
+        Grade grade = new Grade(this, assessment, part, score, feedback);
+        addGrade(grade);
+    }
+
     public void addGrade(Assessment assessment, double score, String feedback) {
-        Grade grade = new Grade(this, assessment, score, feedback);
+        addGrade(assessment, null, score, feedback);
+    }
+
+    public void addGrade(Grade grade) {
         grades.add(grade);
         if (course != null && course.getGradeBook() != null) {
             course.getGradeBook().addGrade(grade);
@@ -33,6 +41,7 @@ public class Student {
     public List<Grade> getGrades() {
         return new ArrayList<>(grades);
     }
+
 
     // Methods for calculating performance
     public double calculateOverallPerformance() {
