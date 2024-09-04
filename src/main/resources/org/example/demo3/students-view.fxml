@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="studentsContainer" prefHeight="509.0" prefWidth="566.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentController">
+<VBox fx:id="studentsContainer" prefHeight="509.0" prefWidth="566.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentController">
    <VBox prefHeight="81.0" prefWidth="566.0">
       <children>
          <Label text="Add a new student">
