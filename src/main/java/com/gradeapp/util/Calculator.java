@@ -92,17 +92,13 @@ public class Calculator {
 
     public double calculateTaskCompletionRate(Assessment assessment) {
         List<AssessmentPart> parts = assessment.getParts();
+        if (parts.isEmpty()) {
+            return 0.0;
+        }
         long completedParts = parts.stream().filter(AssessmentPart::isCompleted).count();
         return (double) completedParts / parts.size();
     }
 
-    public Map<Object, Object> calculateTaskCompletionRates(Assessment assessment) {
-        return assessment.getTasks().stream()
-                .collect(Collectors.toMap(
-                        task -> task,
-                        task -> task.isCompleted() ? 1.0 : 0.0
-                ));
-    }
 
     public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
         return grades.stream()
@@ -129,4 +125,5 @@ public class Calculator {
         }
         return gradesByAssessment;
     }
+
 }

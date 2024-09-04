@@ -1,11 +1,12 @@
 module org.example.demo {
-    requires javafx.controls;
-    requires javafx.fxml;
-    requires javafx.web;
-    requires javafx.swing;
-    requires javafx.media;
-    requires javafx.graphics;
-    requires javafx.base;
+    requires transitive javafx.controls;
+    requires transitive javafx.fxml;
+    requires transitive javafx.web;
+    requires transitive javafx.swing;
+    requires transitive javafx.media;
+    requires transitive javafx.graphics;
+    requires transitive javafx.base;
+
 
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
@@ -31,12 +32,12 @@ module org.example.demo {
     opens com.gradeapp.controller to javafx.fxml;
     opens com.gradeapp.model to javafx.base;
     opens com.gradeapp.util to javafx.base;
-
+    opens com.gradeapp.database to javafx.base;
 
     exports com.gradeapp.controller;
     exports com.gradeapp.model;
     exports com.gradeapp.util;
-
+    exports com.gradeapp.database;
 
 
 }

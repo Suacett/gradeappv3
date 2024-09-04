@@ -5,13 +5,7 @@ import com.gradeapp.database.Database;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.converter.DoubleStringConverter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AssessmentCreationController {
