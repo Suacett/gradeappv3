@@ -36,4 +36,9 @@ public class AssessmentPart {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'isCompleted'");
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }

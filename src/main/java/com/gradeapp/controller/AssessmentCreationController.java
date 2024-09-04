@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DoubleStringConverter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AssessmentCreationController {
@@ -19,72 +20,16 @@ public class AssessmentCreationController {
     @FXML private TextField weightField;
     @FXML private TextField maxScoreField;
     @FXML private VBox outcomeCheckboxContainer;
-    @FXML private TableView<AssessmentPart> partsTable;
-    @FXML private Label totalWeightLabel;
     
     private Course selectedCourse;
     private Assessment newAssessment;
     private Map<Outcome, TextField> outcomeWeightFields = new HashMap<>();
-    private ObservableList<AssessmentPart> parts = FXCollections.observableArrayList();
     private Database db = new Database();
+    private AssessmentCreationCallback callback;
 
     @FXML
     public void initialize() {
-        setupPartsTable();
-        updateTotalWeight();
-    }
-
-    private void setupPartsTable() {
-        partsTable.setEditable(true);
-
-        TableColumn<AssessmentPart, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(event -> {
-            event.getTableView().getItems().get(event.getTablePosition().getRow()).setName(event.getNewValue());
-        });
-
-        TableColumn<AssessmentPart, Double> weightColumn = new TableColumn<>("Weight");
-        weightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
-        weightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        weightColumn.setOnEditCommit(event -> {
-            event.getTableView().getItems().get(event.getTablePosition().getRow()).setWeight(event.getNewValue());
-            updateTotalWeight();
-        });
-
-        TableColumn<AssessmentPart, Double> maxScoreColumn = new TableColumn<>("Max Score");
-        maxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
-        maxScoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-        maxScoreColumn.setOnEditCommit(event -> {
-            event.getTableView().getItems().get(event.getTablePosition().getRow()).setMaxScore(event.getNewValue());
-        });
-
-        partsTable.getColumns().addAll(nameColumn, weightColumn, maxScoreColumn);
-        partsTable.setItems(parts);
-    }
-
-    public void setCourse(Course course) {
-        this.selectedCourse = course;
-        populateOutcomes();
-    }
-
-    private void populateOutcomes() {
-        outcomeCheckboxContainer.getChildren().clear();
-        outcomeWeightFields.clear();
-        for (Outcome outcome : selectedCourse.getOutcomes()) {
-            CheckBox cb = new CheckBox(outcome.getName());
-            TextField weightField = new TextField();
-            weightField.setPromptText("Weight");
-            outcomeCheckboxContainer.getChildren().addAll(cb, weightField);
-            outcomeWeightFields.put(outcome, weightField);
-        }
-    }
-
-    @FXML
-    private void addPart() {
-        AssessmentPart newPart = new AssessmentPart(-1, "New Part", 0, 0);
-        parts.add(newPart);
-        updateTotalWeight();
+        // Initialization code if needed
     }
 
     @FXML
@@ -94,46 +39,37 @@ public class AssessmentCreationController {
             String description = descriptionField.getText();
             double weight = Double.parseDouble(weightField.getText());
             double maxScore = Double.parseDouble(maxScoreField.getText());
-    
-            if (name.isEmpty() || description.isEmpty()) {
-                showAlert("Please enter a name and description for the assessment.");
-                return;
-            }
-    
+
             newAssessment = new Assessment(name, description, weight, maxScore);
-            
-            // Add the assessment to the database and get the generated ID
             int assessmentId = db.addAssessment(newAssessment, selectedCourse.getId());
-            newAssessment.setId(assessmentId);  // Set the generated ID to the assessment object
-            
+            newAssessment.setId(assessmentId);
+
+            // Save linked outcomes
             for (Map.Entry<Outcome, TextField> entry : outcomeWeightFields.entrySet()) {
-                CheckBox cb = (CheckBox) outcomeCheckboxContainer.getChildren().get(
-                        outcomeCheckboxContainer.getChildren().indexOf(entry.getValue()) - 1);
-                if (cb.isSelected() && !entry.getValue().getText().isEmpty()) {
-                    double outcomeWeight = Double.parseDouble(entry.getValue().getText());
-                    newAssessment.addOutcome(entry.getKey(), outcomeWeight);
-                    db.linkOutcomeToAssessment(assessmentId, entry.getKey().getId(), outcomeWeight);
+                Outcome outcome = entry.getKey();
+                TextField weightField = entry.getValue();
+                CheckBox checkbox = (CheckBox) outcomeCheckboxContainer.getChildren().get(
+                    outcomeCheckboxContainer.getChildren().indexOf(weightField) - 1);
+                
+                if (checkbox.isSelected()) {
+                    try {
+                        double outcomeWeight = Double.parseDouble(weightField.getText());
+                        newAssessment.setOutcomeWeight(outcome, outcomeWeight);
+                        db.linkOutcomeToAssessment(assessmentId, outcome.getId(), outcomeWeight);
+                    } catch (NumberFormatException e) {
+                        showAlert("Invalid weight for outcome: " + outcome.getName());
+                    }
                 }
             }
-    
-            for (AssessmentPart part : parts) {
-                db.addAssessmentPart(part, assessmentId);
+
+            if (callback != null) {
+                callback.onAssessmentCreated(newAssessment);
             }
-    
-            selectedCourse.addAssessment(newAssessment);
-    
+
             closeWindow();
         } catch (NumberFormatException e) {
-            showAlert("Invalid input. Please enter valid numbers for weight and max score.");
-        } catch (IllegalArgumentException e) {
-            showAlert(e.getMessage());
+            showAlert("Invalid input for weight or max score.");
         }
-    }
-
-    private void updateTotalWeight() {
-        double totalWeight = parts.stream().mapToDouble(AssessmentPart::getWeight).sum();
-        totalWeightLabel.setText(String.format("Total Weight: %.2f%%", totalWeight));
-        totalWeightLabel.setStyle(totalWeight == 100 ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
     }
 
     private void showAlert(String message) {
@@ -146,5 +82,28 @@ public class AssessmentCreationController {
 
     private void closeWindow() {
         nameField.getScene().getWindow().hide();
+    }
+
+    public void setCourse(Course course) {
+        this.selectedCourse = course;
+        populateOutcomes();
+    }
+
+    public void setCallback(AssessmentCreationCallback callback) {
+        this.callback = callback;
+    }
+
+    private void populateOutcomes() {
+        outcomeCheckboxContainer.getChildren().clear();
+        outcomeWeightFields.clear();
+        if (selectedCourse != null) {
+            for (Outcome outcome : selectedCourse.getOutcomes()) {
+                CheckBox cb = new CheckBox(outcome.getName());
+                TextField weightField = new TextField();
+                weightField.setPromptText("Weight");
+                outcomeCheckboxContainer.getChildren().addAll(cb, weightField);
+                outcomeWeightFields.put(outcome, weightField);
+            }
+        }
     }
 }

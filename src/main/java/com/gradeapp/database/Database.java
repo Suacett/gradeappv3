@@ -26,7 +26,7 @@ public class Database {
         String createStudentsTable = "CREATE TABLE IF NOT EXISTS students ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "name TEXT NOT NULL,"
-                + "studentId TEXT NOT NULL"
+                + "studentId TEXT NOT NULL UNIQUE"
                 + ");";
         String createGradesTable = "CREATE TABLE IF NOT EXISTS grades ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -88,6 +88,13 @@ public class Database {
                 + "FOREIGN KEY (class_id) REFERENCES classes(id),"
                 + "FOREIGN KEY (student_id) REFERENCES students(id)"
                 + ");";
+        String createStudentClassesTable = "CREATE TABLE IF NOT EXISTS student_classes ("
+                + "student_id TEXT NOT NULL,"
+                + "class_id TEXT NOT NULL,"
+                + "PRIMARY KEY (student_id, class_id),"
+                + "FOREIGN KEY (student_id) REFERENCES students(studentId),"
+                + "FOREIGN KEY (class_id) REFERENCES classes(classId)"
+                + ");";
         try (Connection conn = this.connect();
              Statement stmt = conn.createStatement()) {
                 stmt.execute(createCoursesTable);
@@ -99,6 +106,8 @@ public class Database {
                 stmt.execute(createAssessmentPartsTable);
                 stmt.execute(createClassStudentsTable);
                 stmt.execute(createGradesTable);
+                stmt.execute(createStudentClassesTable);
+
                 try {
                     stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
                 } catch (SQLException e) {
@@ -107,10 +116,14 @@ public class Database {
                         throw e; // Re-throw if it's a different error
                     }
                 }
+
+                
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
         }
+
+        
     }
 
     private Connection connect() {
@@ -126,41 +139,103 @@ public class Database {
 
     // ASSESSMENT PARTS
 
-    public void addAssessmentPart(AssessmentPart part, int assessmentId) {
-        String sql = "INSERT INTO assessment_parts(assessment_id, name, weight, max_score) VALUES(?, ?, ?, ?)";
+    public int addAssessment(Assessment assessment, String courseId) {
+        String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, assessmentId);
-            pstmt.setString(2, part.getName());
-            pstmt.setDouble(3, part.getWeight());
-            pstmt.setDouble(4, part.getMaxScore());
-            pstmt.executeUpdate();
-            System.out.println("Assessment part added successfully.");
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            pstmt.setString(1, courseId);
+            pstmt.setString(2, assessment.getName());
+            pstmt.setString(3, assessment.getDescription());
+            pstmt.setDouble(4, assessment.getWeight());
+            pstmt.setDouble(5, assessment.getMaxScore());
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int id = generatedKeys.getInt(1);
+                        assessment.setId(id);
+                        System.out.println("Assessment added successfully with ID: " + id);
+                        return id;
+                    }
+                }
+            }
         } catch (SQLException e) {
-            System.out.println("Error adding assessment part: " + e.getMessage());
+            System.out.println("Error adding assessment: " + e.getMessage());
+            e.printStackTrace();
         }
+        return -1;
     }
 
-    public List<AssessmentPart> getAssessmentParts(int assessmentId) {
-        List<AssessmentPart> parts = new ArrayList<>();
-        String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
+
+public int addAssessmentPart(AssessmentPart part, int assessmentId) {
+    String sql = "INSERT INTO assessment_parts (assessment_id, name, weight, max_score) VALUES (?, ?, ?, ?)";
+    try (Connection conn = this.connect();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, assessmentId);
+        pstmt.setString(2, part.getName());
+        pstmt.setDouble(3, part.getWeight());
+        pstmt.setDouble(4, part.getMaxScore());
+        int affectedRows = pstmt.executeUpdate();
+        if (affectedRows > 0) {
+            // Get the last inserted ID
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+    } catch (SQLException e) {
+        System.out.println("Error adding assessment part: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return -1;
+}
+    
+public List<AssessmentPart> getAssessmentParts(int assessmentId) {
+    List<AssessmentPart> parts = new ArrayList<>();
+    String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
+    try (Connection conn = this.connect();
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        pstmt.setInt(1, assessmentId);
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String name = rs.getString("name");
+            double weight = rs.getDouble("weight");
+            double maxScore = rs.getDouble("max_score");
+            AssessmentPart part = new AssessmentPart(id, name, weight, maxScore);
+            parts.add(part);
+            System.out.println("Retrieved part: " + name + " (ID: " + id + ") for assessment ID: " + assessmentId);
+        }
+    } catch (SQLException e) {
+        System.out.println("Error getting assessment parts: " + e.getMessage());
+        e.printStackTrace();
+    }
+    return parts;
+}
+    
+    public void verifyAssessmentParts() {
+        String sql = "SELECT * FROM assessment_parts";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, assessmentId);
-            ResultSet rs = pstmt.executeQuery();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            System.out.println("Contents of assessment_parts table:");
             while (rs.next()) {
                 int id = rs.getInt("id");
+                int assessmentId = rs.getInt("assessment_id");
                 String name = rs.getString("name");
                 double weight = rs.getDouble("weight");
                 double maxScore = rs.getDouble("max_score");
-                parts.add(new AssessmentPart(id, name, weight, maxScore));
+                System.out.println("Part ID: " + id + ", Assessment ID: " + assessmentId + ", Name: " + name + ", Weight: " + weight + ", Max Score: " + maxScore);
             }
         } catch (SQLException e) {
-            System.out.println("Error getting assessment parts: " + e.getMessage());
+            System.out.println("Error verifying assessment parts: " + e.getMessage());
+            e.printStackTrace();
         }
-        return parts;
     }
-
     
     // COURSES
     public void addCourse(Course course) {
@@ -478,24 +553,12 @@ public class Database {
     }
 
     public boolean addStudentToClass(String studentId, String classId) {
-        String checkSql = "SELECT COUNT(*) FROM class_students WHERE student_id = ? AND class_id = ?";
-        String insertSql = "INSERT INTO class_students(student_id, class_id) VALUES(?, ?)";
-        
+        String sql = "INSERT OR IGNORE INTO student_classes (student_id, class_id) VALUES (?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement checkStmt = conn.prepareStatement(checkSql);
-             PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-            
-            checkStmt.setString(1, studentId);
-            checkStmt.setString(2, classId);
-            ResultSet rs = checkStmt.executeQuery();
-            if (rs.next() && rs.getInt(1) > 0) {
-                System.out.println("Student is already in the class.");
-                return false;
-            }
-            
-            insertStmt.setString(1, studentId);
-            insertStmt.setString(2, classId);
-            int affectedRows = insertStmt.executeUpdate();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, classId);
+            int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
         } catch (SQLException e) {
             System.out.println("Error adding student to class: " + e.getMessage());
@@ -504,7 +567,7 @@ public class Database {
     }
 
     public void removeStudentFromClass(String studentId, String classId) {
-        String sql = "DELETE FROM class_students WHERE student_id = ? AND class_id = ?";
+        String sql = "DELETE FROM student_classes WHERE student_id = ? AND class_id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
@@ -536,22 +599,6 @@ public class Database {
         return students;
     }
 
-    public Student getStudentById(String studentId) {
-        String sql = "SELECT * FROM students WHERE studentId = ?";
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, studentId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                String name = rs.getString("name");
-                return new Student(name, studentId);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error getting student by ID: " + e.getMessage());
-        }
-        return null;
-    }
-
     public List<Student> getStudentsNotInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students WHERE studentId NOT IN " +
@@ -571,11 +618,28 @@ public class Database {
         return students;
     }
 
+    public Student getStudentById(String studentId) {
+        String sql = "SELECT * FROM students WHERE studentId = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String name = rs.getString("name");
+                return new Student(name, studentId);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting student by ID: " + e.getMessage());
+        }
+        return null;
+    }
+
+
     public List<Classes> getClassesForStudent(String studentId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT c.* FROM classes c " +
-                     "JOIN class_students cs ON c.classId = cs.class_id " +
-                     "WHERE cs.student_id = ?";
+                     "JOIN student_classes sc ON c.classId = sc.class_id " +
+                     "WHERE sc.student_id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
@@ -639,7 +703,111 @@ public class Database {
 
     // ASSESSMENTS
 
+    public void delete(String table, String idColumn, String id) {
+        String sql = "DELETE FROM " + table + " WHERE " + idColumn + " = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error deleting from " + table + ": " + e.getMessage());
+        }
+    }
+    
+    public List<Outcome> getOutcomesForAssessment(int assessmentId) {
+        List<Outcome> outcomes = new ArrayList<>();
+        String sql = "SELECT o.*, ao.weight as assessment_weight FROM outcomes o " +
+                     "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
+                     "WHERE ao.assessment_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                double weight = rs.getDouble("assessment_weight");
+                Outcome outcome = new Outcome(id, name, description, weight);
+                outcomes.add(outcome);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting outcomes for assessment: " + e.getMessage());
+        }
+        return outcomes;
+    }
 
+    public void updateAssessment(Assessment assessment) {
+        String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, assessment.getName());
+            pstmt.setString(2, assessment.getDescription());
+            pstmt.setDouble(3, assessment.getWeight());
+            pstmt.setDouble(4, assessment.getMaxScore());
+            pstmt.setInt(5, assessment.getId());
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error updating assessment: " + e.getMessage());
+        }
+    }
+    
+    public List<Assessment> getAllAssessments() {
+        List<Assessment> assessments = new ArrayList<>();
+        String sql = "SELECT * FROM assessments";
+        try (Connection conn = this.connect();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Assessment assessment = new Assessment(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("weight"),
+                    rs.getDouble("maxScore")
+                );
+                assessments.add(assessment);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting all assessments: " + e.getMessage());
+        }
+        return assessments;
+    }
+    
+    public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
+        String sql = "INSERT INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, outcomeId);
+            pstmt.setDouble(3, weight);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error linking outcome to assessment: " + e.getMessage());
+        }
+    }
+    
+    public Assessment getAssessmentById(int assessmentId) {
+        String sql = "SELECT * FROM assessments WHERE id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return new Assessment(
+                    rs.getInt("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getDouble("weight"),
+                    rs.getDouble("maxScore")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting assessment by ID: " + e.getMessage());
+        }
+        return null;
+    }
+    
     public void deleteAssessmentPart(int partId) {
         String sql = "DELETE FROM assessment_parts WHERE id = ?";
         try (Connection conn = this.connect();
@@ -704,13 +872,19 @@ public class Database {
             pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String name = rs.getString("name");
-                    String description = rs.getString("description");
-                    double weight = rs.getDouble("weight");
-                    double maxScore = rs.getDouble("maxScore");
-                    Assessment assessment = new Assessment(id, name, description, weight, maxScore);
+                    Assessment assessment = new Assessment(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("weight"),
+                        rs.getDouble("maxScore")
+                    );
+                    List<AssessmentPart> parts = getAssessmentParts(assessment.getId());
+                    for (AssessmentPart part : parts) {
+                        assessment.addPart(part);
+                    }
                     assessments.add(assessment);
+                    System.out.println("Loaded assessment: " + assessment.getName() + " (ID: " + assessment.getId() + ")");
                 }
             }
         } catch (SQLException e) {
@@ -719,122 +893,86 @@ public class Database {
         return assessments;
     }
 
-    public Assessment getAssessmentById(int id) {
-        String sql = "SELECT * FROM assessments WHERE id = ?";
+    public Classes getClassForStudent(String studentId) {
+        String sql = "SELECT c.* FROM classes c " +
+                     "JOIN student_class sc ON c.classId = sc.classId " +
+                     "WHERE sc.studentId = ?";
+        
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, id);
+            
+            pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
+            
             if (rs.next()) {
-                Assessment assessment = new Assessment(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("weight"),
-                    rs.getDouble("maxScore")
-                );
-                // Fetch and add parts
-                List<AssessmentPart> parts = getAssessmentParts(id);
-                for (AssessmentPart part : parts) {
-                    assessment.addPart(part);
-                }
-                return assessment;
+                String classId = rs.getString("classId");
+                String className = rs.getString("name");
+                return new Classes(className, classId);
             }
         } catch (SQLException e) {
-            System.out.println("Error getting assessment by ID: " + e.getMessage());
+            System.out.println("Error getting class for student: " + e.getMessage());
         }
+        
         return null;
     }
-    
 
-    public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
-        String sql = "INSERT OR REPLACE INTO assessment_outcomes(assessment_id, outcome_id, weight) VALUES(?, ?, ?)";
+    public List<Course> getCoursesForStudent(String studentId) {
+        List<Course> courses = new ArrayList<>();
+        String sql = "SELECT DISTINCT c.* FROM courses c " +
+                     "JOIN classes cl ON c.id = cl.course_id " +
+                     "JOIN student_classes sc ON cl.classId = sc.class_id " +
+                     "WHERE sc.student_id = ?";
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, assessmentId);
-            pstmt.setString(2, outcomeId);
-            pstmt.setDouble(3, weight);
-            pstmt.executeUpdate();
-            System.out.println("Outcome linked to assessment successfully.");
-        } catch (SQLException e) {
-            System.out.println("Error linking outcome to assessment: " + e.getMessage());
-        }
-    }
-
-    public int addAssessment(Assessment assessment, String courseId) {
-        String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, courseId);
-            pstmt.setString(2, assessment.getName());
-            pstmt.setString(3, assessment.getDescription());
-            pstmt.setDouble(4, assessment.getWeight());
-            pstmt.setDouble(5, assessment.getMaxScore());
-            pstmt.executeUpdate();
-    
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int id = generatedKeys.getInt(1);
-                    assessment.setId(id);
-                    System.out.println("Assessment added successfully with ID: " + id);
-                    return id;
-                } else {
-                    throw new SQLException("Creating assessment failed, no ID obtained.");
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Error adding assessment: " + e.getMessage());
-            return -1;
-        }
-    }
-
-    public void updateAssessment(Assessment assessment) {
-        String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, assessment.getName());
-            pstmt.setString(2, assessment.getDescription());
-            pstmt.setDouble(3, assessment.getWeight());
-            pstmt.setDouble(4, assessment.getMaxScore());
-            pstmt.setInt(5, assessment.getId());
-            pstmt.executeUpdate();
-            System.out.println("Assessment updated successfully.");
-        } catch (SQLException e) {
-            System.out.println("Error updating assessment: " + e.getMessage());
-        }
-    }
-
-
-    
-    public List<Assessment> getAllAssessments() {
-        List<Assessment> assessments = new ArrayList<>();
-        String sql = "SELECT * FROM assessments";
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+            pstmt.setString(1, studentId);
+            ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
+                String id = rs.getString("id");
                 String name = rs.getString("name");
                 String description = rs.getString("description");
-                double weight = rs.getDouble("weight");
-                double maxScore = rs.getDouble("maxScore");
-                assessments.add(new Assessment(name, description, weight, maxScore));
+                Course course = new Course(id, name, description);
+                courses.add(course);
             }
         } catch (SQLException e) {
-            System.out.println("Error getting assessments: " + e.getMessage());
+            System.out.println("Error getting courses for student: " + e.getMessage());
         }
-        return assessments;
+        return courses;
     }
 
-    // Generic delete method
-    public void delete(String table, String column, String value) {
-        String sql = "DELETE FROM " + table + " WHERE " + column + " = ?";
+    private void loadOutcomesForCourse(Course course) {
+        String sql = "SELECT * FROM outcomes WHERE courseId = ?";
+        
         try (Connection conn = this.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, value);
-            pstmt.executeUpdate();
-            System.out.println("Record deleted successfully from " + table + ".");
+            
+            pstmt.setString(1, course.getId());
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                String outcomeId = rs.getString("outcomeId");
+                String outcomeName = rs.getString("name");
+                String outcomeDescription = rs.getString("description");
+                double weight = rs.getDouble("weight");
+                
+                Outcome outcome = new Outcome(outcomeId, outcomeName, outcomeDescription, weight);
+                course.addOutcome(outcome);
+            }
         } catch (SQLException e) {
-            System.out.println("Error deleting record: " + e.getMessage());
+            System.out.println("Error loading outcomes for course: " + e.getMessage());
         }
     }
+
+    public boolean deleteStudent(String studentId) {
+        String sql = "DELETE FROM students WHERE studentId = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            int affectedRows = pstmt.executeUpdate();
+            return affectedRows > 0;
+        } catch (SQLException e) {
+            System.out.println("Error deleting student: " + e.getMessage());
+            return false;
+        }
+    }
+ 
 }

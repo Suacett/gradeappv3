@@ -30,81 +30,73 @@ public class ClassController {
     @FXML
     private void initialize() {
         setupCourseSelector();
-        displayCurrentClasses();
     }
 
 
-private void setupCourseSelector() {
-    ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
-    courseSelector.setItems(courses);
+    private void setupCourseSelector() {
+        ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
+        courseSelector.setItems(courses);
         courseSelector.setCellFactory(lv -> new ListCell<Course>() {
-        @Override
-        protected void updateItem(Course course, boolean empty) {
-            super.updateItem(course, empty);
-            if (empty || course == null) {
-                setText(null);
-            } else {
-                setText(course.getName() + " (" + course.getId() + ")");
+            @Override
+            protected void updateItem(Course course, boolean empty) {
+                super.updateItem(course, empty);
+                if (empty || course == null) {
+                    setText(null);
+                } else {
+                    setText(course.getName() + " (" + course.getId() + ")");
+                }
             }
-        }
-    });
-     courseSelector.setConverter(new StringConverter<Course>() {
-        @Override
-        public String toString(Course course) {
-            return course == null ? "" : course.getName() + " (" + course.getId() + ")";
-        }
+        });
+        courseSelector.setConverter(new StringConverter<Course>() {
+            @Override
+            public String toString(Course course) {
+                return course == null ? "" : course.getName() + " (" + course.getId() + ")";
+            }
+    
+            @Override
+            public Course fromString(String string) {
+                return null; // Not needed for this use case
+            }
+        });
+    
+        courseSelector.setOnAction(e -> updateClassList());
+    }
 
-        @Override
-        public Course fromString(String string) {
-            return null; // Not needed for this use case
-        }
-    });
-
-    courseSelector.setOnAction(e -> updateClassList());
+private void updateClassList() {
+    Course selectedCourse = courseSelector.getValue();
+    if (selectedCourse != null) {
+        List<Classes> classes = db.getClassesForCourse(selectedCourse.getId());
+        displayClasses(classes);
+    } else {
+        currentClassContainer.getChildren().clear();
+    }
 }
 
-    private void updateClassList() {
-        Course selectedCourse = courseSelector.getValue();
-        if (selectedCourse != null) {
-            ObservableList<Classes> classes = FXCollections.observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
-        }
+private void displayClasses(List<Classes> classes) {
+    currentClassContainer.getChildren().clear();
+    for (Classes classObj : classes) {
+        VBox classCard = createClassCard(classObj);
+        currentClassContainer.getChildren().add(classCard);
+    }
+}
+
+@FXML
+private void handleAddClassButtonAction() {
+    Course selectedCourse = courseSelector.getValue();
+    if (selectedCourse == null) {
+        showError("Please select a course first.");
+        return;
     }
 
-    @FXML
-private void handleAddClassButtonAction() throws SQLException {
     Dialog<Classes> dialog = new Dialog<>();
     dialog.setTitle("Add New Class");
 
     TextField nameField = new TextField();
     TextField idField = new TextField();
-    ComboBox<Course> courseComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllCourses()));
-    courseComboBox.setCellFactory(lv -> new ListCell<Course>() {
-        @Override
-        protected void updateItem(Course course, boolean empty) {
-            super.updateItem(course, empty);
-            if (empty || course == null) {
-                setText(null);
-            } else {
-                setText(course.getName() + " (" + course.getId() + ")");
-            }
-        }
-    });
-    courseComboBox.setConverter(new StringConverter<Course>() {
-        @Override
-        public String toString(Course course) {
-            return course == null ? "" : course.getName() + " (" + course.getId() + ")";
-        }
-
-        @Override
-        public Course fromString(String string) {
-            return null;
-        }
-    });
 
     dialog.getDialogPane().setContent(new VBox(10, 
         new Label("Class Name:"), nameField,
-        new Label("Class ID:"), idField,
-        new Label("Course:"), courseComboBox
+        new Label("Class ID:"), idField
     ));
 
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -113,23 +105,26 @@ private void handleAddClassButtonAction() throws SQLException {
         if (dialogButton == ButtonType.OK) {
             String name = nameField.getText();
             String id = idField.getText();
-            Course course = courseComboBox.getValue();
-            if (name.isEmpty() || id.isEmpty() || course == null) {
-                showError("Please fill in all fields and select a course.");
+            if (name.isEmpty() || id.isEmpty()) {
+                showError("Please fill in all fields.");
                 return null;
             }
             Classes newClass = new Classes(name, id);
             try {
-                db.addClass(newClass, course.getId());
+                db.addClass(newClass, selectedCourse.getId());
             } catch (SQLException e) {
                 e.printStackTrace();
+                showError("Error adding class: " + e.getMessage());
+                return null;
             }
             return newClass;
         }
         return null;
     });
-    dialog.showAndWait().ifPresent(result -> displayCurrentClasses());
+
+    dialog.showAndWait().ifPresent(result -> updateClassList());
 }
+
 
     @FXML
     public void handleViewClassDetailsAction(Classes classObj) {
@@ -172,7 +167,7 @@ private void handleAddClassButtonAction() throws SQLException {
     }
     
     @FXML
-    public void handleAddStudentToClassAction() throws SQLException {
+    public void handleAddStudentToClassAction() {
         if (selectedClass == null) {
             showError("Please select a class first.");
             return;
@@ -181,9 +176,14 @@ private void handleAddClassButtonAction() throws SQLException {
         Dialog<Student> dialog = new Dialog<>();
         dialog.setTitle("Add Student to Class");
     
-        ComboBox<Student> studentComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getStudentsNotInClass(selectedClass.getClassId())));
+        List<Student> availableStudents = db.getStudentsNotInClass(selectedClass.getClassId());
+        if (availableStudents.isEmpty()) {
+            showError("No students available to add to this class.");
+            return;
+        }
+    
+        ComboBox<Student> studentComboBox = new ComboBox<>(FXCollections.observableArrayList(availableStudents));
         
-        // Set a custom cell factory to display student names
         studentComboBox.setCellFactory(lv -> new ListCell<Student>() {
             @Override
             protected void updateItem(Student student, boolean empty) {
@@ -196,7 +196,6 @@ private void handleAddClassButtonAction() throws SQLException {
             }
         });
     
-        // Set a custom string converter for the selected value
         studentComboBox.setConverter(new StringConverter<Student>() {
             @Override
             public String toString(Student student) {

@@ -31,6 +31,14 @@ public class Student {
         }
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+    
     public void removeGrade(Grade grade) {
         grades.remove(grade);
         if (course != null && course.getGradeBook() != null) {

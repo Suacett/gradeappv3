@@ -1,343 +1,331 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.database.Database;
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.AssessmentPart;
-import com.gradeapp.model.Classes;
-import com.gradeapp.model.Grade;
-import com.gradeapp.model.Outcome;
-import com.gradeapp.model.Student;
-
-import java.util.Map;
-import javafx.collections.FXCollections;
+import com.gradeapp.model.*;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-
 import java.io.File;
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.List;
+import java.util.Optional;
 
-// StudentController manages the Student category dynamic content.
 public class StudentController {
 
-    public VBox studentsContainer;
-    // FXML ids
-    @FXML
-    private VBox studentContainer;
-    @FXML
-    private VBox newStudentInputContainer;
-    @FXML
-    private VBox currentStudentContainer;
-    @FXML
-    private Button addStudentButton;
-    @FXML private VBox studentDetailsContent;
-    @FXML private Student selectedStudent;
-
-    private List<Student> studentList = new ArrayList<>();
+    @FXML private ListView<Student> studentListView;
+    @FXML private VBox studentDetailsContainer;
+    @FXML private GridPane studentDetailsGrid;
 
     private Database db = new Database();
+    private ObservableList<Student> students = FXCollections.observableArrayList();
 
-    // Initialise StudentController
     @FXML
     private void initialize() {
-        displayCurrentStudent();
-        db.initialiseDatabase();
-        
-        if (studentDetailsContent == null) {
-            System.err.println("studentDetailsContent is null after initialization");
-        } else {
-            System.out.println("studentDetailsContent initialized successfully");
-        }
+        loadStudents();
+        studentListView.setItems(students);
+        studentListView.setCellFactory(lv -> new ListCell<Student>() {
+            @Override
+            protected void updateItem(Student student, boolean empty) {
+                super.updateItem(student, empty);
+                setText(empty ? null : student.getName() + " (" + student.getStudentId() + ")");
+            }
+        });
     }
 
-    // Add Student click event
+    private void loadStudents() {
+        students.setAll(db.getAllStudents());
+    }
+
     @FXML
     private void handleAddStudentButtonAction() {
-        VBox studentInputBox = createStudentInputBox();
-        newStudentInputContainer.getChildren().add(studentInputBox);
-    }
-
-    // New student inputs, appear on Add Student button click
-    private VBox createStudentInputBox() {
-        VBox studentInputBox = new VBox(); // Add VBox
-        studentInputBox.setPadding(new Insets(20, 20, 20, 20));
-        studentInputBox.setSpacing(10);
-        Label studentNameLabel = new Label("Student Name:");
-        TextField studentNameField = new TextField();
-        studentNameField.setPromptText("Student name");
-        TextField studentIdField = new TextField();
-        studentIdField.setPromptText("Student Id");
-        Button submitButton = new Button("+ Add Student"); // Submit button
-        submitButton.setOnAction(event -> handleSubmitButtonAction(studentNameField, studentIdField));
-        studentInputBox.getChildren().addAll(studentNameLabel, studentNameField, studentIdField, submitButton);
-        return studentInputBox;
-    }
-
-    // Submit new student click event
-    private void handleSubmitButtonAction(TextField studentNameField, TextField studentIdField) {
-        String studentName = studentNameField.getText();
-        String studentId = studentIdField.getText();
-        if (!studentName.isEmpty() && !studentId.isEmpty()) {
-            Student newStudent = new Student(studentName, studentId); // New Student object
-            studentList.add(newStudent); // Add to list
-            db.addStudent(studentName, studentId); // Add list to db
-            studentNameField.clear(); // Clear inputs
-            studentIdField.clear();
-            displayCurrentStudent(); // Display current students
-        } else {
-            System.out.println("The form is incomplete...");
-        }
-    }
-
-
-// Student card, displays current students
-private VBox createStudentCard(Student student) {
-    VBox studentCard = new VBox();
-    studentCard.getStyleClass().add("card");
-    studentCard.setSpacing(10);
-    studentCard.setPadding(new Insets(10));
-    Label studentNameLabel = new Label(student.getName());
-    Label studentIdLabel = new Label(student.getStudentId());
-    studentCard.setOnMouseClicked(event -> {
-        this.selectedStudent = student;
-        displayStudentDetails(student);
-    });
-    // HBox to hold the student info and buttons
-    HBox studentCardInfo = new HBox();
-    studentCardInfo.setSpacing(10); // Add spacing between student cards
-    Region spacer = new Region(); // Spacer region floats buttons right
-    HBox.setHgrow(spacer, Priority.ALWAYS);
-    HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
-    buttonContainer.setSpacing(10); // Space between buttons
-    Button editButton = new Button("Edit");
-    editButton.setOnAction(event -> handleEditButtonAction(student));
-    Button deleteButton = new Button("Delete");
-    deleteButton.getStyleClass().add("delete-button");
-    deleteButton.setOnAction(event -> {
-        db.delete("students", "studentId", student.getStudentId());
-        displayCurrentStudent();
-    });
-    Button viewDetailsButton = new Button("View Details");
-    viewDetailsButton.setOnAction(event -> displayStudentDetails(student));
-    buttonContainer.getChildren().addAll(editButton, deleteButton, viewDetailsButton);
-    // Add the labels, spacer, and button container to the studentCardInfo HBox
-    studentCardInfo.getChildren().addAll(studentNameLabel, studentIdLabel, spacer, buttonContainer);
-    // Add the studentCardInfo HBox to the studentCard VBox
-    studentCard.getChildren().add(studentCardInfo);
-    VBox.setMargin(studentCard, new Insets(0, 10, 10, 10));
-    return studentCard;
-}
-
-
-private void displayStudentDetails(Student student) {
-    if (studentDetailsContent == null) {
-        System.err.println("studentDetailsContent is null. Check FXML file and controller initialization.");
-        return;
-    }
-
-    studentDetailsContent.getChildren().clear();
-
-    Label nameLabel = new Label("Name: " + student.getName());
-    Label idLabel = new Label("ID: " + student.getStudentId());
-
-    studentDetailsContent.getChildren().addAll(nameLabel, idLabel);
-
-    // Get classes for the student
-    List<Classes> classes = db.getClassesForStudent(student.getStudentId());
-    VBox classesBox = new VBox(5);
-    classesBox.getChildren().add(new Label("Classes:"));
-    if (!classes.isEmpty()) {
-        for (Classes cls : classes) {
-            classesBox.getChildren().add(new Label("  - " + cls.getName()));
-        }
-    } else {
-        classesBox.getChildren().add(new Label("  Not enrolled in any classes."));
-    }
-    studentDetailsContent.getChildren().add(classesBox);
-
-    VBox gradesBox = new VBox(5);
-    gradesBox.getChildren().add(new Label("Grades:"));
+        Dialog<Student> dialog = new Dialog<>();
+        dialog.setTitle("Add New Student");
     
-    List<Grade> studentGrades = student.getGrades();
+        TextField nameField = new TextField();
+        TextField idField = new TextField();
     
-    if (!studentGrades.isEmpty()) {
-        for (Grade grade : studentGrades) {
-            Assessment assessment = grade.getAssessment();
-            String gradeInfo = String.format("  - %s: %.2f", assessment.getName(), grade.getScore());
-            if (grade.getPart() != null) {
-                gradeInfo += String.format(" (Part: %s)", grade.getPart().getName());
-            }
-            gradesBox.getChildren().add(new Label(gradeInfo));
-        }
-        
-        double averageGrade = student.calculateOverallPerformance();
-        gradesBox.getChildren().add(new Label(String.format("Average Grade: %.2f", averageGrade)));
-    } else {
-        gradesBox.getChildren().add(new Label("  No grades available."));
-    }
-
-    studentDetailsContent.getChildren().add(gradesBox);
-}
-
-@FXML
-private void handleAddGradeButtonAction() {
-    Student selectedStudent = getSelectedStudent();
-    if (selectedStudent == null) {
-        showAlert("Please select a student first.");
-        return;
-    }
+        GridPane grid = new GridPane();
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Student ID:"), 0, 1);
+        grid.add(idField, 1, 1);
     
-    Dialog<Grade> dialog = new Dialog<>();
-    dialog.setTitle("Add Grade");
-    dialog.setHeaderText("Add a new grade for " + selectedStudent.getName());
+        dialog.getDialogPane().setContent(grid);
     
-        ComboBox<Assessment> assessmentComboBox = new ComboBox<>(FXCollections.observableArrayList(db.getAllAssessments()));
-        ComboBox<AssessmentPart> partComboBox = new ComboBox<>();
-        TextField scoreField = new TextField();
-        TextArea feedbackArea = new TextArea();
-    
-        assessmentComboBox.setCellFactory(lv -> new ListCell<Assessment>() {
-            @Override
-            protected void updateItem(Assessment item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty ? null : item.getName());
-            }
-        });
-        assessmentComboBox.setButtonCell(assessmentComboBox.getCellFactory().call(null));
-    
-        assessmentComboBox.setOnAction(e -> {
-            Assessment selectedAssessment = assessmentComboBox.getValue();
-            if (selectedAssessment != null) {
-                partComboBox.setItems(FXCollections.observableArrayList(selectedAssessment.getParts()));
-                partComboBox.setDisable(selectedAssessment.getParts().isEmpty());
-            }
-        });
-    
-        dialog.getDialogPane().setContent(new VBox(10,
-            new Label("Assessment:"), assessmentComboBox,
-            new Label("Part (optional):"), partComboBox,
-            new Label("Score:"), scoreField,
-            new Label("Feedback:"), feedbackArea
-        ));
-    
-        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
     
         dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == addButtonType) {
-                try {
-                    Assessment assessment = assessmentComboBox.getValue();
-                    AssessmentPart part = partComboBox.getValue();
-                    if (assessment == null) {
-                        showAlert("Please select an assessment.");
-                        return null;
-                    }
-                    double score = Double.parseDouble(scoreField.getText());
-                    String feedback = feedbackArea.getText();
-                    
-                    Grade grade;
-                    if (part != null) {
-                        grade = new Grade(selectedStudent, assessment, part, score, feedback);
-                    } else {
-                        grade = new Grade(selectedStudent, assessment, score, feedback);
-                    }
-                    
-                    selectedStudent.addGrade(grade);
-                    db.saveGrade(grade);
-                    
-                    return grade;
-                } catch (NumberFormatException e) {
-                    showAlert("Invalid input. Please enter a valid number for the score.");
-                    return null;
+            if (dialogButton == addButton) {
+                String name = nameField.getText();
+                String id = idField.getText();
+                if (!name.isEmpty() && !id.isEmpty()) {
+                    return new Student(name, id);
                 }
             }
             return null;
         });
     
-        dialog.showAndWait().ifPresent(grade -> {
-            System.out.println("Grade added: " + grade);
-            displayStudentDetails(selectedStudent);
+        Optional<Student> result = dialog.showAndWait();
+        result.ifPresent(student -> {
+            db.addStudent(student.getName(), student.getStudentId());
+            loadStudents();
         });
-    }
-
-private Student getSelectedStudent() {
-    return this.selectedStudent;
-}
-
-
-    // Edit button action
-    private void handleEditButtonAction(Student student) {
-        // Display an input form with the current student's details filled in
-        TextField studentNameField = new TextField(student.getName());
-        TextField studentIdField = new TextField(student.getStudentId());
-        Button saveButton = new Button("Save");
-
-        saveButton.setOnAction(event -> {
-            String newName = studentNameField.getText();
-            String newId = studentIdField.getText();
-            if (!newName.isEmpty() && !newId.isEmpty()) {
-                // Update student information in the database
-                db.updateStudent(student.getStudentId(), newName, newId);
-                displayCurrentStudent(); // Refresh the display
-            } else {
-                System.out.println("The form is incomplete...");
-            }
-        });
-
-        VBox editStudentBox = new VBox(10, new Label("Edit Student"), studentNameField, studentIdField, saveButton);
-        currentStudentContainer.getChildren().clear();
-        currentStudentContainer.getChildren().add(editStudentBox);
     }
 
     @FXML
     private void handleImportStudentsFromFile() {
-        // Logic to handle file import
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
-        File file = fileChooser.showOpenDialog(addStudentButton.getScene().getWindow());
+        fileChooser.setTitle("Select Student CSV File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
+        File file = fileChooser.showOpenDialog(null);
 
         if (file != null) {
-            // Assuming you have a DataImportExportController set up
-            DataImportExportController dataImportExportController = new DataImportExportController();
-            dataImportExportController.importData(file.getAbsolutePath());
-
-            // Refresh the student list after importing
-            displayCurrentStudent();
-        }
-    }
-
-    // Display current students
-    private void displayCurrentStudent() {
-        currentStudentContainer.getChildren().clear();
-        this.selectedStudent = null; // Clear the selected student
-        List<Student> studentFromDb = db.getAllStudents(); // Get students from db
-        if (studentFromDb.isEmpty()) { // Display message if db empty
-            Label emptyLabel = new Label("You have no current students");
-            currentStudentContainer.getChildren().add(emptyLabel);
-        } else {
-            for (Student student : studentFromDb) {
-                VBox studentCard = createStudentCard(student);
-                currentStudentContainer.getChildren().add(studentCard);
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",");
+                    if (data.length >= 2) {
+                        String name = data[0].trim();
+                        String id = data[1].trim();
+                        db.addStudent(name, id);
+                    }
+                }
+                loadStudents();
+                showAlert("Students imported successfully.");
+            } catch (Exception e) {
+                showAlert("Error importing students: " + e.getMessage());
             }
         }
     }
 
-private void showAlert(String message) {
-    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-    alert.setTitle("Information");
-    alert.setHeaderText(null);
-    alert.setContentText(message);
-    alert.showAndWait();
-}
+    @FXML
+    private void handleViewDetailsButtonAction() {
+        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        if (selectedStudent != null) {
+            displayStudentDetails(selectedStudent);
+        } else {
+            showAlert("Please select a student to view details.");
+        }
+    }
+
+    @FXML
+    private void handleAddGradeButtonAction() {
+        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        if (selectedStudent != null) {
+            List<Course> courses = db.getCoursesForStudent(selectedStudent.getStudentId());
+            if (!courses.isEmpty()) {
+                // If there's more than one course, you might want to let the user choose
+                // For now, we'll just use the first course
+                Course course = courses.get(0);
+                showAddGradeDialog(selectedStudent, course);
+            } else {
+                showAlert("The selected student is not assigned to any course.");
+            }
+        } else {
+            showAlert("Please select a student to add a grade.");
+        }
+    }
+
+    @FXML
+    private void handleEditStudentButtonAction() {
+        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        if (selectedStudent != null) {
+            showEditStudentDialog(selectedStudent);
+        } else {
+            showAlert("Please select a student to edit.");
+        }
+    }
+
+    @FXML
+    private void handleDeleteStudentButtonAction() {
+        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        if (selectedStudent != null) {
+            if (showConfirmationDialog("Are you sure you want to delete this student?")) {
+                boolean deleted = db.deleteStudent(selectedStudent.getStudentId());
+                if (deleted) {
+                    loadStudents();
+                    showAlert("Student deleted successfully.");
+                } else {
+                    showAlert("Failed to delete student. Please try again.");
+                }
+            }
+        } else {
+            showAlert("Please select a student to delete.");
+        }
+    }
+
+    private void displayStudentDetails(Student student) {
+        studentDetailsGrid.getChildren().clear();
+        studentDetailsGrid.addRow(0, new Label("Name:"), new Label(student.getName()));
+        studentDetailsGrid.addRow(1, new Label("ID:"), new Label(student.getStudentId()));
+        
+        List<Course> courses = db.getCoursesForStudent(student.getStudentId());
+        if (!courses.isEmpty()) {
+            StringBuilder courseNames = new StringBuilder();
+            for (Course course : courses) {
+                if (courseNames.length() > 0) {
+                    courseNames.append(", ");
+                }
+                courseNames.append(course.getName());
+            }
+            studentDetailsGrid.addRow(2, new Label("Courses:"), new Label(courseNames.toString()));
+        } else {
+            studentDetailsGrid.addRow(2, new Label("Courses:"), new Label("Not assigned"));
+        }
+        
+        List<Classes> classes = db.getClassesForStudent(student.getStudentId());
+        if (!classes.isEmpty()) {
+            StringBuilder classNames = new StringBuilder();
+            for (Classes cls : classes) {
+                if (classNames.length() > 0) {
+                    classNames.append(", ");
+                }
+                classNames.append(cls.getName());
+            }
+            studentDetailsGrid.addRow(3, new Label("Classes:"), new Label(classNames.toString()));
+        } else {
+            studentDetailsGrid.addRow(3, new Label("Classes:"), new Label("Not assigned"));
+        }
+        
+        List<Grade> grades = db.getGradesForStudent(student.getStudentId());
+        if (!grades.isEmpty()) {
+            studentDetailsGrid.addRow(4, new Label("Grades:"), new Label());
+            int row = 5;
+            for (Grade grade : grades) {
+                studentDetailsGrid.addRow(row++, new Label(grade.getAssessment().getName() + ":"), 
+                                          new Label(String.format("%.2f", grade.getScore())));
+            }
+        } else {
+            studentDetailsGrid.addRow(4, new Label("Grades:"), new Label("No grades available"));
+        }
+        
+        studentDetailsContainer.setVisible(true);
+        studentDetailsContainer.setManaged(true);
+    }
+
+    private void showAddGradeDialog(Student student, Course course) {
+        Dialog<Grade> dialog = new Dialog<>();
+        dialog.setTitle("Add Grade");
+        dialog.setHeaderText("Add a new grade for " + student.getName());
+
+        // Set up the dialog content
+        ComboBox<Assessment> assessmentComboBox = new ComboBox<>();
+        ComboBox<AssessmentPart> partComboBox = new ComboBox<>();
+        TextField scoreField = new TextField();
+        TextArea feedbackArea = new TextArea();
+
+        // Populate assessments
+        List<Assessment> assessments = db.getAssessmentsForCourse(course.getId());
+        assessmentComboBox.setItems(FXCollections.observableArrayList(assessments));
+
+        // Set up assessment selection listener
+        assessmentComboBox.setOnAction(e -> {
+            Assessment selectedAssessment = assessmentComboBox.getValue();
+            if (selectedAssessment != null) {
+                List<AssessmentPart> parts = db.getAssessmentParts(selectedAssessment.getId());
+                partComboBox.setItems(FXCollections.observableArrayList(parts));
+                partComboBox.setDisable(parts.isEmpty());
+            } else {
+                partComboBox.getItems().clear();
+                partComboBox.setDisable(true);
+            }
+        });
+
+        GridPane grid = new GridPane();
+        grid.add(new Label("Assessment:"), 0, 0);
+        grid.add(assessmentComboBox, 1, 0);
+        grid.add(new Label("Part:"), 0, 1);
+        grid.add(partComboBox, 1, 1);
+        grid.add(new Label("Score:"), 0, 2);
+        grid.add(scoreField, 1, 2);
+        grid.add(new Label("Feedback:"), 0, 3);
+        grid.add(feedbackArea, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                try {
+                    Assessment assessment = assessmentComboBox.getValue();
+                    AssessmentPart part = partComboBox.getValue();
+                    double score = Double.parseDouble(scoreField.getText());
+                    String feedback = feedbackArea.getText();
+
+                    Grade grade = new Grade(student, assessment, part, score, feedback);
+                    db.saveGrade(grade);
+                    return grade;
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid score. Please enter a valid number.");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    private void showEditStudentDialog(Student student) {
+        Dialog<Student> dialog = new Dialog<>();
+        dialog.setTitle("Edit Student");
+
+        TextField nameField = new TextField(student.getName());
+        TextField idField = new TextField(student.getStudentId());
+
+        GridPane grid = new GridPane();
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+        grid.add(new Label("Student ID:"), 0, 1);
+        grid.add(idField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        ButtonType editButton = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(editButton, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == editButton) {
+                String name = nameField.getText();
+                String id = idField.getText();
+                if (!name.isEmpty() && !id.isEmpty()) {
+                    student.setName(name);
+                    student.setStudentId(id);
+                    return student;
+                }
+            }
+            return null;
+        });
+
+        Optional<Student> result = dialog.showAndWait();
+        result.ifPresent(updatedStudent -> {
+            db.updateStudent(student.getStudentId(), updatedStudent.getName(), updatedStudent.getStudentId());
+            loadStudents();
+            displayStudentDetails(updatedStudent);
+        });
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private boolean showConfirmationDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        Optional<ButtonType> result = alert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
+    }
 
 }

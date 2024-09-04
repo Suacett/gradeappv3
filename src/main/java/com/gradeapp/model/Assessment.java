@@ -231,5 +231,9 @@ public class Assessment {
         return maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
 

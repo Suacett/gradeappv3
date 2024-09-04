@@ -30,12 +30,7 @@
         <VBox fx:id="outcomeCheckboxContainer" spacing="5"/>
     </ScrollPane>
 
-    <Label text="Assessment Parts:"/>
-    <TableView fx:id="partsTable" VBox.vgrow="ALWAYS"/>
-    <Label fx:id="totalWeightLabel" text="Total Weight: 0.00%"/>
-
     <HBox spacing="10">
-        <Button text="Add Part" onAction="#addPart"/>
         <Button text="Save Assessment" onAction="#saveAssessment"/>
     </HBox>
 </VBox>

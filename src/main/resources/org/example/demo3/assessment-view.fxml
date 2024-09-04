@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -45,7 +46,7 @@
                   <TableView fx:id="assessmentTable" prefHeight="200.0" prefWidth="340.0" />
                   <HBox spacing="10">
                       <Button onAction="#handleAddAssessmentButtonAction" text="Add Assessment" />
-                      <Button fx:id="deleteAssessmentButton" styleClass="delete-button" text="Delete" />
+                      <Button fx:id="deleteAssessmentButton" onAction="#handleDeleteAssessmentButtonAction" styleClass="delete-button" text="Delete" />
                   <padding>
                      <Insets bottom="10.0" top="10.0" />
                   </padding>
@@ -60,10 +61,16 @@
                      <Insets bottom="10.0" />
                   </VBox.margin>
                </Label>
-                  <TableView fx:id="partsTable" prefHeight="200.0" prefWidth="240.0" />
+                  <TableView fx:id="partsTable" prefHeight="200.0" prefWidth="240.0">
+                      <columns>
+                          <TableColumn fx:id="partNameColumn" text="Name" />
+                          <TableColumn fx:id="partWeightColumn" text="Weight" />
+                          <TableColumn fx:id="partMaxScoreColumn" text="Max Score" />
+                      </columns>
+                  </TableView>
                   <HBox spacing="10">
-                      <Button onAction="#handleAddPartButtonAction" text="Add Part" />
-                      <Button fx:id="deletePartButton" styleClass="delete-button" text="Delete" />
+                      <Button text="Add Part" onAction="#handleAddPartButtonAction" />
+                      <Button fx:id="deletePartButton" onAction="#handleDeletePartButtonAction" styleClass="delete-button" text="Delete" />
                   <padding>
                      <Insets bottom="10.0" top="10.0" />
                   </padding>
@@ -81,7 +88,7 @@
                   <TableView fx:id="outcomeTable" prefHeight="200.0" prefWidth="330.0" />
                   <HBox spacing="10">
                       <Button onAction="#handleLinkOutcomeButtonAction" text="Link Outcome" />
-                      <Button fx:id="unlinkOutcomeButton" styleClass="delete-button" text="Unlink Outcome" />
+                      <Button fx:id="unlinkOutcomeButton" onAction="#handleUnlinkOutcomeButtonAction" styleClass="delete-button" text="Unlink Outcome" />
                   <padding>
                      <Insets bottom="10.0" top="10.0" />
                   </padding>
