@@ -134,7 +134,7 @@ private VBox createStudentCard(Student student) {
     studentCardInfo.getChildren().addAll(studentNameLabel, studentIdLabel, spacer, buttonContainer);
     // Add the studentCardInfo HBox to the studentCard VBox
     studentCard.getChildren().add(studentCardInfo);
-    VBox.setMargin(studentCard, new Insets(0, 0, 10, 0));
+    VBox.setMargin(studentCard, new Insets(0, 10, 10, 10));
     return studentCard;
 }
 

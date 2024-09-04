@@ -12,6 +12,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.List;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 public class CoursesController {
 
@@ -73,34 +75,39 @@ public class CoursesController {
             }
         }
     }
-
     private VBox createCourseCard(Course course) {
-        VBox courseCard = new VBox(10);
-        HBox buttons = new HBox(10);
-        courseCard.setStyle("-fx-border-color: gray; -fx-border-width: 1px; -fx-padding: 10px;");
-
+        VBox courseCard = new VBox();
+        courseCard.getStyleClass().add("card");
+        courseCard.setSpacing(10);
+        // HBox to hold the course info and buttons
+        HBox courseCardInfo = new HBox();
+        courseCardInfo.setSpacing(10); // Add spacing between elements
+        // Create a Region to act as a spacer
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        // Labels for course information
         Label nameLabel = new Label("Name: " + course.getName());
         Label idLabel = new Label("ID: " + course.getId());
-        Label descriptionLabel = new Label("Description: " + course.getDescription());
-
+        // Create HBox to hold the buttons
+        HBox buttonContainer = new HBox();
+        buttonContainer.setSpacing(10);
         Button viewDetailsButton = new Button("View Details");
         viewDetailsButton.setOnAction(event -> openCourseDetailsWindow(course));
-
         Button editButton = new Button("Edit");
         editButton.setOnAction(event -> openCourseEditWindow(course));
-
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.deleteCourse(course.getId());
             displayCurrentCourses();
         });
-        buttons.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
-
-        courseCard.getChildren().addAll(nameLabel, idLabel, descriptionLabel, buttons);
-        VBox.setMargin(courseCard, new Insets(0, 0, 10, 0));
+        buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
+        // Add the labels, spacer, and button container to the courseCardInfo HBox
+        courseCardInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
+        // Add the courseCardInfo HBox to the courseCard VBox
+        courseCard.getChildren().add(courseCardInfo);
+        VBox.setMargin(courseCard, new Insets(0, 10, 10, 10));
         return courseCard;
-
     }
     
     private void openCourseDetailsWindow(Course course) {

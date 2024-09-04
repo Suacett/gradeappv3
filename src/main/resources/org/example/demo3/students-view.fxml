@@ -64,6 +64,9 @@
             <children>
                   <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
                       <VBox fx:id="currentStudentContainer" prefHeight="100.0" prefWidth="200.0" />
+                  <padding>
+                     <Insets bottom="10.0" top="10.0" />
+                  </padding>
                   </ScrollPane>
             </children>
          </VBox>

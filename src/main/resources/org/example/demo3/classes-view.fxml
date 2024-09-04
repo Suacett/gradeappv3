@@ -23,7 +23,7 @@
       <children>
       
           <HBox alignment="CENTER_LEFT" spacing="10">
-              <Label text="Select Course">
+              <Label text="Select a course">
                <font>
                   <Font size="16.0" />
                </font></Label>
@@ -45,12 +45,19 @@
       <font>
          <Font size="18.0" />
       </font></Label>
-    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-        <VBox fx:id="currentClassContainer" spacing="10" />
-      <VBox.margin>
-         <Insets bottom="10.0" />
-      </VBox.margin>
-    </ScrollPane>
+   <VBox prefHeight="280.0" prefWidth="745.0" styleClass="section-style">
+      <children>
+          <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+              <VBox fx:id="currentClassContainer" spacing="10" />
+            <VBox.margin>
+               <Insets bottom="10.0" />
+            </VBox.margin>
+            <padding>
+               <Insets bottom="10.0" top="10.0" />
+            </padding>
+          </ScrollPane>
+      </children>
+   </VBox>
     <Label fx:id="classStatisticsLabel" text="Class Statistics">
       <font>
          <Font size="18.0" />
