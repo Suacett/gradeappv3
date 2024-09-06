@@ -1,20 +1,32 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.*;
-import com.gradeapp.database.Database;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.layout.VBox;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.gradeapp.database.Database;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Outcome;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+
 public class AssessmentCreationController {
-    @FXML private TextField nameField;
-    @FXML private TextArea descriptionField;
-    @FXML private TextField weightField;
-    @FXML private TextField maxScoreField;
-    @FXML private VBox outcomeCheckboxContainer;
-    
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private TextField weightField;
+    @FXML
+    private TextField maxScoreField;
+    @FXML
+    private VBox outcomeCheckboxContainer;
+
     private Course selectedCourse;
     private Assessment newAssessment;
     private Map<Outcome, TextField> outcomeWeightFields = new HashMap<>();
@@ -43,8 +55,8 @@ public class AssessmentCreationController {
                 Outcome outcome = entry.getKey();
                 TextField weightField = entry.getValue();
                 CheckBox checkbox = (CheckBox) outcomeCheckboxContainer.getChildren().get(
-                    outcomeCheckboxContainer.getChildren().indexOf(weightField) - 1);
-                
+                        outcomeCheckboxContainer.getChildren().indexOf(weightField) - 1);
+
                 if (checkbox.isSelected()) {
                     try {
                         double outcomeWeight = Double.parseDouble(weightField.getText());

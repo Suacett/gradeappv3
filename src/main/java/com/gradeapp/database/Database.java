@@ -1,10 +1,22 @@
 package com.gradeapp.database;
 
-import com.gradeapp.model.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Classes;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
+import com.gradeapp.model.Student;
 
 public class Database {
     private static final String URL = "jdbc:sqlite:com.gradeapp.db";
@@ -104,35 +116,33 @@ public class Database {
                 + "FOREIGN KEY (class_id) REFERENCES classes(classId)"
                 + ");";
         try (Connection conn = this.connect();
-             Statement stmt = conn.createStatement()) {
-                stmt.execute(createCoursesTable);
-                stmt.execute(createStudentsTable);
-                stmt.execute(createClassesTable);
-                stmt.execute(createAssessmentsTable);
-                stmt.execute(createOutcomesTable);
-                stmt.execute(createAssessmentOutcomesTable);
-                stmt.execute(createAssessmentPartsTable);
-                stmt.execute(createClassStudentsTable);
-                stmt.execute(createGradesTable);
-                stmt.execute(createStudentClassesTable);
-                stmt.execute(createAssessmentPartOutcomesTable);
+                Statement stmt = conn.createStatement()) {
+            stmt.execute(createCoursesTable);
+            stmt.execute(createStudentsTable);
+            stmt.execute(createClassesTable);
+            stmt.execute(createAssessmentsTable);
+            stmt.execute(createOutcomesTable);
+            stmt.execute(createAssessmentOutcomesTable);
+            stmt.execute(createAssessmentPartsTable);
+            stmt.execute(createClassStudentsTable);
+            stmt.execute(createGradesTable);
+            stmt.execute(createStudentClassesTable);
+            stmt.execute(createAssessmentPartOutcomesTable);
 
-                try {
-                    stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
-                } catch (SQLException e) {
-                    // If the column already exists, this is not an error we need to worry about
-                    if (!e.getMessage().contains("duplicate column name")) {
-                        throw e; // Re-throw if it's a different error
-                    }
+            try {
+                stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
+            } catch (SQLException e) {
+                // If the column already exists, this is not an error we need to worry about
+                if (!e.getMessage().contains("duplicate column name")) {
+                    throw e; // Re-throw if it's a different error
                 }
+            }
 
-                
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
         }
 
-        
     }
 
     private Connection connect() {
@@ -148,16 +158,16 @@ public class Database {
 
     // ASSESSMENT PARTS
 
-
     public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             pstmt.setString(2, outcomeId);
             pstmt.setDouble(3, weight);
             int affectedRows = pstmt.executeUpdate();
-            System.out.println("Linked outcome " + outcomeId + " to assessment " + assessmentId + " with weight " + weight + ". Affected rows: " + affectedRows);
+            System.out.println("Linked outcome " + outcomeId + " to assessment " + assessmentId + " with weight "
+                    + weight + ". Affected rows: " + affectedRows);
         } catch (SQLException e) {
             System.out.println("Error linking outcome to assessment: " + e.getMessage());
         }
@@ -166,12 +176,13 @@ public class Database {
     public void linkOutcomeToAssessmentPart(int partId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_part_outcomes (part_id, outcome_id, weight) VALUES (?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, partId);
             pstmt.setString(2, outcomeId);
             pstmt.setDouble(3, weight);
             int affectedRows = pstmt.executeUpdate();
-            System.out.println("Linked outcome " + outcomeId + " to assessment part " + partId + " with weight " + weight + ". Affected rows: " + affectedRows);
+            System.out.println("Linked outcome " + outcomeId + " to assessment part " + partId + " with weight "
+                    + weight + ". Affected rows: " + affectedRows);
         } catch (SQLException e) {
             System.out.println("Error linking outcome to assessment part: " + e.getMessage());
         }
@@ -180,10 +191,10 @@ public class Database {
     public List<Outcome> getLinkedOutcomesForAssessment(int assessmentId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, ao.weight FROM outcomes o " +
-                     "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
-                     "WHERE ao.assessment_id = ?";
+                "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
+                "WHERE ao.assessment_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -193,7 +204,8 @@ public class Database {
                 double weight = rs.getDouble("weight");
                 Outcome outcome = new Outcome(id, name, description, weight);
                 outcomes.add(outcome);
-                System.out.println("Retrieved linked outcome for assessment " + assessmentId + ": " + id + " with weight " + weight);
+                System.out.println("Retrieved linked outcome for assessment " + assessmentId + ": " + id
+                        + " with weight " + weight);
             }
         } catch (SQLException e) {
             System.out.println("Error getting linked outcomes for assessment: " + e.getMessage());
@@ -204,7 +216,7 @@ public class Database {
     public double getOutcomeWeightForPart(int partId, String outcomeId) {
         String sql = "SELECT weight FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, partId);
             pstmt.setString(2, outcomeId);
             ResultSet rs = pstmt.executeQuery();
@@ -220,7 +232,7 @@ public class Database {
     public double getOutcomeWeightForAssessment(int assessmentId, String outcomeId) {
         String sql = "SELECT weight FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             pstmt.setString(2, outcomeId);
             ResultSet rs = pstmt.executeQuery();
@@ -236,10 +248,10 @@ public class Database {
     public List<Outcome> getLinkedOutcomesForPart(int partId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, apo.weight FROM outcomes o " +
-                     "JOIN assessment_part_outcomes apo ON o.id = apo.outcome_id " +
-                     "WHERE apo.part_id = ?";
+                "JOIN assessment_part_outcomes apo ON o.id = apo.outcome_id " +
+                "WHERE apo.part_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, partId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -249,7 +261,8 @@ public class Database {
                 double weight = rs.getDouble("weight");
                 Outcome outcome = new Outcome(id, name, description, weight);
                 outcomes.add(outcome);
-                System.out.println("Retrieved linked outcome for part " + partId + ": " + id + " with weight " + weight);
+                System.out
+                        .println("Retrieved linked outcome for part " + partId + ": " + id + " with weight " + weight);
             }
         } catch (SQLException e) {
             System.out.println("Error getting linked outcomes for part: " + e.getMessage());
@@ -257,19 +270,17 @@ public class Database {
         return outcomes;
     }
 
-
-
     public int addAssessment(Assessment assessment, String courseId) {
         String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, courseId);
             pstmt.setString(2, assessment.getName());
             pstmt.setString(3, assessment.getDescription());
             pstmt.setDouble(4, assessment.getWeight());
             pstmt.setDouble(5, assessment.getMaxScore());
             int affectedRows = pstmt.executeUpdate();
-            
+
             if (affectedRows > 0) {
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
@@ -287,61 +298,60 @@ public class Database {
         return -1;
     }
 
-
-public int addAssessmentPart(AssessmentPart part, int assessmentId) {
-    String sql = "INSERT INTO assessment_parts (assessment_id, name, weight, max_score) VALUES (?, ?, ?, ?)";
-    try (Connection conn = this.connect();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setInt(1, assessmentId);
-        pstmt.setString(2, part.getName());
-        pstmt.setDouble(3, part.getWeight());
-        pstmt.setDouble(4, part.getMaxScore());
-        int affectedRows = pstmt.executeUpdate();
-        if (affectedRows > 0) {
-            // Get the last inserted ID
-            try (Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
-                if (rs.next()) {
-                    return rs.getInt(1);
+    public int addAssessmentPart(AssessmentPart part, int assessmentId) {
+        String sql = "INSERT INTO assessment_parts (assessment_id, name, weight, max_score) VALUES (?, ?, ?, ?)";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, part.getName());
+            pstmt.setDouble(3, part.getWeight());
+            pstmt.setDouble(4, part.getMaxScore());
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                // Get the last inserted ID
+                try (Statement stmt = conn.createStatement();
+                        ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
                 }
             }
+        } catch (SQLException e) {
+            System.out.println("Error adding assessment part: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.out.println("Error adding assessment part: " + e.getMessage());
-        e.printStackTrace();
+        return -1;
     }
-    return -1;
-}
-    
-public List<AssessmentPart> getAssessmentParts(int assessmentId) {
-    List<AssessmentPart> parts = new ArrayList<>();
-    String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
-    try (Connection conn = this.connect();
-         PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        pstmt.setInt(1, assessmentId);
-        ResultSet rs = pstmt.executeQuery();
-        while (rs.next()) {
-            int id = rs.getInt("id");
-            String name = rs.getString("name");
-            double weight = rs.getDouble("weight");
-            double maxScore = rs.getDouble("max_score");
-            AssessmentPart part = new AssessmentPart(id, name, weight, maxScore);
-            parts.add(part);
-            System.out.println("Retrieved part: " + name + " (ID: " + id + ") for assessment ID: " + assessmentId);
+
+    public List<AssessmentPart> getAssessmentParts(int assessmentId) {
+        List<AssessmentPart> parts = new ArrayList<>();
+        String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                double weight = rs.getDouble("weight");
+                double maxScore = rs.getDouble("max_score");
+                AssessmentPart part = new AssessmentPart(id, name, weight, maxScore);
+                parts.add(part);
+                System.out.println("Retrieved part: " + name + " (ID: " + id + ") for assessment ID: " + assessmentId);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting assessment parts: " + e.getMessage());
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        System.out.println("Error getting assessment parts: " + e.getMessage());
-        e.printStackTrace();
+        return parts;
     }
-    return parts;
-}
-    
+
     public void verifyAssessmentParts() {
         String sql = "SELECT * FROM assessment_parts";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+
             System.out.println("Contents of assessment_parts table:");
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -349,7 +359,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
                 String name = rs.getString("name");
                 double weight = rs.getDouble("weight");
                 double maxScore = rs.getDouble("max_score");
-                System.out.println("Part ID: " + id + ", Assessment ID: " + assessmentId + ", Name: " + name + ", Weight: " + weight + ", Max Score: " + maxScore);
+                System.out.println("Part ID: " + id + ", Assessment ID: " + assessmentId + ", Name: " + name
+                        + ", Weight: " + weight + ", Max Score: " + maxScore);
             }
         } catch (SQLException e) {
             System.out.println("Error verifying assessment parts: " + e.getMessage());
@@ -357,18 +368,16 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         }
     }
 
-
-    
     // COURSES
     public void addCourse(Course course) {
         String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
             pstmt.executeUpdate();
-            
+
             // Add outcomes for the course
             for (Outcome outcome : course.getOutcomes()) {
                 addOutcome(outcome, course.getId());
@@ -383,7 +392,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT * FROM outcomes WHERE course_id = ?";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -403,7 +412,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public boolean isCourseIdUnique(String newId, String currentId) {
         String sql = "SELECT COUNT(*) FROM courses WHERE id = ? AND id != ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newId);
             pstmt.setString(2, currentId);
             ResultSet rs = pstmt.executeQuery();
@@ -415,11 +424,11 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         }
         return false;
     }
-    
+
     public void saveCourse(Course course) {
         String sql = "INSERT OR REPLACE INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
@@ -455,8 +464,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT * FROM courses";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String id = rs.getString("id");
                 String name = rs.getString("name");
@@ -464,7 +473,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
                 Course course = new Course(id, name, description);
                 course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
-                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); // Debug print
+                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); // Debug
+                                                                                                                // print
             }
         } catch (SQLException e) {
             System.out.println("Error getting courses: " + e.getMessage());
@@ -487,11 +497,10 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         }
     }
 
-
     public void deleteOutcome(String courseId, String outcomeId) {
         String sql = "DELETE FROM outcomes WHERE course_id = ? AND id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             pstmt.setString(2, outcomeId);
             pstmt.executeUpdate();
@@ -505,7 +514,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void addOutcome(Outcome outcome, String courseId) {
         String sql = "INSERT INTO outcomes (course_id, id, name, description, weight) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             pstmt.setString(2, outcome.getId());
             pstmt.setString(3, outcome.getName());
@@ -518,11 +527,10 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         }
     }
 
-
     public void updateOutcome(String courseId, Outcome outcome) {
         String sql = "UPDATE outcomes SET name = ?, description = ?, weight = ? WHERE course_id = ? AND id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, outcome.getName());
             pstmt.setString(2, outcome.getDescription());
             pstmt.setDouble(3, outcome.getWeight());
@@ -535,27 +543,12 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             e.printStackTrace();
         }
     }
-    
-    
-    private int getCourseId(String courseName) throws SQLException {
-        String sql = "SELECT id FROM courses WHERE name = ?";
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, courseName);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("id");
-                }
-            }
-        }
-        throw new SQLException("Course not found: " + courseName);
-    }
 
     // STUDENTS
     public void addStudent(String name, String studentId) {
         String sql = "INSERT INTO students(name, studentId) VALUES(?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.setString(2, studentId);
             pstmt.executeUpdate();
@@ -568,7 +561,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void updateStudent(String oldStudentId, String newName, String newStudentId) {
         String sql = "UPDATE students SET name = ?, studentId = ? WHERE studentId = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newName);
             pstmt.setString(2, newStudentId);
             pstmt.setString(3, oldStudentId);
@@ -583,8 +576,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString("name");
                 String studentId = rs.getString("studentId");
@@ -600,7 +593,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void addClass(String name, String classId) {
         String sql = "INSERT INTO classes(name, classId) VALUES(?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.setString(2, classId);
             pstmt.executeUpdate();
@@ -613,7 +606,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void addClass(Classes classObj, String courseId) throws SQLException {
         String sql = "INSERT INTO classes(name, classId, course_id) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classObj.getName());
             pstmt.setString(2, classObj.getClassId());
             pstmt.setString(3, courseId);
@@ -628,7 +621,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void unlinkOutcomeFromAssessmentPart(int partId, String outcomeId) {
         String sql = "DELETE FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, partId);
             pstmt.setString(2, outcomeId);
             pstmt.executeUpdate();
@@ -642,7 +635,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT * FROM classes WHERE course_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -659,7 +652,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void updateClass(String oldClassId, String newName, String newClassId) {
         String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newName);
             pstmt.setString(2, newClassId);
             pstmt.setString(3, oldClassId);
@@ -674,8 +667,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT name, classId FROM classes";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString("name");
                 String classId = rs.getString("classId");
@@ -690,7 +683,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public boolean addStudentToClass(String studentId, String classId) {
         String sql = "INSERT OR IGNORE INTO student_classes (student_id, class_id) VALUES (?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             pstmt.setString(2, classId);
             int affectedRows = pstmt.executeUpdate();
@@ -704,7 +697,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void removeStudentFromClass(String studentId, String classId) {
         String sql = "DELETE FROM student_classes WHERE student_id = ? AND class_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             pstmt.setString(2, classId);
             pstmt.executeUpdate();
@@ -717,10 +710,10 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public List<Student> getStudentsInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT s.* FROM students s " +
-                     "JOIN class_students cs ON s.studentId = cs.student_id " +
-                     "WHERE cs.class_id = ?";
+                "JOIN class_students cs ON s.studentId = cs.student_id " +
+                "WHERE cs.class_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -737,9 +730,9 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public List<Student> getStudentsNotInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students WHERE studentId NOT IN " +
-                     "(SELECT student_id FROM class_students WHERE class_id = ?)";
+                "(SELECT student_id FROM class_students WHERE class_id = ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -756,7 +749,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public Student getStudentById(String studentId) {
         String sql = "SELECT * FROM students WHERE studentId = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -769,14 +762,13 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         return null;
     }
 
-
     public List<Classes> getClassesForStudent(String studentId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT c.* FROM classes c " +
-                     "JOIN student_classes sc ON c.classId = sc.class_id " +
-                     "WHERE sc.student_id = ?";
+                "JOIN student_classes sc ON c.classId = sc.class_id " +
+                "WHERE sc.student_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -793,7 +785,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void saveGrade(Grade grade) {
         String sql = "INSERT INTO grades (student_id, assessment_id, part_id, score, feedback, date) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, grade.getStudent().getStudentId());
             pstmt.setInt(2, grade.getAssessment().getId());
             if (grade.getPart() != null) {
@@ -810,12 +802,12 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             System.out.println("Error saving grade: " + e.getMessage());
         }
     }
-    
+
     public List<Grade> getGradesForStudent(String studentId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT * FROM grades WHERE student_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -841,21 +833,21 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void delete(String table, String idColumn, String id) {
         String sql = "DELETE FROM " + table + " WHERE " + idColumn + " = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, id);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error deleting from " + table + ": " + e.getMessage());
         }
     }
-    
+
     public List<Outcome> getOutcomesForAssessment(int assessmentId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, ao.weight as assessment_weight FROM outcomes o " +
-                     "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
-                     "WHERE ao.assessment_id = ?";
+                "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
+                "WHERE ao.assessment_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -875,7 +867,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void updateAssessment(Assessment assessment) {
         String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, assessment.getName());
             pstmt.setString(2, assessment.getDescription());
             pstmt.setDouble(3, assessment.getWeight());
@@ -886,21 +878,20 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             System.out.println("Error updating assessment: " + e.getMessage());
         }
     }
-    
+
     public List<Assessment> getAllAssessments() {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments";
         try (Connection conn = this.connect();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 Assessment assessment = new Assessment(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("weight"),
-                    rs.getDouble("maxScore")
-                );
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("weight"),
+                        rs.getDouble("maxScore"));
                 assessments.add(assessment);
             }
         } catch (SQLException e) {
@@ -908,32 +899,31 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         }
         return assessments;
     }
-    
+
     public Assessment getAssessmentById(int assessmentId) {
         String sql = "SELECT * FROM assessments WHERE id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return new Assessment(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("description"),
-                    rs.getDouble("weight"),
-                    rs.getDouble("maxScore")
-                );
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getDouble("weight"),
+                        rs.getDouble("maxScore"));
             }
         } catch (SQLException e) {
             System.out.println("Error getting assessment by ID: " + e.getMessage());
         }
         return null;
     }
-    
+
     public void deleteAssessmentPart(int partId) {
         String sql = "DELETE FROM assessment_parts WHERE id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, partId);
             pstmt.executeUpdate();
             System.out.println("Assessment part deleted successfully.");
@@ -945,7 +935,7 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
     public void unlinkOutcomeFromAssessment(int assessmentId, String outcomeId) {
         String sql = "DELETE FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, assessmentId);
             pstmt.setString(2, outcomeId);
             pstmt.executeUpdate();
@@ -990,23 +980,23 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments WHERE course_id = ?";
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     Assessment assessment = new Assessment(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getDouble("weight"),
-                        rs.getDouble("maxScore")
-                    );
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getDouble("weight"),
+                            rs.getDouble("maxScore"));
                     List<AssessmentPart> parts = getAssessmentParts(assessment.getId());
                     for (AssessmentPart part : parts) {
                         assessment.addPart(part);
                     }
                     assessments.add(assessment);
-                    System.out.println("Loaded assessment: " + assessment.getName() + " (ID: " + assessment.getId() + ")");
+                    System.out.println(
+                            "Loaded assessment: " + assessment.getName() + " (ID: " + assessment.getId() + ")");
                 }
             }
         } catch (SQLException e) {
@@ -1017,15 +1007,15 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
 
     public Classes getClassForStudent(String studentId) {
         String sql = "SELECT c.* FROM classes c " +
-                     "JOIN student_class sc ON c.classId = sc.classId " +
-                     "WHERE sc.studentId = ?";
-        
+                "JOIN student_class sc ON c.classId = sc.classId " +
+                "WHERE sc.studentId = ?";
+
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
             pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
-            
+
             if (rs.next()) {
                 String classId = rs.getString("classId");
                 String className = rs.getString("name");
@@ -1034,18 +1024,18 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         } catch (SQLException e) {
             System.out.println("Error getting class for student: " + e.getMessage());
         }
-        
+
         return null;
     }
 
     public List<Course> getCoursesForStudent(String studentId) {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT DISTINCT c.* FROM courses c " +
-                     "JOIN classes cl ON c.id = cl.course_id " +
-                     "JOIN student_classes sc ON cl.classId = sc.class_id " +
-                     "WHERE sc.student_id = ?";
+                "JOIN classes cl ON c.id = cl.course_id " +
+                "JOIN student_classes sc ON cl.classId = sc.class_id " +
+                "WHERE sc.student_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -1061,33 +1051,10 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         return courses;
     }
 
-    private void loadOutcomesForCourse(Course course) {
-        String sql = "SELECT * FROM outcomes WHERE courseId = ?";
-        
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, course.getId());
-            ResultSet rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                String outcomeId = rs.getString("outcomeId");
-                String outcomeName = rs.getString("name");
-                String outcomeDescription = rs.getString("description");
-                double weight = rs.getDouble("weight");
-                
-                Outcome outcome = new Outcome(outcomeId, outcomeName, outcomeDescription, weight);
-                course.addOutcome(outcome);
-            }
-        } catch (SQLException e) {
-            System.out.println("Error loading outcomes for course: " + e.getMessage());
-        }
-    }
-
     public boolean deleteStudent(String studentId) {
         String sql = "DELETE FROM students WHERE studentId = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, studentId);
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -1096,5 +1063,5 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             return false;
         }
     }
- 
+
 }

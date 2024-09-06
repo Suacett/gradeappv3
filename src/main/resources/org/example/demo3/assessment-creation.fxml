@@ -4,7 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="assessmentCreationContainer" spacing="10" xmlns:fx="http://javafx.com/fxml" fx:controller="com.gradeapp.controller.AssessmentCreationController">
+<VBox fx:id="assessmentCreationContainer" spacing="10"
+    xmlns:fx="http://javafx.com/fxml" fx:controller="com.gradeapp.controller.AssessmentCreationController">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>

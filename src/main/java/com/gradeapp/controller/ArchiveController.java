@@ -11,5 +11,5 @@ public class ArchiveController {
 
     @FXML
     private Label welcomeText;
-    
+
 }

@@ -1,12 +1,13 @@
 package com.gradeapp.controller;
 
+import java.util.List;
+
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Student;
 import com.gradeapp.util.FileHandler;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
-import java.util.List;
 
 public class DataImportExportController {
     private FileHandler fileHandler;

@@ -1,32 +1,46 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.Course;
-import com.gradeapp.model.Outcome;
-
-
 import java.util.ArrayList;
 import java.util.Optional;
 
 import com.gradeapp.database.Database;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Outcome;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.util.converter.DoubleStringConverter;
 
 public class CourseEditController {
 
-    @FXML private TextField courseNameField;
-    @FXML private TextField courseIdField;
-    @FXML private TextArea courseDescriptionField;
-    @FXML private TableView<Outcome> outcomesTable;
-    @FXML private TableColumn<Outcome, String> outcomeIdentifierColumn;
-    @FXML private TableColumn<Outcome, String> outcomeNameColumn;
-    @FXML private TableColumn<Outcome, String> outcomeDescriptionColumn;
-    @FXML private TableColumn<Outcome, Double> outcomeWeightColumn;
-    @FXML private Label totalWeightLabel;
+    @FXML
+    private TextField courseNameField;
+    @FXML
+    private TextField courseIdField;
+    @FXML
+    private TextArea courseDescriptionField;
+    @FXML
+    private TableView<Outcome> outcomesTable;
+    @FXML
+    private TableColumn<Outcome, String> outcomeIdentifierColumn;
+    @FXML
+    private TableColumn<Outcome, String> outcomeNameColumn;
+    @FXML
+    private TableColumn<Outcome, String> outcomeDescriptionColumn;
+    @FXML
+    private TableColumn<Outcome, Double> outcomeWeightColumn;
+    @FXML
+    private Label totalWeightLabel;
 
     private Course course;
     private Database db = new Database();
@@ -39,6 +53,7 @@ public class CourseEditController {
         updateTotalWeight();
         System.out.println("CourseEditController initialized"); // Debug print
     }
+
     private void setupOutcomesTable() {
         outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -74,13 +89,6 @@ public class CourseEditController {
         outcomesTable.setEditable(true);
     }
 
-
-
-    private boolean isValidCourseId(String id) {
-        return id.matches("^[A-Z]{2,4}[0-9]{1,4}$");
-    }
-
-
     public void setCourse(Course course) {
         this.course = course;
         if (course != null) {
@@ -88,7 +96,8 @@ public class CourseEditController {
             courseNameField.setText(course.getName());
             courseDescriptionField.setText(course.getDescription());
             outcomes.setAll(course.getOutcomes());
-            System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size()); // Debug print
+            System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size()); // Debug
+                                                                                                                   // print
         } else {
             courseIdField.clear();
             courseNameField.clear();
@@ -100,28 +109,27 @@ public class CourseEditController {
         updateTotalWeight();
     }
 
-@FXML
-private void addOutcome() {
-    String newId = ""; // This will be filled by user input
-    TextInputDialog dialog = new TextInputDialog("");
-    dialog.setTitle("New Outcome");
-    dialog.setHeaderText("Enter Outcome ID");
-    dialog.setContentText("Please enter the outcome ID:");
+    @FXML
+    private void addOutcome() {
+        String newId = ""; // This will be filled by user input
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("New Outcome");
+        dialog.setHeaderText("Enter Outcome ID");
+        dialog.setContentText("Please enter the outcome ID:");
 
-    Optional<String> result = dialog.showAndWait();
-    if (result.isPresent()) {
-        newId = result.get();
-    } else {
-        return; // User cancelled the dialog
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            newId = result.get();
+        } else {
+            return; // User cancelled the dialog
+        }
+
+        Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
+        outcomes.add(newOutcome);
+        outcomesTable.refresh();
+        updateTotalWeight();
+        System.out.println("Outcome added: " + newOutcome);
     }
-
-    Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
-    outcomes.add(newOutcome);
-    outcomesTable.refresh();
-    updateTotalWeight();
-    System.out.println("Outcome added: " + newOutcome);
-}
-
 
     @FXML
     private void removeSelectedOutcome() {
@@ -160,7 +168,6 @@ private void addOutcome() {
             }
         }
     }
-
 
     @FXML
     private void cancel() {

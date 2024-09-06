@@ -1,11 +1,11 @@
 package com.gradeapp.model;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 
 public class Assessment {
     private int id;
@@ -17,7 +17,6 @@ public class Assessment {
     private ObservableMap<Outcome, Double> outcomeWeights;
     private ObservableList<Assessment> childAssessments;
     private Assessment parentAssessment;
-
 
     // Constructor with id
     public Assessment(int id, String name, String description, double weight, double maxScore) {
@@ -37,7 +36,6 @@ public class Assessment {
         this.outcomeWeights = FXCollections.observableHashMap();
     }
 
-
     // Getters and setters for id
     public int getId() {
         return id;
@@ -56,7 +54,6 @@ public class Assessment {
         childAssessments.add(child);
         child.parentAssessment = this;
     }
-
 
     // Methods for generating reports
     public Map<String, Object> generateDetailedReport() {
@@ -144,7 +141,6 @@ public class Assessment {
         return parts;
     }
 
-
     public ObservableList<AssessmentPart> getParts() {
         return parts;
     }
@@ -168,7 +164,6 @@ public class Assessment {
         return childAssessments;
     }
 
-    
     public void removeChildAssessment(Assessment child) {
         this.childAssessments.remove(child);
         child.setParentAssessment(null);
@@ -235,4 +230,3 @@ public class Assessment {
         return getName();
     }
 }
-

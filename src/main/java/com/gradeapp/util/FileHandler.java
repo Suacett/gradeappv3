@@ -1,74 +1,95 @@
 package com.gradeapp.util;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import com.gradeapp.model.Assessment;
 import com.gradeapp.model.Grade;
 import com.gradeapp.model.Student;
 import com.gradeapp.model.StudentGrade;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javafx.scene.control.Alert;
-import java.io.*;
-import java.nio.file.*;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class FileHandler {
     private Map<String, Student> studentMap = new HashMap<>();
     private Map<String, Assessment> assessmentMap = new HashMap<>();
 
-//    public List<Student> importStudents(String filePath) throws IOException {
-//        List<Student> students = new ArrayList<>();
-//        List<Integer> skippedRows = new ArrayList<>();
-//        Path path = Paths.get(filePath);
-//
-//        try (InputStream inputStream = Files.newInputStream(path);
-//             Workbook workbook = WorkbookFactory.create(inputStream)) {
-//
-//            Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
-//
-//            // Iterate starting from the second row (index 1), assuming row 0 is the header
-//            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-//                Row row = sheet.getRow(i);
-//                if (row == null) continue;
-//
-//                String studentCode = getCellValue(row.getCell(0)); // "Student Code" column
-//                String firstName = getCellValue(row.getCell(1)); // "Student First Name" column
-//                String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
-//
-//                // Check if the relevant cells are all empty (we treat these rows as non-existent)
-//                if ((studentCode == null || studentCode.trim().isEmpty()) &&
-//                        (firstName == null || firstName.trim().isEmpty()) &&
-//                        (lastName == null || lastName.trim().isEmpty())) {
-//                    continue; // Skip this row
-//                }
-//
-//                // If any of the critical fields are null or empty, skip and record the row
-//                if (studentCode == null || studentCode.trim().isEmpty() ||
-//                        firstName == null || firstName.trim().isEmpty() ||
-//                        lastName == null || lastName.trim().isEmpty()) {
-//                    skippedRows.add(i + 1); // Add row number to skippedRows (1-based index)
-//                    continue; // Skip this row
-//                }
-//
-//                // Combine first and last names for the full name
-//                String fullName = firstName + " " + lastName;
-//
-//                Student student = new Student(fullName, studentCode);
-//                students.add(student);
-//            }
-//        }
-//
-//        // If there are skipped rows, show an error dialog
-//        if (!skippedRows.isEmpty()) {
-//            String skippedRowsStr = skippedRows.stream()
-//                    .map(String::valueOf)
-//                    .collect(Collectors.joining(", "));
-//            showErrorDialog("The following rows were skipped due to missing values: " + skippedRowsStr);
-//        }
-//
-//        return students;
-//    }
+    // public List<Student> importStudents(String filePath) throws IOException {
+    // List<Student> students = new ArrayList<>();
+    // List<Integer> skippedRows = new ArrayList<>();
+    // Path path = Paths.get(filePath);
+    //
+    // try (InputStream inputStream = Files.newInputStream(path);
+    // Workbook workbook = WorkbookFactory.create(inputStream)) {
+    //
+    // Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
+    //
+    // // Iterate starting from the second row (index 1), assuming row 0 is the
+    // header
+    // for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+    // Row row = sheet.getRow(i);
+    // if (row == null) continue;
+    //
+    // String studentCode = getCellValue(row.getCell(0)); // "Student Code" column
+    // String firstName = getCellValue(row.getCell(1)); // "Student First Name"
+    // column
+    // String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
+    //
+    // // Check if the relevant cells are all empty (we treat these rows as
+    // non-existent)
+    // if ((studentCode == null || studentCode.trim().isEmpty()) &&
+    // (firstName == null || firstName.trim().isEmpty()) &&
+    // (lastName == null || lastName.trim().isEmpty())) {
+    // continue; // Skip this row
+    // }
+    //
+    // // If any of the critical fields are null or empty, skip and record the row
+    // if (studentCode == null || studentCode.trim().isEmpty() ||
+    // firstName == null || firstName.trim().isEmpty() ||
+    // lastName == null || lastName.trim().isEmpty()) {
+    // skippedRows.add(i + 1); // Add row number to skippedRows (1-based index)
+    // continue; // Skip this row
+    // }
+    //
+    // // Combine first and last names for the full name
+    // String fullName = firstName + " " + lastName;
+    //
+    // Student student = new Student(fullName, studentCode);
+    // students.add(student);
+    // }
+    // }
+    //
+    // // If there are skipped rows, show an error dialog
+    // if (!skippedRows.isEmpty()) {
+    // String skippedRowsStr = skippedRows.stream()
+    // .map(String::valueOf)
+    // .collect(Collectors.joining(", "));
+    // showErrorDialog("The following rows were skipped due to missing values: " +
+    // skippedRowsStr);
+    // }
+    //
+    // return students;
+    // }
 
     public List<Student> importStudents(String filePath) throws IOException {
         List<Student> students = new ArrayList<>();
@@ -76,20 +97,22 @@ public class FileHandler {
         Path path = Paths.get(filePath);
 
         try (InputStream inputStream = Files.newInputStream(path);
-             Workbook workbook = WorkbookFactory.create(inputStream)) {
+                Workbook workbook = WorkbookFactory.create(inputStream)) {
 
             Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
 
             // Start iterating from the third row (index 2) to skip headers
             for (int i = 2; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
-                if (row == null || isRowEmpty(row)) continue;
+                if (row == null || isRowEmpty(row))
+                    continue;
 
                 String studentCode = getCellValue(row.getCell(0)); // "Student Code" column
                 String firstName = getCellValue(row.getCell(1)); // "Student First Name" column
                 String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
 
-                // Check if the relevant cells are all empty (we treat these rows as non-existent)
+                // Check if the relevant cells are all empty (we treat these rows as
+                // non-existent)
                 if (isNullOrEmpty(studentCode) && isNullOrEmpty(firstName) && isNullOrEmpty(lastName)) {
                     continue; // Skip this row
                 }
@@ -137,11 +160,11 @@ public class FileHandler {
     private void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Import Error");
-        alert.setHeaderText("Some rows were skipped due to null values, please check that all the cells are correct and that there are no null values.");
+        alert.setHeaderText(
+                "Some rows were skipped due to null values, please check that all the cells are correct and that there are no null values.");
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 
     public void exportStudents(List<Student> students, String filePath) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
@@ -172,10 +195,10 @@ public class FileHandler {
         }
     }
 
-
     // Utility method to get cell value
     private String getCellValue(Cell cell) {
-        if (cell == null) return null;
+        if (cell == null)
+            return null;
 
         switch (cell.getCellType()) {
             case STRING:
@@ -186,7 +209,6 @@ public class FileHandler {
                 return ""; // Handle unexpected types
         }
     }
-
 
     public List<Student> importFromCsv(String filePath) throws IOException {
         List<Student> students = new ArrayList<>();
@@ -206,10 +228,11 @@ public class FileHandler {
         List<StudentGrade> grades = new ArrayList<>();
         Path path = Paths.get(filePath);
         try (InputStream inputStream = Files.newInputStream(path);
-             Workbook workbook = WorkbookFactory.create(inputStream)) {
+                Workbook workbook = WorkbookFactory.create(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
-                if (row.getRowNum() == 0) continue; // Skip header
+                if (row.getRowNum() == 0)
+                    continue; // Skip header
 
                 String studentId = getCellValue(row.getCell(0));
                 String assessmentName = getCellValue(row.getCell(1));

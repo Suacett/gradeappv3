@@ -1,6 +1,7 @@
 package com.gradeapp.model;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Student {
     private String name;
@@ -34,11 +35,11 @@ public class Student {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
-    
+
     public void removeGrade(Grade grade) {
         grades.remove(grade);
         if (course != null && course.getGradeBook() != null) {
@@ -49,7 +50,6 @@ public class Student {
     public List<Grade> getGrades() {
         return new ArrayList<>(grades);
     }
-
 
     // Methods for calculating performance
     public double calculateOverallPerformance() {

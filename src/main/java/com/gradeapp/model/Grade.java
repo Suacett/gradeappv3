@@ -22,8 +22,6 @@ public class Grade {
         this.feedback = feedback;
         this.date = LocalDate.now();
     }
-    
-
 
     // Methods for managing the grade book
     public void addToGradeBook() {
@@ -74,9 +72,8 @@ public class Grade {
     @Override
     public String toString() {
         return String.format("Grade(student=%s, assessment=%s, part=%s, score=%.2f, feedback=%s, date=%s)",
-            student.getName(), assessment.getName(), 
-            (part != null ? part.getName() : "N/A"), 
-            score, feedback, date);
+                student.getName(), assessment.getName(),
+                (part != null ? part.getName() : "N/A"),
+                score, feedback, date);
     }
 }
-

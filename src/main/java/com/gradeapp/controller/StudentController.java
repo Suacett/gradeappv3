@@ -1,24 +1,44 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.database.Database;
-import com.gradeapp.model.*;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.stage.FileChooser;
-import java.io.File;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.Optional;
 
+import com.gradeapp.database.Database;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Classes;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Student;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+
 public class StudentController {
 
-    @FXML private ListView<Student> studentListView;
-    @FXML private VBox studentDetailsContainer;
-    @FXML private GridPane studentDetailsGrid;
+    @FXML
+    private ListView<Student> studentListView;
+    @FXML
+    private VBox studentDetailsContainer;
+    @FXML
+    private GridPane studentDetailsGrid;
 
     private Database db = new Database();
     private ObservableList<Student> students = FXCollections.observableArrayList();
@@ -44,21 +64,21 @@ public class StudentController {
     private void handleAddStudentButtonAction() {
         Dialog<Student> dialog = new Dialog<>();
         dialog.setTitle("Add New Student");
-    
+
         TextField nameField = new TextField();
         TextField idField = new TextField();
-    
+
         GridPane grid = new GridPane();
         grid.add(new Label("Name:"), 0, 0);
         grid.add(nameField, 1, 0);
         grid.add(new Label("Student ID:"), 0, 1);
         grid.add(idField, 1, 1);
-    
+
         dialog.getDialogPane().setContent(grid);
-    
+
         ButtonType addButton = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButton, ButtonType.CANCEL);
-    
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == addButton) {
                 String name = nameField.getText();
@@ -69,7 +89,7 @@ public class StudentController {
             }
             return null;
         });
-    
+
         Optional<Student> result = dialog.showAndWait();
         result.ifPresent(student -> {
             db.addStudent(student.getName(), student.getStudentId());
@@ -163,7 +183,7 @@ public class StudentController {
         studentDetailsGrid.getChildren().clear();
         studentDetailsGrid.addRow(0, new Label("Name:"), new Label(student.getName()));
         studentDetailsGrid.addRow(1, new Label("ID:"), new Label(student.getStudentId()));
-        
+
         List<Course> courses = db.getCoursesForStudent(student.getStudentId());
         if (!courses.isEmpty()) {
             StringBuilder courseNames = new StringBuilder();
@@ -177,7 +197,7 @@ public class StudentController {
         } else {
             studentDetailsGrid.addRow(2, new Label("Courses:"), new Label("Not assigned"));
         }
-        
+
         List<Classes> classes = db.getClassesForStudent(student.getStudentId());
         if (!classes.isEmpty()) {
             StringBuilder classNames = new StringBuilder();
@@ -191,19 +211,19 @@ public class StudentController {
         } else {
             studentDetailsGrid.addRow(3, new Label("Classes:"), new Label("Not assigned"));
         }
-        
+
         List<Grade> grades = db.getGradesForStudent(student.getStudentId());
         if (!grades.isEmpty()) {
             studentDetailsGrid.addRow(4, new Label("Grades:"), new Label());
             int row = 5;
             for (Grade grade : grades) {
-                studentDetailsGrid.addRow(row++, new Label(grade.getAssessment().getName() + ":"), 
-                                          new Label(String.format("%.2f", grade.getScore())));
+                studentDetailsGrid.addRow(row++, new Label(grade.getAssessment().getName() + ":"),
+                        new Label(String.format("%.2f", grade.getScore())));
             }
         } else {
             studentDetailsGrid.addRow(4, new Label("Grades:"), new Label("No grades available"));
         }
-        
+
         studentDetailsContainer.setVisible(true);
         studentDetailsContainer.setManaged(true);
     }

@@ -14,7 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@styles.css"
+    xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
@@ -34,15 +36,15 @@
 
         <Label alignment="TOP_LEFT" text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
         <TextArea fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <columnConstraints>
-         <ColumnConstraints />
-         <ColumnConstraints />
-      </columnConstraints>
-      <rowConstraints>
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-      </rowConstraints>
+        <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
     </GridPane>
 
     <Label text="Course Outcomes">

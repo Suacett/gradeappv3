@@ -1,12 +1,17 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.database.Database;
-import com.gradeapp.model.*;
-import com.gradeapp.util.WeightedAverageGradeCalculator;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.gradeapp.database.Database;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
+import com.gradeapp.model.Student;
+import com.gradeapp.util.WeightedAverageGradeCalculator;
 
 public class GradingController {
     private WeightedAverageGradeCalculator calculator;
@@ -75,8 +80,6 @@ public class GradingController {
         return addGrade(student, assessment, null, score, feedback);
     }
 
-
-    
     public double calculateAssessmentGrade(Student student, Assessment assessment) {
         Map<AssessmentPart, Double> partScores = new HashMap<>();
         for (AssessmentPart part : assessment.getParts()) {
@@ -91,7 +94,7 @@ public class GradingController {
     public Map<Outcome, Double> calculateOutcomeGrades(Student student, Assessment assessment) {
         Map<Outcome, Double> outcomeGrades = new HashMap<>();
         Map<AssessmentPart, Double> partScores = new HashMap<>();
-        
+
         for (AssessmentPart part : assessment.getParts()) {
             Grade partGrade = getGrade(student, part);
             if (partGrade != null) {
@@ -107,10 +110,10 @@ public class GradingController {
         return outcomeGrades;
     }
 
-private Grade getGrade(Student student, AssessmentPart part) {
-    return student.getGrades().stream()
-            .filter(grade -> grade.getAssessment().getParts().contains(part))
-            .findFirst()
-            .orElse(null);
-}
+    private Grade getGrade(Student student, AssessmentPart part) {
+        return student.getGrades().stream()
+                .filter(grade -> grade.getAssessment().getParts().contains(part))
+                .findFirst()
+                .orElse(null);
+    }
 }

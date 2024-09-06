@@ -1,25 +1,31 @@
 package com.gradeapp.controller;
 
-import com.gradeapp.model.Course;
+import java.io.IOException;
+import java.util.List;
+
 import com.gradeapp.database.Database;
+import com.gradeapp.model.Course;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
-import java.io.IOException;
-import java.util.List;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class CoursesController {
 
-    @FXML private VBox currentCourseContainer;
-    @FXML private VBox content;
-    @FXML private HBox buttons;
+    @FXML
+    private VBox currentCourseContainer;
+    @FXML
+    private VBox content;
+    @FXML
+    private HBox buttons;
 
     private Database db = new Database();
 
@@ -37,7 +43,7 @@ public class CoursesController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-creation.fxml"));
             VBox courseEditView = loader.load();
-            
+
             CourseEditController controller = loader.getController();
             if (course != null) {
                 controller.setCourse(course);
@@ -75,6 +81,7 @@ public class CoursesController {
             }
         }
     }
+
     private VBox createCourseCard(Course course) {
         VBox courseCard = new VBox();
         courseCard.getStyleClass().add("card");
@@ -109,7 +116,7 @@ public class CoursesController {
         VBox.setMargin(courseCard, new Insets(0, 10, 10, 10));
         return courseCard;
     }
-    
+
     private void openCourseDetailsWindow(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
@@ -124,7 +131,5 @@ public class CoursesController {
             System.err.println("Error loading course-details.fxml: " + e.getMessage());
         }
     }
-
-
 
 }

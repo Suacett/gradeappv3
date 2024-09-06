@@ -1,9 +1,12 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
+import com.gradeapp.model.Student;
 
 public class WeightedAverageGradeCalculator {
 
@@ -28,7 +31,7 @@ public class WeightedAverageGradeCalculator {
         List<? extends Grade> relevantGrades = student.getGrades().stream()
                 .filter(grade -> grade.getAssessment().getOutcomeWeights().containsKey(outcome))
                 .collect(Collectors.toList());
-                
+
         double totalScore = 0;
         double totalMaxScore = 0;
 

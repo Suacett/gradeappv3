@@ -6,26 +6,37 @@ import java.util.Optional;
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
-import javafx.scene.Node;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.util.converter.DoubleStringConverter;
 
 public class CourseDetailsController {
 
-    @FXML private TextField courseIdField;
-    @FXML private TextField courseNameField;
-    @FXML private TextField courseDescriptionField;
-    @FXML private TableView<Outcome> outcomesTable;
-    @FXML private TableColumn<Outcome, String> identifierColumn;
-    @FXML private TableColumn<Outcome, String> descriptionColumn;
-    @FXML private TableColumn<Outcome, Double> weightColumn;
-    
+    @FXML
+    private TextField courseIdField;
+    @FXML
+    private TextField courseNameField;
+    @FXML
+    private TextField courseDescriptionField;
+    @FXML
+    private TableView<Outcome> outcomesTable;
+    @FXML
+    private TableColumn<Outcome, String> identifierColumn;
+    @FXML
+    private TableColumn<Outcome, String> descriptionColumn;
+    @FXML
+    private TableColumn<Outcome, Double> weightColumn;
 
     private Course course;
     private Database db = new Database();
@@ -63,7 +74,6 @@ public class CourseDetailsController {
         outcomesTable.setEditable(true);
     }
 
-
     public void setCourse(Course course, Node previousView, VBox content) {
         this.course = course;
         this.previousView = previousView;
@@ -85,24 +95,24 @@ public class CourseDetailsController {
         String updatedId = courseIdField.getText();
         String updatedName = courseNameField.getText();
         String updatedDescription = courseDescriptionField.getText();
-    
+
         if (!isValidCourseId(updatedId)) {
             showAlert("Invalid Course ID", "Please enter a valid course ID (e.g., 'CS101').");
             return;
         }
-    
+
         if (!db.isCourseIdUnique(updatedId, course.getId())) {
             showAlert("Duplicate Course ID", "This course ID already exists. Please choose a unique ID.");
             return;
         }
-    
+
         course.setId(updatedId);
         course.setName(updatedName);
         course.setDescription(updatedDescription);
         course.setOutcomes(new ArrayList<>(outcomes));
-    
+
         db.saveCourse(course);
-    
+
         content.getChildren().setAll(previousView);
     }
 
@@ -115,22 +125,21 @@ public class CourseDetailsController {
         content.getChildren().setAll(previousView);
     }
 
-@FXML
-private void addOutcome() {
-    TextInputDialog dialog = new TextInputDialog();
-    dialog.setTitle("Add New Outcome");
-    dialog.setHeaderText("Enter Outcome ID");
-    dialog.setContentText("Please enter the outcome ID (e.g., F5.1):");
+    @FXML
+    private void addOutcome() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Add New Outcome");
+        dialog.setHeaderText("Enter Outcome ID");
+        dialog.setContentText("Please enter the outcome ID (e.g., F5.1):");
 
-    Optional<String> result = dialog.showAndWait();
-    if (result.isPresent()) {
-        String newId = result.get();
-        Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
-        outcomes.add(newOutcome);
-        outcomesTable.refresh();
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String newId = result.get();
+            Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
+            outcomes.add(newOutcome);
+            outcomesTable.refresh();
+        }
     }
-}
-    
 
     @FXML
     private void removeSelectedOutcome() {

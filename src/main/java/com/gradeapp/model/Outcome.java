@@ -1,9 +1,9 @@
 package com.gradeapp.model;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.property.DoubleProperty;
 
 public class Outcome {
     private final StringProperty id;
@@ -68,7 +68,7 @@ public class Outcome {
 
     @Override
     public String toString() {
-        return String.format("Outcome{id='%s', name='%s', description='%s', weight=%f}", 
-                             getId(), getName(), getDescription(), getWeight());
+        return String.format("Outcome{id='%s', name='%s', description='%s', weight=%f}",
+                getId(), getName(), getDescription(), getWeight());
     }
 }

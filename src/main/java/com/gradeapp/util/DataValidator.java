@@ -1,7 +1,13 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Student;
 
 public class DataValidator {
     public static boolean isValidWeight(double weight) {
@@ -16,7 +22,7 @@ public class DataValidator {
         double totalWeight = assessment.getParts().stream().mapToDouble(AssessmentPart::getWeight).sum();
         return Math.abs(totalWeight - 100) < 0.001; // Allow for floating-point imprecision
     }
-    
+
     public static List<String> validateImportData(List<Student> students) {
         List<String> errors = new ArrayList<>();
         for (Student student : students) {

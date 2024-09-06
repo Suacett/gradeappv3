@@ -13,7 +13,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@styles.css"
+    xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -25,23 +27,23 @@
     </Label>
 
     <GridPane hgap="10" vgap="10">
-    <Label text="Course ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-    <TextField fx:id="courseIdField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="Course ID:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="courseIdField" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-    <Label text="Course Name:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-    <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Course Name:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="courseNameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-    <Label text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-    <TextField fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <columnConstraints>
-         <ColumnConstraints />
-         <ColumnConstraints />
-      </columnConstraints>
-      <rowConstraints>
-         <RowConstraints />
-         <RowConstraints />
-         <RowConstraints />
-      </rowConstraints>
+        <Label text="Course Description:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="courseDescriptionField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <columnConstraints>
+            <ColumnConstraints />
+            <ColumnConstraints />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints />
+            <RowConstraints />
+            <RowConstraints />
+        </rowConstraints>
     </GridPane>
 
     <Label text="Course Outcomes">

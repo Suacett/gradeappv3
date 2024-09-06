@@ -1,9 +1,16 @@
 package com.gradeapp.util;
 
-import com.gradeapp.model.*;
-
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
+import com.gradeapp.model.Student;
 
 public class Calculator {
 
@@ -57,15 +64,18 @@ public class Calculator {
         return grades.stream()
                 .collect(Collectors.groupingBy(
                         g -> getGradeCategory(g.getScore()),
-                        Collectors.summingInt(g -> 1)
-                ));
+                        Collectors.summingInt(g -> 1)));
     }
 
     private String getGradeCategory(double score) {
-        if (score >= 90) return "A";
-        if (score >= 80) return "B";
-        if (score >= 70) return "C";
-        if (score >= 60) return "D";
+        if (score >= 90)
+            return "A";
+        if (score >= 80)
+            return "B";
+        if (score >= 70)
+            return "C";
+        if (score >= 60)
+            return "D";
         return "F";
     }
 
@@ -98,7 +108,6 @@ public class Calculator {
         long completedParts = parts.stream().filter(AssessmentPart::isCompleted).count();
         return (double) completedParts / parts.size();
     }
-
 
     public double calculateWeightedAverage(List<? extends Grade> grades, Assessment assessment) {
         return grades.stream()

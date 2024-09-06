@@ -1,11 +1,11 @@
 package com.gradeapp.controller;
 
+import java.util.List;
+
 import com.gradeapp.database.Database;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-
-
-import java.util.List;
 
 public class HomeController {
 
@@ -29,7 +29,7 @@ public class HomeController {
     private List<String> fetchRecentActivities() {
         // This is a placeholder. Replace with actual database logic.
         return List.of(
-                
+
         );
     }
 }

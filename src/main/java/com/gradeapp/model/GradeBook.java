@@ -1,6 +1,10 @@
 package com.gradeapp.model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class GradeBook {
@@ -64,8 +68,7 @@ public class GradeBook {
                         e -> e.getValue().values().stream()
                                 .mapToDouble(Grade::getScore)
                                 .average()
-                                .orElse(0.0)
-                ));
+                                .orElse(0.0)));
     }
 
     public Map<Student, Map<Assessment, Grade>> getGrades() {

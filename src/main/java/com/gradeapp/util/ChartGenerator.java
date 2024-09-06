@@ -1,14 +1,15 @@
 package com.gradeapp.util;
 
+import java.util.List;
+import java.util.Map;
+
 import com.gradeapp.model.Grade;
 import com.gradeapp.model.Student;
+
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-
-import java.util.List;
-import java.util.Map;
 
 public class ChartGenerator {
     private final Calculator calculator;
