@@ -13,11 +13,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.stage.Modality;
 import java.io.IOException;
 import java.util.List;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.scene.control.cell.PropertyValueFactory;
+import java.util.stream.Collectors;
 
 
 public class AssessmentController implements AssessmentCreationCallback {
@@ -32,75 +37,131 @@ public class AssessmentController implements AssessmentCreationCallback {
     @FXML private TableView<Outcome> outcomeTable;
     @FXML private VBox outcomeInputContainer;
     @FXML private ComboBox<Course> courseSelector;
-
-
-    
+    @FXML private TableView<Outcome> linkedOutcomesForPartTable;
+    @FXML private TableColumn<Outcome, String> linkedOutcomeIdColumn;
+    @FXML private TableColumn<Outcome, String> linkedOutcomeNameColumn;
+    @FXML private TableColumn<Outcome, Double> linkedOutcomeWeightColumn;
+    @FXML private TableColumn<Assessment, String> assessmentNameColumn;
+    @FXML private TableColumn<Assessment, String> assessmentDescriptionColumn;
+    @FXML private TableColumn<Assessment, Double> assessmentWeightColumn;
+    @FXML private TableColumn<Assessment, Double> assessmentMaxScoreColumn;
+    @FXML private TableView<Outcome> linkedOutcomesForAssessmentTable;
+    @FXML private TableColumn<Outcome, String> linkedAssessmentOutcomeIdColumn;
+    @FXML private TableColumn<Outcome, String> linkedAssessmentOutcomeNameColumn;
+    @FXML private TableColumn<Outcome, Double> linkedAssessmentOutcomeWeightColumn;
 
     private Database db = new Database();
     private Assessment currentAssessment;
     private Course selectedCourse;
+
+
 
     @FXML
     private void initialize() {
         setupCourseSelector();
         setupAssessmentTable();
         setupPartsTable();
-        setupOutcomeTable();
-    
+        setupLinkedOutcomesForPartTable();
+        setupLinkedOutcomesForAssessmentTable();
+
+        assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                currentAssessment = newSelection;
+                updatePartsTable();
+                updateLinkedOutcomesForAssessmentTable();
+            }
+        });
+
         courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedCourse = newSelection;
                 updateAssessmentTable();
-                updateOutcomeTable();
             }
         });
-    
+
         assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                System.out.println("Selected assessment changed to: " + newSelection.getName() + " (ID: " + newSelection.getId() + ")");
                 currentAssessment = newSelection;
                 updatePartsTable();
-                updateOutcomeTableForAssessment(newSelection);
+            }
+        });
+
+        partsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                updateLinkedOutcomesForPartTable(newSelection);
             }
         });
     }
-    
     
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-        courseSelector.setCellFactory(lv -> new ListCell<Course>() {
-            @Override
-            protected void updateItem(Course course, boolean empty) {
-                super.updateItem(course, empty);
-                if (empty || course == null) {
-                    setText(null);
-                } else {
-                    setText(course.getName() + " (" + course.getId() + ")");
-                }
+    }
+
+
+    private void setupLinkedOutcomesForPartTable() {
+        linkedOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        linkedOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        linkedOutcomeWeightColumn.setCellValueFactory(cellData -> {
+            AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
+            if (selectedPart != null) {
+                double weight = db.getOutcomeWeightForPart(selectedPart.getId(), cellData.getValue().getId());
+                return new SimpleDoubleProperty(weight).asObject();
             }
-        });
-    
-        courseSelector.setConverter(new StringConverter<Course>() {
-            @Override
-            public String toString(Course course) {
-                return course == null ? "" : course.getName() + " (" + course.getId() + ")";
-            }
-    
-            @Override
-            public Course fromString(String string) {
-                return null; // Not needed for this use case
-            }
-        });
-    
-        courseSelector.setOnAction(e -> {
-            if (courseSelector.getValue() != null) {
-                selectedCourse = courseSelector.getValue();
-                updateAssessmentTable();
-                updateOutcomeTable();
-            }
+            return new SimpleDoubleProperty(0).asObject();
         });
     }
+
+    private void setupLinkedOutcomesForAssessmentTable() {
+        linkedAssessmentOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        linkedAssessmentOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        linkedAssessmentOutcomeWeightColumn.setCellValueFactory(cellData -> {
+            if (currentAssessment != null) {
+                double weight = db.getOutcomeWeightForAssessment(currentAssessment.getId(), cellData.getValue().getId());
+                return new SimpleDoubleProperty(weight).asObject();
+            }
+            return new SimpleDoubleProperty(0).asObject();
+        });
+    }
+
+    private void updateLinkedOutcomesForPartTable(AssessmentPart part) {
+        if (part != null) {
+            List<Outcome> linkedOutcomes = db.getLinkedOutcomesForPart(part.getId());
+            linkedOutcomesForPartTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
+            linkedOutcomesForPartTable.refresh();
+        } else {
+            linkedOutcomesForPartTable.getItems().clear();
+        }
+    }
+
+    private void updateLinkedOutcomesForAssessmentTable() {
+        if (currentAssessment != null) {
+            List<Outcome> linkedOutcomes = db.getLinkedOutcomesForAssessment(currentAssessment.getId());
+            linkedOutcomesForAssessmentTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
+            linkedOutcomesForAssessmentTable.refresh();
+        } else {
+            linkedOutcomesForAssessmentTable.getItems().clear();
+        }
+    }
+
+
+    private void setupAssessmentTable() {
+        assessmentNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        assessmentDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        assessmentWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
+        assessmentMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
+    }
+
+    private void setupPartsTable() {
+        partNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        partWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
+        partMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
+    }
+
+
+        
+
+    
 
     @FXML
     private void handleAddAssessmentButtonAction() {
@@ -127,6 +188,25 @@ public class AssessmentController implements AssessmentCreationCallback {
         }
     }
 
+
+    private void updateAssessmentTable() {
+        if (selectedCourse != null) {
+            List<Assessment> assessments = db.getAssessmentsForCourse(selectedCourse.getId());
+            assessmentTable.setItems(FXCollections.observableArrayList(assessments));
+        } else {
+            assessmentTable.getItems().clear();
+        }
+    }
+
+    private void updatePartsTable() {
+        if (currentAssessment != null) {
+            List<AssessmentPart> parts = db.getAssessmentParts(currentAssessment.getId());
+            partsTable.setItems(FXCollections.observableArrayList(parts));
+        } else {
+            partsTable.getItems().clear();
+        }
+    }
+
     @Override
     public void onAssessmentCreated(Assessment newAssessment) {
         System.out.println("New assessment created: " + newAssessment.getName() + " (ID: " + newAssessment.getId() + ")");
@@ -135,40 +215,67 @@ public class AssessmentController implements AssessmentCreationCallback {
         updatePartsTable();
     }
 
-        @FXML
-        private void setupAssessmentTable() {
-            TableColumn<Assessment, String> nameColumn = new TableColumn<>("Name");
-            nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-    
-            TableColumn<Assessment, String> descriptionColumn = new TableColumn<>("Description");
-            descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-    
-            TableColumn<Assessment, Double> weightColumn = new TableColumn<>("Weight");
-            weightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
-    
-            TableColumn<Assessment, Double> maxScoreColumn = new TableColumn<>("Max Score");
-            maxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
-    
-            assessmentTable.getColumns().addAll(nameColumn, descriptionColumn, weightColumn, maxScoreColumn);
-        }
-
-
-        private void updateAssessmentTable() {
-            if (selectedCourse != null) {
-                List<Assessment> assessments = db.getAssessmentsForCourse(selectedCourse.getId());
-                ObservableList<Assessment> observableAssessments = FXCollections.observableArrayList(assessments);
-                assessmentTable.setItems(observableAssessments);
-                System.out.println("Loaded " + assessments.size() + " assessments for course: " + selectedCourse.getName());
-            } else {
-                assessmentTable.getItems().clear();
-            }
-        }
 
     @FXML
-    private void setupPartsTable() {
-        partNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        partWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
-        partMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
+    private void handleLinkOutcomeToAssessmentButtonAction() {
+        if (currentAssessment == null) {
+            showAlert("Please select an assessment first.");
+            return;
+        }
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Link Outcome to Assessment");
+        dialog.setHeaderText("Link an outcome to " + currentAssessment.getName());
+
+        ComboBox<Outcome> outcomeComboBox = new ComboBox<>();
+        outcomeComboBox.setItems(FXCollections.observableArrayList(selectedCourse.getOutcomes()));
+        TextField weightField = new TextField();
+
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Select Outcome:"), outcomeComboBox,
+                new Label("Weight (%):"), weightField
+        ));
+
+        ButtonType linkButtonType = new ButtonType("Link", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(linkButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == linkButtonType) {
+                try {
+                    Outcome selectedOutcome = outcomeComboBox.getValue();
+                    double weight = Double.parseDouble(weightField.getText());
+                    if (selectedOutcome != null) {
+                        db.linkOutcomeToAssessment(currentAssessment.getId(), selectedOutcome.getId(), weight);
+                        updateLinkedOutcomesForAssessmentTable();
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter a valid number for weight.");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
+
+    
+    @FXML
+    private void handleUnlinkOutcomeFromAssessmentButtonAction() {
+        if (currentAssessment == null) {
+            showAlert("Please select an assessment first.");
+            return;
+        }
+
+        Outcome selectedOutcome = linkedOutcomesForAssessmentTable.getSelectionModel().getSelectedItem();
+        if (selectedOutcome == null) {
+            showAlert("Please select an outcome to unlink.");
+            return;
+        }
+
+        if (showConfirmationDialog("Are you sure you want to unlink this outcome from the assessment?")) {
+            db.unlinkOutcomeFromAssessment(currentAssessment.getId(), selectedOutcome.getId());
+            updateLinkedOutcomesForAssessmentTable();
+        }
     }
 
     private void setupOutcomeInputForm() {
@@ -224,9 +331,9 @@ public class AssessmentController implements AssessmentCreationCallback {
         } catch (NumberFormatException e) {
             showAlert("Invalid weight. Please enter a number between 0 and 100.");
         } catch (IllegalArgumentException e) {
-            showAlert(e.getMessage());
+            showAlert(e.getMessage()); }
         }
-    }
+    
 
     @FXML
     private void setupOutcomeTable() {
@@ -245,22 +352,22 @@ public class AssessmentController implements AssessmentCreationCallback {
         outcomeTable.getColumns().addAll(idColumn, nameColumn, descriptionColumn, weightColumn);
     }
 
-    private void updatePartsTable() {
-        if (currentAssessment != null) {
-            List<AssessmentPart> parts = db.getAssessmentParts(currentAssessment.getId());
-            ObservableList<AssessmentPart> observableParts = FXCollections.observableArrayList(parts);
-            partsTable.setItems(observableParts);
-            System.out.println("Updating parts table for assessment: " + currentAssessment.getName() + " (ID: " + currentAssessment.getId() + ")");
-            System.out.println("Number of parts: " + parts.size());
-            
-            // Debug: Print out each part
-            for (AssessmentPart part : parts) {
-                System.out.println("Part: " + part.getName() + " (ID: " + part.getId() + ")");
-            }
-        } else {
-            partsTable.getItems().clear();
+
+    
+    @FXML
+    private void handleUnlinkOutcomeFromPartButtonAction() {
+    AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
+    Outcome selectedOutcome = linkedOutcomesForPartTable.getSelectionModel().getSelectedItem();
+    if (selectedPart != null && selectedOutcome != null) {
+        if (showConfirmationDialog("Are you sure you want to unlink this outcome from the part?")) {
+            db.unlinkOutcomeFromAssessmentPart(selectedPart.getId(), selectedOutcome.getId());
+            updateLinkedOutcomesForPartTable(selectedPart);
         }
+    } else {
+        showAlert("Please select a part and an outcome to unlink.");
     }
+    }
+
 
 
     private void refreshAssessmentTable() {
@@ -388,6 +495,49 @@ private void handleAddPartButtonAction() {
         }
     }
 
+    
+    @FXML
+    private void handleLinkOutcomeToPartButtonAction() {
+        AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
+        if (selectedPart == null) {
+            showAlert("Please select an assessment part first.");
+            return;
+        }
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Link Outcome to Part");
+        dialog.setHeaderText("Link an outcome to " + selectedPart.getName());
+
+        ComboBox<Outcome> outcomeComboBox = new ComboBox<>();
+        outcomeComboBox.setItems(FXCollections.observableArrayList(selectedCourse.getOutcomes()));
+        TextField weightField = new TextField();
+
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Select Outcome:"), outcomeComboBox,
+                new Label("Weight (%):"), weightField
+        ));
+
+        ButtonType linkButtonType = new ButtonType("Link", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(linkButtonType, ButtonType.CANCEL);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == linkButtonType) {
+                try {
+                    Outcome selectedOutcome = outcomeComboBox.getValue();
+                    double weight = Double.parseDouble(weightField.getText());
+                    if (selectedOutcome != null) {
+                        db.linkOutcomeToAssessmentPart(selectedPart.getId(), selectedOutcome.getId(), weight);
+                        updatePartsTable();
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter a valid number for weight.");
+                }
+            }
+            return null;
+        });
+
+        dialog.showAndWait();
+    }
 
     @FXML
     private void handleLinkOutcomeButtonAction() {

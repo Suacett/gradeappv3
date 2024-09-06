@@ -1,5 +1,6 @@
 package com.gradeapp.model;
 
+import java.util.*; 
 import javafx.beans.property.*;
 
 public class AssessmentPart {
@@ -8,6 +9,7 @@ public class AssessmentPart {
     private final DoubleProperty weight;
     private final DoubleProperty maxScore;
     private final DoubleProperty score; 
+    private Map<Outcome, Double> linkedOutcomes = new HashMap<>();
 
     public AssessmentPart(int id, String name, double weight, double maxScore) {
         this.id = new SimpleIntegerProperty(id);
@@ -15,7 +17,7 @@ public class AssessmentPart {
         this.weight = new SimpleDoubleProperty(weight);
         this.maxScore = new SimpleDoubleProperty(maxScore);
         this.score = new SimpleDoubleProperty(0); 
-
+        
 
     }
     
@@ -50,4 +52,18 @@ public class AssessmentPart {
         return getName();
     
 }
+
+    public void addLinkedOutcome(Outcome outcome, double weight) {
+        linkedOutcomes.put(outcome, weight);
+    }
+
+    public Map<Outcome, Double> getLinkedOutcomes() {
+        return linkedOutcomes;
+    }
+
+    public double getOutcomeWeight(Outcome outcome) {
+        return linkedOutcomes.getOrDefault(outcome, 0.0);
+    }
+
+
 }

@@ -28,6 +28,14 @@ public class Database {
                 + "name TEXT NOT NULL,"
                 + "studentId TEXT NOT NULL UNIQUE"
                 + ");";
+        String createAssessmentPartOutcomesTable = "CREATE TABLE IF NOT EXISTS assessment_part_outcomes ("
+                + "part_id INTEGER,"
+                + "outcome_id TEXT,"
+                + "weight REAL NOT NULL,"
+                + "PRIMARY KEY (part_id, outcome_id),"
+                + "FOREIGN KEY (part_id) REFERENCES assessment_parts(id),"
+                + "FOREIGN KEY (outcome_id) REFERENCES outcomes(id)"
+                + ");";
         String createGradesTable = "CREATE TABLE IF NOT EXISTS grades ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "student_id TEXT NOT NULL,"
@@ -107,6 +115,7 @@ public class Database {
                 stmt.execute(createClassStudentsTable);
                 stmt.execute(createGradesTable);
                 stmt.execute(createStudentClassesTable);
+                stmt.execute(createAssessmentPartOutcomesTable);
 
                 try {
                     stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
@@ -138,6 +147,117 @@ public class Database {
     }
 
     // ASSESSMENT PARTS
+
+
+    public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
+        String sql = "INSERT OR REPLACE INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, outcomeId);
+            pstmt.setDouble(3, weight);
+            int affectedRows = pstmt.executeUpdate();
+            System.out.println("Linked outcome " + outcomeId + " to assessment " + assessmentId + " with weight " + weight + ". Affected rows: " + affectedRows);
+        } catch (SQLException e) {
+            System.out.println("Error linking outcome to assessment: " + e.getMessage());
+        }
+    }
+
+    public void linkOutcomeToAssessmentPart(int partId, String outcomeId, double weight) {
+        String sql = "INSERT OR REPLACE INTO assessment_part_outcomes (part_id, outcome_id, weight) VALUES (?, ?, ?)";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, partId);
+            pstmt.setString(2, outcomeId);
+            pstmt.setDouble(3, weight);
+            int affectedRows = pstmt.executeUpdate();
+            System.out.println("Linked outcome " + outcomeId + " to assessment part " + partId + " with weight " + weight + ". Affected rows: " + affectedRows);
+        } catch (SQLException e) {
+            System.out.println("Error linking outcome to assessment part: " + e.getMessage());
+        }
+    }
+
+    public List<Outcome> getLinkedOutcomesForAssessment(int assessmentId) {
+        List<Outcome> outcomes = new ArrayList<>();
+        String sql = "SELECT o.*, ao.weight FROM outcomes o " +
+                     "JOIN assessment_outcomes ao ON o.id = ao.outcome_id " +
+                     "WHERE ao.assessment_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                double weight = rs.getDouble("weight");
+                Outcome outcome = new Outcome(id, name, description, weight);
+                outcomes.add(outcome);
+                System.out.println("Retrieved linked outcome for assessment " + assessmentId + ": " + id + " with weight " + weight);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting linked outcomes for assessment: " + e.getMessage());
+        }
+        return outcomes;
+    }
+
+    public double getOutcomeWeightForPart(int partId, String outcomeId) {
+        String sql = "SELECT weight FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, partId);
+            pstmt.setString(2, outcomeId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("weight");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting outcome weight for part: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public double getOutcomeWeightForAssessment(int assessmentId, String outcomeId) {
+        String sql = "SELECT weight FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, assessmentId);
+            pstmt.setString(2, outcomeId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getDouble("weight");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting outcome weight for assessment: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public List<Outcome> getLinkedOutcomesForPart(int partId) {
+        List<Outcome> outcomes = new ArrayList<>();
+        String sql = "SELECT o.*, apo.weight FROM outcomes o " +
+                     "JOIN assessment_part_outcomes apo ON o.id = apo.outcome_id " +
+                     "WHERE apo.part_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, partId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String id = rs.getString("id");
+                String name = rs.getString("name");
+                String description = rs.getString("description");
+                double weight = rs.getDouble("weight");
+                Outcome outcome = new Outcome(id, name, description, weight);
+                outcomes.add(outcome);
+                System.out.println("Retrieved linked outcome for part " + partId + ": " + id + " with weight " + weight);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting linked outcomes for part: " + e.getMessage());
+        }
+        return outcomes;
+    }
+
+
 
     public int addAssessment(Assessment assessment, String courseId) {
         String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
@@ -236,6 +356,8 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             e.printStackTrace();
         }
     }
+
+
     
     // COURSES
     public void addCourse(Course course) {
@@ -500,6 +622,19 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         } catch (SQLException e) {
             System.out.println("Error adding class: " + e.getMessage());
             throw e; // Rethrow the exception for the controller to handle
+        }
+    }
+
+    public void unlinkOutcomeFromAssessmentPart(int partId, String outcomeId) {
+        String sql = "DELETE FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, partId);
+            pstmt.setString(2, outcomeId);
+            pstmt.executeUpdate();
+            System.out.println("Outcome unlinked from assessment part successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error unlinking outcome from assessment part: " + e.getMessage());
         }
     }
 
@@ -772,19 +907,6 @@ public List<AssessmentPart> getAssessmentParts(int assessmentId) {
             System.out.println("Error getting all assessments: " + e.getMessage());
         }
         return assessments;
-    }
-    
-    public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
-        String sql = "INSERT INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
-        try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, assessmentId);
-            pstmt.setString(2, outcomeId);
-            pstmt.setDouble(3, weight);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println("Error linking outcome to assessment: " + e.getMessage());
-        }
     }
     
     public Assessment getAssessmentById(int assessmentId) {

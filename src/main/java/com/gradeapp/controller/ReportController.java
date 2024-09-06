@@ -50,7 +50,7 @@ public class ReportController {
     
         report.put("assessmentName", assessment.getName());
         report.put("statistics", calculator.calculateStatistics(assessmentGrades));
-        report.put("taskCompletionRates", calculator.calculateTaskCompletionRates(assessment));
+        //report.put("taskCompletionRates", calculator.calculateTaskCompletionRates(assessment));
         report.put("gradeDistribution", calculator.calculateGradeDistribution(assessmentGrades));
         report.put("gradeDistributionChart", (BarChart<String, Number>) chartGenerator.createGradeDistributionChart(assessmentGrades));
     
