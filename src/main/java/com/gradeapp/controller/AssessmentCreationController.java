@@ -35,7 +35,6 @@ public class AssessmentCreationController {
 
     @FXML
     public void initialize() {
-        // Initialization code if needed
     }
 
     @FXML
@@ -50,7 +49,6 @@ public class AssessmentCreationController {
             int assessmentId = db.addAssessment(newAssessment, selectedCourse.getId());
             newAssessment.setId(assessmentId);
 
-            // Save linked outcomes
             for (Map.Entry<Outcome, TextField> entry : outcomeWeightFields.entrySet()) {
                 Outcome outcome = entry.getKey();
                 TextField weightField = entry.getValue();

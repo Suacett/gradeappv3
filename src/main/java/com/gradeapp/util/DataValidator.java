@@ -29,7 +29,7 @@ public class DataValidator {
             if (student.getName() == null || student.getName().isEmpty()) {
                 errors.add("Invalid name for student ID: " + student.getStudentId());
             }
-            // Add more student data validation as needed
+
         }
         return errors;
     }
@@ -41,7 +41,7 @@ public class DataValidator {
                 errors.add("Invalid score for student: " + grade.getStudent().getName() +
                         ", assessment: " + grade.getAssessment().getName());
             }
-            // Add more grade data validation as needed
+
         }
         return errors;
     }
@@ -56,7 +56,7 @@ public class DataValidator {
         if (data == null) {
             throw new IllegalArgumentException("Data cannot be null");
         }
-        // Add more data integrity checks as needed
+
     }
 
     public static String generateErrorReport(List<String> errors) {

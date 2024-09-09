@@ -56,7 +56,6 @@ public class CoursesController {
             stage.setScene(new Scene(courseEditView));
             stage.showAndWait();
 
-            // Refresh the course list after the window is closed
             displayCurrentCourses();
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,7 +67,7 @@ public class CoursesController {
         currentCourseContainer.getChildren().clear();
 
         List<Course> coursesFromDb = db.getAllCourses();
-        System.out.println("Courses fetched from DB: " + coursesFromDb.size()); // Debug print
+        System.out.println("Courses fetched from DB: " + coursesFromDb.size()); 
 
         if (coursesFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current Courses");
@@ -77,7 +76,7 @@ public class CoursesController {
             for (Course course : coursesFromDb) {
                 VBox courseCard = createCourseCard(course);
                 currentCourseContainer.getChildren().add(courseCard);
-                System.out.println("Added course card: " + course.getName()); // Debug print
+                System.out.println("Added course card: " + course.getName()); 
             }
         }
     }
@@ -86,16 +85,16 @@ public class CoursesController {
         VBox courseCard = new VBox();
         courseCard.getStyleClass().add("card");
         courseCard.setSpacing(10);
-        // HBox to hold the course info and buttons
+
         HBox courseCardInfo = new HBox();
-        courseCardInfo.setSpacing(10); // Add spacing between elements
-        // Create a Region to act as a spacer
+        courseCardInfo.setSpacing(10); 
+
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        // Labels for course information
+
         Label nameLabel = new Label("Name: " + course.getName());
         Label idLabel = new Label("ID: " + course.getId());
-        // Create HBox to hold the buttons
+
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
         Button viewDetailsButton = new Button("View Details");
@@ -109,9 +108,9 @@ public class CoursesController {
             displayCurrentCourses();
         });
         buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
-        // Add the labels, spacer, and button container to the courseCardInfo HBox
+
         courseCardInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
-        // Add the courseCardInfo HBox to the courseCard VBox
+
         courseCard.getChildren().add(courseCardInfo);
         VBox.setMargin(courseCard, new Insets(0, 10, 10, 10));
         return courseCard;
