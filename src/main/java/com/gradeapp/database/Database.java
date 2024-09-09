@@ -132,9 +132,8 @@ public class Database {
             try {
                 stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
             } catch (SQLException e) {
-                // If the column already exists, this is not an error we need to worry about
                 if (!e.getMessage().contains("duplicate column name")) {
-                    throw e; // Re-throw if it's a different error
+                    throw e;
                 }
             }
 
@@ -308,7 +307,6 @@ public class Database {
             pstmt.setDouble(4, part.getMaxScore());
             int affectedRows = pstmt.executeUpdate();
             if (affectedRows > 0) {
-                // Get the last inserted ID
                 try (Statement stmt = conn.createStatement();
                         ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
                     if (rs.next()) {
@@ -473,8 +471,8 @@ public class Database {
                 Course course = new Course(id, name, description);
                 course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
-                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); // Debug
-                                                                                                                // print
+                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); 
+                                                                                                                
             }
         } catch (SQLException e) {
             System.out.println("Error getting courses: " + e.getMessage());
@@ -614,7 +612,7 @@ public class Database {
             System.out.println("Class added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding class: " + e.getMessage());
-            throw e; // Rethrow the exception for the controller to handle
+            throw e;
         }
     }
 
@@ -949,14 +947,13 @@ public class Database {
         try (Connection conn = this.connect()) {
             conn.setAutoCommit(false);
             try {
-                // First, delete all outcome links for this assessment
+
                 String deleteLinksSQL = "DELETE FROM assessment_outcomes WHERE assessment_id = ?";
                 try (PreparedStatement pstmt = conn.prepareStatement(deleteLinksSQL)) {
                     pstmt.setInt(1, assessmentId);
                     pstmt.executeUpdate();
                 }
 
-                // Then, delete the assessment itself
                 String deleteAssessmentSQL = "DELETE FROM assessments WHERE id = ?";
                 try (PreparedStatement pstmt = conn.prepareStatement(deleteAssessmentSQL)) {
                     pstmt.setInt(1, assessmentId);

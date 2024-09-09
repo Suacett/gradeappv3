@@ -215,8 +215,8 @@ public class Assessment {
 
         for (AssessmentPart part : parts) {
             double partScore = partScores.getOrDefault(part, 0.0);
-            double partWeight = part.getWeight() / 100.0; // Convert weight to decimal
-            double outcomeWeight = outcomeWeights.getOrDefault(outcome, 0.0) / 100.0; // Convert weight to decimal
+            double partWeight = part.getWeight() / 100.0;
+            double outcomeWeight = outcomeWeights.getOrDefault(outcome, 0.0) / 100.0; 
 
             totalScore += partScore * partWeight * outcomeWeight;
             maxPossibleScore += part.getMaxScore() * partWeight * outcomeWeight;

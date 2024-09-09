@@ -72,7 +72,7 @@ public class ClassController {
 
             @Override
             public Course fromString(String string) {
-                return null; // Not needed for this use case
+                return null;
             }
         });
 
@@ -158,7 +158,6 @@ public class ClassController {
         List<Student> students = db.getStudentsInClass(selectedClass.getClassId());
         int totalStudents = students.size();
 
-        // Since grading is not implemented, just show the total number of students
         return String.format("Total Students: %d", totalStudents);
     }
 
@@ -221,7 +220,7 @@ public class ClassController {
 
             @Override
             public Student fromString(String string) {
-                return null; // Not needed for this use case
+                return null;
             }
         });
 
@@ -253,15 +252,14 @@ public class ClassController {
         classCard.getStyleClass().add("card");
         classCard.setPadding(new Insets(10));
         classCard.setSpacing(10);
-        Label classNameLabel = new Label(classes.getName()); // Display the full name as it is
+        Label classNameLabel = new Label(classes.getName()); 
         Label classIdLabel = new Label(classes.getClassId());
-        // HBox to hold the class info
+
         HBox classCardInfo = new HBox();
-        classCardInfo.setSpacing(10); // Add spacing between elements
-        // Spacer region floats buttons to right
+        classCardInfo.setSpacing(10); 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox buttonContainer = new HBox(); // Create HBox to hold the buttons
+        HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
         Button viewDetailsButton = new Button("View Details");
         viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classes));
@@ -271,45 +269,44 @@ public class ClassController {
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
-            db.delete("classes", "classId", classes.getClassId()); // Ensure deletion is based on classId
-            displayCurrentClasses(); // Refresh the class list after deletion
+            db.delete("classes", "classId", classes.getClassId());
+            displayCurrentClasses();
         });
         buttonContainer.getChildren().addAll(editButton, deleteButton);
-        // Add the labels, spacer, and button container to the classCardInfo HBox
+
         classCardInfo.getChildren().addAll(classNameLabel, classIdLabel, spacer, buttonContainer);
-        // Add the classCardInfo HBox to the classCard VBox
+
         classCard.getChildren().add(classCardInfo);
         VBox.setMargin(classCard, new Insets(0, 10, 0, 10));
         return classCard;
     }
 
-    // Edit button action for classes
+
     private void handleEditClassButtonAction(Classes classes) {
-        // Create text fields pre-populated with the current class's details
+
         TextField classNameField = new TextField(classes.getName());
         TextField classIdField = new TextField(classes.getClassId());
         Button saveButton = new Button("Save");
 
-        // Set the action for the save button
+
         saveButton.setOnAction(event -> {
             String newName = classNameField.getText();
             String newId = classIdField.getText();
             if (!newName.isEmpty() && !newId.isEmpty()) {
-                // Update the class in the database
+
                 db.updateClass(classes.getClassId(), newName, newId);
-                displayCurrentClasses(); // Refresh the UI to reflect changes
+                displayCurrentClasses();
             } else {
                 System.out.println("The form is incomplete...");
             }
         });
 
-        // Display the edit form in the UI
+
         VBox editClassBox = new VBox(10, new Label("Edit Class"), classNameField, classIdField, saveButton);
-        currentClassContainer.getChildren().clear(); // Clear the current view
-        currentClassContainer.getChildren().add(editClassBox); // Display the edit form
+        currentClassContainer.getChildren().clear();
+        currentClassContainer.getChildren().add(editClassBox);
     }
 
-    // Display current classes
     private void displayCurrentClasses() {
         currentClassContainer.getChildren().clear();
         List<Classes> classes = db.getAllClasses();

@@ -51,7 +51,7 @@ public class CourseEditController {
         outcomes = FXCollections.observableArrayList();
         setupOutcomesTable();
         updateTotalWeight();
-        System.out.println("CourseEditController initialized"); // Debug print
+        System.out.println("CourseEditController initialized");
     }
 
     private void setupOutcomesTable() {
@@ -96,14 +96,14 @@ public class CourseEditController {
             courseNameField.setText(course.getName());
             courseDescriptionField.setText(course.getDescription());
             outcomes.setAll(course.getOutcomes());
-            System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size()); // Debug
-                                                                                                                   // print
+            System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size());
+                                                                                                                  
         } else {
             courseIdField.clear();
             courseNameField.clear();
             courseDescriptionField.clear();
             outcomes.clear();
-            System.out.println("Creating new course"); // Debug print
+            System.out.println("Creating new course"); 
         }
         outcomesTable.setItems(outcomes);
         updateTotalWeight();
@@ -111,7 +111,7 @@ public class CourseEditController {
 
     @FXML
     private void addOutcome() {
-        String newId = ""; // This will be filled by user input
+        String newId = ""; 
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Outcome");
         dialog.setHeaderText("Enter Outcome ID");
@@ -121,7 +121,7 @@ public class CourseEditController {
         if (result.isPresent()) {
             newId = result.get();
         } else {
-            return; // User cancelled the dialog
+            return;
         }
 
         Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);

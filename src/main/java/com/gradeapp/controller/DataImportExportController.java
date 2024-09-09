@@ -26,7 +26,7 @@ public class DataImportExportController {
             }
             System.out.println("Data imported successfully from " + filePath);
         } catch (IllegalArgumentException e) {
-            // Display the error message to the user
+
             showErrorDialog(e.getMessage());
         } catch (Exception e) {
             System.err.println("Error importing data from " + filePath + ": " + e.getMessage());

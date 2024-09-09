@@ -583,9 +583,6 @@ public class AssessmentController implements AssessmentCreationCallback {
         return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
     }
 
-    // UNUSED METHODS
-
-    // Create a card to display the current assessments
     private VBox createAssessmentCard(Assessment assessment) {
         VBox assessmentCard = new VBox();
         assessmentCard.setPadding(new Insets(10));
@@ -607,7 +604,7 @@ public class AssessmentController implements AssessmentCreationCallback {
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
-            db.delete("assessments", "id", String.valueOf(assessment.getId())); // Ensure assessmentId is unique
+            db.delete("assessments", "id", String.valueOf(assessment.getId()));
             displayCurrentAssessments();
         });
 
@@ -617,7 +614,6 @@ public class AssessmentController implements AssessmentCreationCallback {
         return assessmentCard;
     }
 
-    // Handle edit button action
     private void handleEditAssessmentButtonAction(Assessment assessment) {
         TextField assessmentNameField = new TextField(assessment.getName());
         TextField assessmentDescriptionField = new TextField(assessment.getDescription());
@@ -658,7 +654,6 @@ public class AssessmentController implements AssessmentCreationCallback {
         currentAssessmentContainer.getChildren().add(editAssessmentBox);
     }
 
-    // Display current assessments
     private void displayCurrentAssessments() {
         currentAssessmentContainer.getChildren().clear();
         List<Assessment> assessmentsFromDb = db.getAllAssessments();

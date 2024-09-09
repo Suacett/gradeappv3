@@ -139,8 +139,6 @@ public class StudentController {
         if (selectedStudent != null) {
             List<Course> courses = db.getCoursesForStudent(selectedStudent.getStudentId());
             if (!courses.isEmpty()) {
-                // If there's more than one course, you might want to let the user choose
-                // For now, we'll just use the first course
                 Course course = courses.get(0);
                 showAddGradeDialog(selectedStudent, course);
             } else {

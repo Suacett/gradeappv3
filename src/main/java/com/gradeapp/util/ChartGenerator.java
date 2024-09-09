@@ -15,7 +15,7 @@ public class ChartGenerator {
     private final Calculator calculator;
 
     public ChartGenerator() {
-        this.calculator = new Calculator(); // Create an instance of Calculator
+        this.calculator = new Calculator();
     }
 
     public BarChart<String, Number> createGradeDistributionChart(List<Grade> grades) {

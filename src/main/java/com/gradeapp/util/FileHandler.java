@@ -34,63 +34,6 @@ public class FileHandler {
     private Map<String, Student> studentMap = new HashMap<>();
     private Map<String, Assessment> assessmentMap = new HashMap<>();
 
-    // public List<Student> importStudents(String filePath) throws IOException {
-    // List<Student> students = new ArrayList<>();
-    // List<Integer> skippedRows = new ArrayList<>();
-    // Path path = Paths.get(filePath);
-    //
-    // try (InputStream inputStream = Files.newInputStream(path);
-    // Workbook workbook = WorkbookFactory.create(inputStream)) {
-    //
-    // Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
-    //
-    // // Iterate starting from the second row (index 1), assuming row 0 is the
-    // header
-    // for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-    // Row row = sheet.getRow(i);
-    // if (row == null) continue;
-    //
-    // String studentCode = getCellValue(row.getCell(0)); // "Student Code" column
-    // String firstName = getCellValue(row.getCell(1)); // "Student First Name"
-    // column
-    // String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
-    //
-    // // Check if the relevant cells are all empty (we treat these rows as
-    // non-existent)
-    // if ((studentCode == null || studentCode.trim().isEmpty()) &&
-    // (firstName == null || firstName.trim().isEmpty()) &&
-    // (lastName == null || lastName.trim().isEmpty())) {
-    // continue; // Skip this row
-    // }
-    //
-    // // If any of the critical fields are null or empty, skip and record the row
-    // if (studentCode == null || studentCode.trim().isEmpty() ||
-    // firstName == null || firstName.trim().isEmpty() ||
-    // lastName == null || lastName.trim().isEmpty()) {
-    // skippedRows.add(i + 1); // Add row number to skippedRows (1-based index)
-    // continue; // Skip this row
-    // }
-    //
-    // // Combine first and last names for the full name
-    // String fullName = firstName + " " + lastName;
-    //
-    // Student student = new Student(fullName, studentCode);
-    // students.add(student);
-    // }
-    // }
-    //
-    // // If there are skipped rows, show an error dialog
-    // if (!skippedRows.isEmpty()) {
-    // String skippedRowsStr = skippedRows.stream()
-    // .map(String::valueOf)
-    // .collect(Collectors.joining(", "));
-    // showErrorDialog("The following rows were skipped due to missing values: " +
-    // skippedRowsStr);
-    // }
-    //
-    // return students;
-    // }
-
     public List<Student> importStudents(String filePath) throws IOException {
         List<Student> students = new ArrayList<>();
         List<Integer> skippedRows = new ArrayList<>();
@@ -111,8 +54,7 @@ public class FileHandler {
                 String firstName = getCellValue(row.getCell(1)); // "Student First Name" column
                 String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
 
-                // Check if the relevant cells are all empty (we treat these rows as
-                // non-existent)
+                // Check if the relevant cells are all empty
                 if (isNullOrEmpty(studentCode) && isNullOrEmpty(firstName) && isNullOrEmpty(lastName)) {
                     continue; // Skip this row
                 }
