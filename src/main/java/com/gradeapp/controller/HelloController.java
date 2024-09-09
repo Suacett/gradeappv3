@@ -53,6 +53,12 @@ public class HelloController {
         loadContent("/org/example/demo3/assessment-view.fxml", "assessment-view.fxml");
     }
 
+    // Marking category click event
+    @FXML
+    public void showMarkingContent() {
+        loadContent("/org/example/demo3/marking-view.fxml", "marking-view.fxml");
+    }
+
     // Loads FXML content into the center content area
     private void loadContent(String fxmlPath, String viewName) {
         try {
