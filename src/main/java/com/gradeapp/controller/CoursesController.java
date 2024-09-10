@@ -39,31 +39,7 @@ public class CoursesController {
         openCourseEditWindow(null);
     }
 
-    private void openCourseEditWindow(Course course) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-creation.fxml"));
-            VBox courseEditView = loader.load();
-
-            CourseEditController controller = loader.getController();
-            if (course != null) {
-                controller.setCourse(course);
-            } else {
-                controller.setCourse(new Course("", "", ""));
-            }
-
-            Stage stage = new Stage();
-            stage.setTitle(course == null ? "Add New Course" : "Edit Course");
-            stage.setScene(new Scene(courseEditView));
-            stage.showAndWait();
-
-            displayCurrentCourses();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Error loading course-creation.fxml: " + e.getMessage());
-        }
-    }
-
-    private void displayCurrentCourses() {
+    public void displayCurrentCourses() {
         currentCourseContainer.getChildren().clear();
 
         List<Course> coursesFromDb = db.getAllCourses();
@@ -81,13 +57,17 @@ public class CoursesController {
         }
     }
 
+    public VBox getCurrentCourseContainer() {
+        return currentCourseContainer;
+    }
+
     private VBox createCourseCard(Course course) {
         VBox courseCard = new VBox();
         courseCard.getStyleClass().add("card");
         courseCard.setSpacing(10);
 
         HBox courseCardInfo = new HBox();
-        courseCardInfo.setSpacing(10); 
+        courseCardInfo.setSpacing(10);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
@@ -97,17 +77,15 @@ public class CoursesController {
 
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
-        Button viewDetailsButton = new Button("View Details");
-        viewDetailsButton.setOnAction(event -> openCourseDetailsWindow(course));
-        Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> openCourseEditWindow(course));
+        Button viewEditButton = new Button("View/Edit Details");
+        viewEditButton.setOnAction(event -> openCourseDetailsWindow(course));
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.deleteCourse(course.getId());
             displayCurrentCourses();
         });
-        buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
+        buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
 
         courseCardInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
 
@@ -116,18 +94,46 @@ public class CoursesController {
         return courseCard;
     }
 
+    private void openCourseEditWindow(Course course) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-creation.fxml"));
+            if (loader.getLocation() == null) {
+                throw new IOException("Cannot find course-creation.fxml");
+            }
+            VBox courseEditView = loader.load();
+    
+            CourseEditController controller = loader.getController();
+            controller.setCourse(course);
+            controller.setCoursesController(this);
+    
+            Stage stage = new Stage();
+            stage.setTitle(course == null ? "Add New Course" : "Edit Course");
+            stage.setScene(new Scene(courseEditView));
+            stage.showAndWait();
+    
+            displayCurrentCourses();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error loading course-creation.fxml: " + e.getMessage());
+        }
+    }
+
     private void openCourseDetailsWindow(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
             VBox courseDetailsView = loader.load();
-
+    
             CourseDetailsController controller = loader.getController();
             controller.setCourse(course, currentCourseContainer, content);
-
+            controller.setCoursesController(this);
+    
             content.getChildren().setAll(courseDetailsView);
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading course-details.fxml: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Unexpected error: " + e.getMessage());
         }
     }
 

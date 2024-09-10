@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import com.gradeapp.database.Database;
+import com.gradeapp.model.Classes;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
 
@@ -41,6 +42,16 @@ public class CourseEditController {
     private TableColumn<Outcome, Double> outcomeWeightColumn;
     @FXML
     private Label totalWeightLabel;
+    @FXML
+    private TableView<Classes> classesTable;
+    @FXML
+    private TableColumn<Classes, String> classNameColumn;
+    @FXML
+    private TableColumn<Classes, String> classIdColumn;
+
+    private CoursesController coursesController;
+
+    
 
     private Course course;
     private Database db = new Database();
@@ -52,8 +63,14 @@ public class CourseEditController {
         setupOutcomesTable();
         updateTotalWeight();
         System.out.println("CourseEditController initialized");
-    }
 
+    
+        outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id")); 
+        outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        outcomeDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        outcomeWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
+    }
+    
     private void setupOutcomesTable() {
         outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -97,7 +114,6 @@ public class CourseEditController {
             courseDescriptionField.setText(course.getDescription());
             outcomes.setAll(course.getOutcomes());
             System.out.println("Editing existing course: " + course.getName() + ", Outcomes: " + outcomes.size());
-                                                                                                                  
         } else {
             courseIdField.clear();
             courseNameField.clear();
@@ -107,6 +123,10 @@ public class CourseEditController {
         }
         outcomesTable.setItems(outcomes);
         updateTotalWeight();
+    }
+
+    public void setCoursesController(CoursesController coursesController) {
+        this.coursesController = coursesController;
     }
 
     @FXML

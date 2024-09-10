@@ -367,6 +367,60 @@ public class Database {
     }
 
     // COURSES
+
+    public void updateCourse(Course course, String originalId) {
+        String sql = "UPDATE courses SET id = ?, name = ?, description = ? WHERE id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, course.getId());
+            pstmt.setString(2, course.getName());
+            pstmt.setString(3, course.getDescription());
+            pstmt.setString(4, originalId);
+            pstmt.executeUpdate();
+
+            // Update outcomes
+            deleteOutcomesForCourse(originalId);
+            for (Outcome outcome : course.getOutcomes()) {
+                addOutcome(outcome, course.getId());
+            }
+
+            // Update class associations if the course ID has changed
+            if (!course.getId().equals(originalId)) {
+                updateClassCourseAssociations(originalId, course.getId());
+            }
+
+            System.out.println("Course updated successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error updating course: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void deleteOutcomesForCourse(String courseId) {
+        String sql = "DELETE FROM outcomes WHERE course_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, courseId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error deleting outcomes for course: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void updateClassCourseAssociations(String oldCourseId, String newCourseId) {
+        String sql = "UPDATE classes SET course_id = ? WHERE course_id = ?";
+        try (Connection conn = this.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newCourseId);
+            pstmt.setString(2, oldCourseId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error updating class course associations: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     public void addCourse(Course course) {
         String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
