@@ -8,7 +8,6 @@ import com.gradeapp.model.Assessment;
 import com.gradeapp.model.AssessmentPart;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
-import javafx.util.StringConverter;
 
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -33,6 +32,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class AssessmentController implements AssessmentCreationCallback {
 
@@ -125,14 +125,14 @@ public class AssessmentController implements AssessmentCreationCallback {
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-    
+
         // Set a custom StringConverter to display the course name
         courseSelector.setConverter(new StringConverter<Course>() {
             @Override
             public String toString(Course course) {
                 return course != null ? course.getName() : "";
             }
-    
+
             @Override
             public Course fromString(String string) {
                 return courses.stream().filter(course -> course.getName().equals(string)).findFirst().orElse(null);

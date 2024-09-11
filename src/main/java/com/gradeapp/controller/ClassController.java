@@ -252,11 +252,11 @@ public class ClassController {
         classCard.getStyleClass().add("card");
         classCard.setPadding(new Insets(10));
         classCard.setSpacing(10);
-        Label classNameLabel = new Label(classes.getName()); 
+        Label classNameLabel = new Label(classes.getName());
         Label classIdLabel = new Label(classes.getClassId());
 
         HBox classCardInfo = new HBox();
-        classCardInfo.setSpacing(10); 
+        classCardInfo.setSpacing(10);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox buttonContainer = new HBox();
@@ -281,13 +281,11 @@ public class ClassController {
         return classCard;
     }
 
-
     private void handleEditClassButtonAction(Classes classes) {
 
         TextField classNameField = new TextField(classes.getName());
         TextField classIdField = new TextField(classes.getClassId());
         Button saveButton = new Button("Save");
-
 
         saveButton.setOnAction(event -> {
             String newName = classNameField.getText();
@@ -300,7 +298,6 @@ public class ClassController {
                 System.out.println("The form is incomplete...");
             }
         });
-
 
         VBox editClassBox = new VBox(10, new Label("Edit Class"), classNameField, classIdField, saveButton);
         currentClassContainer.getChildren().clear();

@@ -51,8 +51,6 @@ public class CourseEditController {
 
     private CoursesController coursesController;
 
-    
-
     private Course course;
     private Database db = new Database();
     private ObservableList<Outcome> outcomes = FXCollections.observableArrayList();
@@ -64,13 +62,12 @@ public class CourseEditController {
         updateTotalWeight();
         System.out.println("CourseEditController initialized");
 
-    
-        outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id")); 
+        outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         outcomeDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         outcomeWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
     }
-    
+
     private void setupOutcomesTable() {
         outcomeIdentifierColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         outcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
@@ -119,7 +116,7 @@ public class CourseEditController {
             courseNameField.clear();
             courseDescriptionField.clear();
             outcomes.clear();
-            System.out.println("Creating new course"); 
+            System.out.println("Creating new course");
         }
         outcomesTable.setItems(outcomes);
         updateTotalWeight();
@@ -131,7 +128,7 @@ public class CourseEditController {
 
     @FXML
     private void addOutcome() {
-        String newId = ""; 
+        String newId = "";
         TextInputDialog dialog = new TextInputDialog("");
         dialog.setTitle("New Outcome");
         dialog.setHeaderText("Enter Outcome ID");

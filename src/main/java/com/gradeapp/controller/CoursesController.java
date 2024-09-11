@@ -43,7 +43,7 @@ public class CoursesController {
         currentCourseContainer.getChildren().clear();
 
         List<Course> coursesFromDb = db.getAllCourses();
-        System.out.println("Courses fetched from DB: " + coursesFromDb.size()); 
+        System.out.println("Courses fetched from DB: " + coursesFromDb.size());
 
         if (coursesFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current Courses");
@@ -52,7 +52,7 @@ public class CoursesController {
             for (Course course : coursesFromDb) {
                 VBox courseCard = createCourseCard(course);
                 currentCourseContainer.getChildren().add(courseCard);
-                System.out.println("Added course card: " + course.getName()); 
+                System.out.println("Added course card: " + course.getName());
             }
         }
     }
@@ -101,16 +101,16 @@ public class CoursesController {
                 throw new IOException("Cannot find course-creation.fxml");
             }
             VBox courseEditView = loader.load();
-    
+
             CourseEditController controller = loader.getController();
             controller.setCourse(course);
             controller.setCoursesController(this);
-    
+
             Stage stage = new Stage();
             stage.setTitle(course == null ? "Add New Course" : "Edit Course");
             stage.setScene(new Scene(courseEditView));
             stage.showAndWait();
-    
+
             displayCurrentCourses();
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,11 +122,11 @@ public class CoursesController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
             VBox courseDetailsView = loader.load();
-    
+
             CourseDetailsController controller = loader.getController();
             controller.setCourse(course, currentCourseContainer, content);
             controller.setCoursesController(this);
-    
+
             content.getChildren().setAll(courseDetailsView);
         } catch (IOException e) {
             e.printStackTrace();

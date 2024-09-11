@@ -371,7 +371,7 @@ public class Database {
     public void updateCourse(Course course, String originalId) {
         String sql = "UPDATE courses SET id = ?, name = ?, description = ? WHERE id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
@@ -399,7 +399,7 @@ public class Database {
     private void deleteOutcomesForCourse(String courseId) {
         String sql = "DELETE FROM outcomes WHERE course_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -411,7 +411,7 @@ public class Database {
     private void updateClassCourseAssociations(String oldCourseId, String newCourseId) {
         String sql = "UPDATE classes SET course_id = ? WHERE course_id = ?";
         try (Connection conn = this.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, newCourseId);
             pstmt.setString(2, oldCourseId);
             pstmt.executeUpdate();
@@ -420,7 +420,7 @@ public class Database {
             e.printStackTrace();
         }
     }
-    
+
     public void addCourse(Course course) {
         String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
@@ -525,8 +525,8 @@ public class Database {
                 Course course = new Course(id, name, description);
                 course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
-                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size()); 
-                                                                                                                
+                System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size());
+
             }
         } catch (SQLException e) {
             System.out.println("Error getting courses: " + e.getMessage());

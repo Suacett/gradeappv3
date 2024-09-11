@@ -3,7 +3,6 @@ package com.gradeapp.controller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +17,8 @@ import com.gradeapp.model.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -27,15 +26,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -54,6 +50,10 @@ public class StudentController {
     @FXML
     private GridPane studentDetailsGrid;
 
+    @FXML
+    private ScrollPane studentScrollPane;
+
+    @FXML
     private VBox studentListContainer;
 
     private Database db = new Database();
@@ -62,21 +62,27 @@ public class StudentController {
     @FXML
     private void initialize() {
         loadStudents();
-        studentListView.setItems(students);
+        displayCurrentStudents();
         studentListContainer = new VBox();
         studentListContainer.setSpacing(10);
-        studentList.setContent(studentListContainer);
-        loadStudents();        studentListView.setCellFactory(lv -> new ListCell<Student>() {
-            @Override
-            protected void updateItem(Student student, boolean empty) {
-                super.updateItem(student, empty);
-                setText(empty ? null : student.getName() + " (" + student.getStudentId() + ")");
-            }
-        });
+        studentListContainer.setPadding(new Insets(10));
+        studentScrollPane.setContent(studentListContainer);
+        loadStudents();
+        displayCurrentStudents();
     }
 
     private void loadStudents() {
         students.setAll(db.getAllStudents());
+    }
+
+    @FXML
+    private void handleEditStudentButtonAction() {
+        Student selectedStudent = getSelectedStudent();
+        if (selectedStudent != null) {
+            showEditStudentDialog(selectedStudent);
+        } else {
+            showAlert("Please select a student to edit.");
+        }
     }
 
     @FXML
@@ -144,7 +150,8 @@ public class StudentController {
 
     @FXML
     private void handleViewDetailsButtonAction() {
-        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        Student selectedStudent = getSelectedStudent();
+        System.out.println("Selected student: " + (selectedStudent != null ? selectedStudent.getName() : "null"));
         if (selectedStudent != null) {
             displayStudentDetails(selectedStudent);
         } else {
@@ -154,7 +161,7 @@ public class StudentController {
 
     @FXML
     private void handleAddGradeButtonAction() {
-        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        Student selectedStudent = getSelectedStudent();
         if (selectedStudent != null) {
             List<Course> courses = db.getCoursesForStudent(selectedStudent.getStudentId());
             if (!courses.isEmpty()) {
@@ -168,24 +175,30 @@ public class StudentController {
         }
     }
 
-    @FXML
-    private void handleEditStudentButtonAction() {
-        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
-        if (selectedStudent != null) {
-            showEditStudentDialog(selectedStudent);
-        } else {
-            showAlert("Please select a student to edit.");
+    private Student getSelectedStudent() {
+        for (Node node : studentListContainer.getChildren()) {
+            if (node instanceof VBox) {
+                VBox studentCard = (VBox) node;
+                if (studentCard.getStyle().contains("-fx-border-color: #2196F3")) {
+                    HBox infoBox = (HBox) studentCard.getChildren().get(0);
+                    Label idLabel = (Label) infoBox.getChildren().get(1);
+                    String studentId = idLabel.getText().replace("ID: ", "");
+                    return db.getStudentById(studentId);
+                }
+            }
         }
+        return null;
     }
 
     @FXML
     private void handleDeleteStudentButtonAction() {
-        Student selectedStudent = studentListView.getSelectionModel().getSelectedItem();
+        Student selectedStudent = getSelectedStudent();
         if (selectedStudent != null) {
             if (showConfirmationDialog("Are you sure you want to delete this student?")) {
                 boolean deleted = db.deleteStudent(selectedStudent.getStudentId());
                 if (deleted) {
                     loadStudents();
+                    displayCurrentStudents();
                     showAlert("Student deleted successfully.");
                 } else {
                     showAlert("Failed to delete student. Please try again.");
@@ -365,54 +378,83 @@ public class StudentController {
         return result.isPresent() && result.get() == ButtonType.OK;
     }
 
-
-
     // Current students list - create student card
-private VBox studentCard(Student student) {
+    private VBox createStudentCard(Student student) {
         VBox studentCard = new VBox();
-        studentCard.getStyleClass().add("card");
+        studentCard.getStyleClass().add("student-card");
         studentCard.setSpacing(10);
+        studentCard.setPadding(new Insets(10));
+        studentCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+
         HBox studentInfo = new HBox();
         studentInfo.setSpacing(10);
-        Region spacer = new Region(); // Set space between buttons and student info
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
+
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
+
         Button viewEditButton = new Button("View/Edit Details");
-        // viewEditButton.setOnAction(event -> openStudentDetailsWindow(student));
+        viewEditButton.setOnAction(event -> handleViewDetailsButtonAction());
+
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setOnAction(event -> {
-            db.deleteStudent(student.getStudentId());
-            // displayCurrentStudents();
-        });
+        deleteButton.setOnAction(event -> handleDeleteStudentAction(student));
+
         buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
-        studentInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
-        studentCard.getChildren().add(studentInfo);
-        VBox.setMargin(studentCard, new Insets(0, 10, 10, 10));
+        studentInfo.getChildren().addAll(nameLabel, idLabel);
+        studentCard.getChildren().addAll(studentInfo, buttonContainer);
+
+        studentCard.setOnMouseClicked(event -> {
+            studentListContainer.getChildren().forEach(node -> {
+                if (node instanceof VBox) {
+                    ((VBox) node).setStyle(
+                            "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+                }
+            });
+            studentCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
+            // handleViewDetailsButtonAction(); When student card is clicked, this will open details automatically
+        });
+
         return studentCard;
+    }
+
+    private Object handleDeleteStudentAction(Student student) {
+        if (student != null) {
+            if (showConfirmationDialog("Are you sure you want to delete " + student.getName() + "?")) {
+                boolean success = db.deleteStudent(student.getStudentId());
+                if (success) {
+                    loadStudents();
+                    displayCurrentStudents();
+                    showAlert("Student '" + student.getName() + "' deleted successfully.");
+                } else {
+                    showAlert("Error: Unable to delete student. Please try again.");
+                }
+            }
+        } else {
+            showAlert("Please select a student to delete.");
+        }
+        return null;
     }
 
     // Display current students list
     public void displayCurrentStudents() {
         studentListContainer.getChildren().clear();
-    
+
         List<Student> studentsFromDb = db.getAllStudents();
         System.out.println("Students from DB: " + studentsFromDb.size());
-    
+
         if (studentsFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current students");
             studentListContainer.getChildren().add(emptyLabel);
         } else {
             for (Student student : studentsFromDb) {
-                VBox studentCard = studentCard(student);
+                VBox studentCard = createStudentCard(student);
                 studentListContainer.getChildren().add(studentCard);
-                System.out.println("Added student card: " + student.getName()); 
+                System.out.println("Added student card: " + student.getName());
             }
         }
     }
-
 
 }

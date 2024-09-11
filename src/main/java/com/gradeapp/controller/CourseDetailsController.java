@@ -46,8 +46,8 @@ public class CourseDetailsController {
     @FXML
     private TableColumn<Classes, String> classIdColumn;
 
-    @FXML private TableColumn<Outcome, String> nameColumn;
-
+    @FXML
+    private TableColumn<Outcome, String> nameColumn;
 
     private CoursesController coursesController;
 
@@ -56,8 +56,6 @@ public class CourseDetailsController {
     private Node previousView;
     private VBox content;
     private ObservableList<Outcome> outcomes;
-    
-    
 
     @FXML
     private void initialize() {
@@ -72,7 +70,7 @@ public class CourseDetailsController {
     private void setupClassesTable() {
         classNameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         classIdColumn.setCellValueFactory(cellData -> cellData.getValue().classIdProperty());
-    
+
         java.util.List<Classes> classes = db.getClassesForCourse(course.getId());
         classesTable.setItems(FXCollections.observableArrayList(classes));
     }
@@ -82,13 +80,13 @@ public class CourseDetailsController {
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
         weightColumn.setCellValueFactory(cellData -> cellData.getValue().weightProperty().asObject());
-    
+
         outcomesTable.setEditable(true);
         identifierColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         weightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-    
+
         identifierColumn.setOnEditCommit(event -> {
             event.getRowValue().setId(event.getNewValue());
             outcomesTable.refresh();
@@ -105,7 +103,7 @@ public class CourseDetailsController {
             event.getRowValue().setWeight(event.getNewValue());
             outcomesTable.refresh();
         });
-    
+
         outcomesTable.setItems(outcomes);
     }
 
@@ -118,11 +116,8 @@ public class CourseDetailsController {
         courseDescriptionField.setText(course.getDescription());
         outcomes = FXCollections.observableArrayList(course.getOutcomes());
         setupTables();
-        updateOutcomeWeights(); 
+        updateOutcomeWeights();
     }
-
-
-    
 
     public void setCoursesController(CoursesController coursesController) {
         this.coursesController = coursesController;
@@ -153,9 +148,9 @@ public class CourseDetailsController {
         course.setId(updatedId);
         course.setName(updatedName);
         course.setDescription(updatedDescription);
-        
+
         updateOutcomeWeights();
-        
+
         course.setOutcomes(new ArrayList<>(outcomes));
 
         db.updateCourse(course, originalId);
@@ -184,7 +179,7 @@ public class CourseDetailsController {
         dialog.setTitle("Add New Outcome");
         dialog.setHeaderText("Enter Outcome ID");
         dialog.setContentText("Please enter the outcome ID:");
-    
+
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
             String newId = result.get();
@@ -194,7 +189,6 @@ public class CourseDetailsController {
             outcomesTable.refresh();
         }
     }
-
 
     private void returnToCoursesView() {
         if (coursesController != null && content != null) {
@@ -206,7 +200,6 @@ public class CourseDetailsController {
     private boolean isValidCourseId(String id) {
         return id.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{3,10}$");
     }
-
 
     private void showAlert(String title, String content, Alert.AlertType alertType) {
         Alert alert = new Alert(alertType);
@@ -229,8 +222,6 @@ public class CourseDetailsController {
     private void cancelEditing() {
         content.getChildren().setAll(previousView);
     }
-
-
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
