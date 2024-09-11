@@ -3,6 +3,7 @@ package com.gradeapp.controller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +18,10 @@ import com.gradeapp.model.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -25,13 +29,23 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 public class StudentController {
+
+    // Display current student list - card display
+    @FXML
+    private ScrollPane studentList;
+    @FXML
+    private VBox content;
 
     @FXML
     private ListView<Student> studentListView;
@@ -345,5 +359,55 @@ public class StudentController {
         Optional<ButtonType> result = alert.showAndWait();
         return result.isPresent() && result.get() == ButtonType.OK;
     }
+
+
+
+    // Current students list - create student card
+private VBox studentCard(Student student) {
+        VBox studentCard = new VBox();
+        studentCard.getStyleClass().add("card");
+        studentCard.setSpacing(10);
+        HBox studentInfo = new HBox();
+        studentInfo.setSpacing(10);
+        Region spacer = new Region(); // Set space between buttons and student info
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Label nameLabel = new Label("Name: " + student.getName());
+        Label idLabel = new Label("ID: " + student.getStudentId());
+        HBox buttonContainer = new HBox();
+        buttonContainer.setSpacing(10);
+        Button viewEditButton = new Button("View/Edit Details");
+        // viewEditButton.setOnAction(event -> openStudentDetailsWindow(student));
+        Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("delete-button");
+        deleteButton.setOnAction(event -> {
+            db.deleteStudent(student.getStudentId());
+            // displayCurrentStudents();
+        });
+        buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
+        studentInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
+        studentCard.getChildren().add(studentInfo);
+        VBox.setMargin(studentCard, new Insets(0, 10, 10, 10));
+        return studentCard;
+    }
+
+    // Display current students list
+    public void displayCurrentStudents() {
+        studentList.getChildren().clear();
+
+        List<Student> studentsFromDb = db.getAllStudents();
+        System.out.println("Students from DB: " + studentsFromDb.size());
+
+        if (studentsFromDb.isEmpty()) {
+            Label emptyLabel = new Label("You have no current students");
+            studentList.getChildren().add(emptyLabel);
+        } else {
+            for (Student student : studentsFromDb) {
+                VBox studentCard = studentCard(student);
+                studentList.getChildren().add(studentCard);
+                System.out.println("Added student card: " + student.getName()); 
+            }
+        }
+    }
+
 
 }
