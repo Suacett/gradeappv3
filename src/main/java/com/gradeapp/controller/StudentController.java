@@ -54,6 +54,8 @@ public class StudentController {
     @FXML
     private GridPane studentDetailsGrid;
 
+    private VBox studentListContainer;
+
     private Database db = new Database();
     private ObservableList<Student> students = FXCollections.observableArrayList();
 
@@ -61,7 +63,10 @@ public class StudentController {
     private void initialize() {
         loadStudents();
         studentListView.setItems(students);
-        studentListView.setCellFactory(lv -> new ListCell<Student>() {
+        studentListContainer = new VBox();
+        studentListContainer.setSpacing(10);
+        studentList.setContent(studentListContainer);
+        loadStudents();        studentListView.setCellFactory(lv -> new ListCell<Student>() {
             @Override
             protected void updateItem(Student student, boolean empty) {
                 super.updateItem(student, empty);
@@ -392,18 +397,18 @@ private VBox studentCard(Student student) {
 
     // Display current students list
     public void displayCurrentStudents() {
-        studentList.getChildren().clear();
-
+        studentListContainer.getChildren().clear();
+    
         List<Student> studentsFromDb = db.getAllStudents();
         System.out.println("Students from DB: " + studentsFromDb.size());
-
+    
         if (studentsFromDb.isEmpty()) {
             Label emptyLabel = new Label("You have no current students");
-            studentList.getChildren().add(emptyLabel);
+            studentListContainer.getChildren().add(emptyLabel);
         } else {
             for (Student student : studentsFromDb) {
                 VBox studentCard = studentCard(student);
-                studentList.getChildren().add(studentCard);
+                studentListContainer.getChildren().add(studentCard);
                 System.out.println("Added student card: " + student.getName()); 
             }
         }
