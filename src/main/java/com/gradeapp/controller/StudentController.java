@@ -32,6 +32,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
@@ -381,10 +383,9 @@ public class StudentController {
     // Current students list - create student card
     private VBox createStudentCard(Student student) {
         VBox studentCard = new VBox();
-        studentCard.getStyleClass().add("student-card");
+        studentCard.getStyleClass().add("card");
         studentCard.setSpacing(10);
         studentCard.setPadding(new Insets(10));
-        studentCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
 
         HBox studentInfo = new HBox();
         studentInfo.setSpacing(10);
@@ -395,6 +396,9 @@ public class StudentController {
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
 
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         Button viewEditButton = new Button("View/Edit Details");
         viewEditButton.setOnAction(event -> handleViewDetailsButtonAction());
 
@@ -403,8 +407,8 @@ public class StudentController {
         deleteButton.setOnAction(event -> handleDeleteStudentAction(student));
 
         buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
-        studentInfo.getChildren().addAll(nameLabel, idLabel);
-        studentCard.getChildren().addAll(studentInfo, buttonContainer);
+        studentInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
+        studentCard.getChildren().addAll(studentInfo);
 
         studentCard.setOnMouseClicked(event -> {
             studentListContainer.getChildren().forEach(node -> {
