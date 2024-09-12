@@ -7,7 +7,6 @@ module org.example.demo {
     requires transitive javafx.graphics;
     requires transitive javafx.base;
 
-
     requires org.controlsfx.controls;
     requires com.dlsc.formsfx;
     requires net.synedra.validatorfx;
@@ -27,6 +26,7 @@ module org.example.demo {
     requires java.sql;
 
     opens org.example.demo3 to javafx.fxml;
+
     exports org.example.demo3;
 
     opens com.gradeapp.controller to javafx.fxml;
@@ -39,6 +39,4 @@ module org.example.demo {
     exports com.gradeapp.util;
     exports com.gradeapp.database;
 
-
 }
-

@@ -16,26 +16,30 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="754.0" prefWidth="800.0" spacing="10.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-    </padding>
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentDetailsController">
+   <TextField fx:id="studentName" />
+   <TextField fx:id="studentId" />
+   <TextField fx:id="studentDescription" />
+   <ComboBox fx:id="courseSelector" />
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+   </padding>
 
-    <Label text="Student details">
-        <font>
-            <Font size="18.0" />
-        </font>
-    </Label>
+   <Label text="Student details">
+      <font>
+         <Font size="18.0" />
+      </font>
+   </Label>
    <GridPane>
-     <columnConstraints>
-       <ColumnConstraints hgrow="SOMETIMES" maxWidth="374.0" minWidth="10.0" prefWidth="115.0" />
-       <ColumnConstraints hgrow="SOMETIMES" maxWidth="645.0" minWidth="10.0" prefWidth="645.0" />
-     </columnConstraints>
-     <rowConstraints>
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-     </rowConstraints>
+      <columnConstraints>
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="374.0" minWidth="10.0" prefWidth="115.0" />
+         <ColumnConstraints hgrow="SOMETIMES" maxWidth="645.0" minWidth="10.0" prefWidth="645.0" />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
       <children>
          <Label text="Name">
             <font>
@@ -80,36 +84,36 @@
    <HBox prefHeight="307.0" prefWidth="760.0" styleClass="section-style">
       <children>
          <TabPane prefHeight="138.0" prefWidth="738.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
-           <tabs>
-             <Tab text="Class name - dynamic - 1">
+            <tabs>
+               <Tab text="Class name - dynamic - 1">
                   <content>
                      <GridPane>
-                       <columnConstraints>
-                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                       </columnConstraints>
-                       <rowConstraints>
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                       </rowConstraints>
+                        <columnConstraints>
+                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                        </columnConstraints>
+                        <rowConstraints>
+                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        </rowConstraints>
                      </GridPane>
                   </content>
                   <content>
                      <TableView prefHeight="200.0" prefWidth="200.0">
-                       <columns>
-                         <TableColumn fx:id="assessmentName" minWidth="120.0" prefWidth="120.0" text="Assessment name" />
-                         <TableColumn fx:id="assessmentPart" prefWidth="74.0" text="Part 1" />
+                        <columns>
+                           <TableColumn fx:id="assessmentName" minWidth="120.0" prefWidth="120.0" text="Assessment name" />
+                           <TableColumn fx:id="assessmentPart" prefWidth="74.0" text="Part 1" />
                            <TableColumn prefWidth="74.0" text="Part 2" />
                            <TableColumn fx:id="assessmentOutcome" prefWidth="74.0" text="Outcome 1" />
                            <TableColumn prefWidth="74.0" text="Outcome 2" />
                            <TableColumn fx:id="grade" prefWidth="74.0" text="Mark" />
-                       </columns>
+                        </columns>
                      </TableView>
                   </content>
                </Tab>
-             <Tab text="Class name - dynamic - 2" />
-           </tabs>
+               <Tab text="Class name - dynamic - 2" />
+            </tabs>
          </TabPane>
       </children>
    </HBox>

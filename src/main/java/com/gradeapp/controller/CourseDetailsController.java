@@ -9,19 +9,14 @@ import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
-
-import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.VBox;
-import javafx.util.converter.DoubleStringConverter;
+import javafx.stage.Stage;
 
 public class CourseDetailsController {
 
@@ -53,18 +48,11 @@ public class CourseDetailsController {
 
     private Course course;
     private Database db = new Database();
-    private Node previousView;
-    private VBox content;
+
     private ObservableList<Outcome> outcomes;
 
     @FXML
     private void initialize() {
-    }
-
-    private void setupTables() {
-        setupOutcomesTable();
-        setupClassesTable();
-        outcomes.addListener((ListChangeListener<Outcome>) c -> updateOutcomeWeights());
     }
 
     private void setupClassesTable() {
@@ -75,47 +63,14 @@ public class CourseDetailsController {
         classesTable.setItems(FXCollections.observableArrayList(classes));
     }
 
-    private void setupOutcomesTable() {
-        identifierColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty());
-        nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
-        descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
-        weightColumn.setCellValueFactory(cellData -> cellData.getValue().weightProperty().asObject());
-
-        outcomesTable.setEditable(true);
-        identifierColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        weightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
-
-        identifierColumn.setOnEditCommit(event -> {
-            event.getRowValue().setId(event.getNewValue());
-            outcomesTable.refresh();
-        });
-        nameColumn.setOnEditCommit(event -> {
-            event.getRowValue().setName(event.getNewValue());
-            outcomesTable.refresh();
-        });
-        descriptionColumn.setOnEditCommit(event -> {
-            event.getRowValue().setDescription(event.getNewValue());
-            outcomesTable.refresh();
-        });
-        weightColumn.setOnEditCommit(event -> {
-            event.getRowValue().setWeight(event.getNewValue());
-            outcomesTable.refresh();
-        });
-
-        outcomesTable.setItems(outcomes);
-    }
-
-    public void setCourse(Course course, Node previousView, VBox content) {
+    public void setCourse(Course course) {
         this.course = course;
-        this.previousView = previousView;
-        this.content = content;
         courseIdField.setText(course.getId());
         courseNameField.setText(course.getName());
         courseDescriptionField.setText(course.getDescription());
         outcomes = FXCollections.observableArrayList(course.getOutcomes());
-        setupTables();
+        outcomesTable.setItems(outcomes);
+        setupClassesTable();
         updateOutcomeWeights();
     }
 
@@ -125,41 +80,46 @@ public class CourseDetailsController {
 
     @FXML
     private void saveCourseDetails() {
-        String updatedId = courseIdField.getText().trim();
-        String updatedName = courseNameField.getText().trim();
-        String updatedDescription = courseDescriptionField.getText().trim();
+        if (validateCourse()) {
+            String updatedId = courseIdField.getText().trim();
+            String updatedName = courseNameField.getText().trim();
+            String updatedDescription = courseDescriptionField.getText().trim();
 
-        if (updatedId.isEmpty() || updatedName.isEmpty()) {
-            showAlert("Invalid Input", "Course ID and Name cannot be empty.");
-            return;
+            course.setId(updatedId);
+            course.setName(updatedName);
+            course.setDescription(updatedDescription);
+            course.setOutcomes(new ArrayList<>(outcomes));
+
+            try {
+                db.updateCourse(course, course.getId());
+                if (coursesController != null) {
+                    coursesController.displayCurrentCourses();
+                }
+                closeWindow();
+            } catch (Exception e) {
+                showAlert("Error", "Failed to save course details: " + e.getMessage());
+            }
+        }
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) courseIdField.getScene().getWindow();
+        stage.close();
+    }
+
+    private boolean validateCourse() {
+        if (courseNameField.getText().trim().isEmpty() || courseIdField.getText().trim().isEmpty()) {
+            showAlert("Invalid Input", "Course name and ID cannot be empty.");
+            return false;
         }
 
-        if (!isValidCourseId(updatedId)) {
-            showAlert("Invalid Course ID", "Please enter a valid course ID (e.g., 'CS101', 'MATH2A', 'ENG303').");
-            return;
+        double totalWeight = outcomes.stream().mapToDouble(Outcome::getWeight).sum();
+        if (Math.abs(totalWeight - 100.0) > 0.01) {
+            showAlert("Invalid Outcomes", "The total weight of outcomes must equal 100%.");
+            return false;
         }
 
-        String originalId = course.getId();
-        if (!originalId.equals(updatedId) && !db.isCourseIdUnique(updatedId, originalId)) {
-            showAlert("Duplicate Course ID", "This course ID already exists. Please choose a unique ID.");
-            return;
-        }
-
-        course.setId(updatedId);
-        course.setName(updatedName);
-        course.setDescription(updatedDescription);
-
-        updateOutcomeWeights();
-
-        course.setOutcomes(new ArrayList<>(outcomes));
-
-        db.updateCourse(course, originalId);
-
-        coursesController.displayCurrentCourses();
-
-        returnToCoursesView();
-
-        showAlert("Success", "Course details saved successfully.", Alert.AlertType.INFORMATION);
+        return true;
     }
 
     private void updateOutcomeWeights() {
@@ -190,25 +150,6 @@ public class CourseDetailsController {
         }
     }
 
-    private void returnToCoursesView() {
-        if (coursesController != null && content != null) {
-            coursesController.displayCurrentCourses();
-            content.getChildren().setAll(coursesController.getCurrentCourseContainer());
-        }
-    }
-
-    private boolean isValidCourseId(String id) {
-        return id.matches("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{3,10}$");
-    }
-
-    private void showAlert(String title, String content, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
-
     @FXML
     private void removeSelectedOutcome() {
         Outcome selectedOutcome = outcomesTable.getSelectionModel().getSelectedItem();
@@ -220,7 +161,10 @@ public class CourseDetailsController {
 
     @FXML
     private void cancelEditing() {
-        content.getChildren().setAll(previousView);
+        if (coursesController != null) {
+            coursesController.displayCurrentCourses();
+        }
+        closeWindow();
     }
 
     private void showAlert(String title, String content) {

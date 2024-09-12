@@ -3,6 +3,7 @@ package com.gradeapp.controller;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +18,11 @@ import com.gradeapp.model.Student;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
@@ -32,10 +36,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class StudentController {
 
@@ -57,6 +60,14 @@ public class StudentController {
 
     @FXML
     private VBox studentListContainer;
+    @FXML
+private TextField studentName;
+@FXML
+private TextField studentId;
+@FXML
+private TextField studentDescription;
+@FXML
+private ComboBox<Course> courseSelector;
 
     private Database db = new Database();
     private ObservableList<Student> students = FXCollections.observableArrayList();
@@ -153,9 +164,22 @@ public class StudentController {
     @FXML
     private void handleViewDetailsButtonAction() {
         Student selectedStudent = getSelectedStudent();
-        System.out.println("Selected student: " + (selectedStudent != null ? selectedStudent.getName() : "null"));
         if (selectedStudent != null) {
-            displayStudentDetails(selectedStudent);
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/student-details-view.fxml"));
+                Parent root = loader.load();
+                
+                StudentDetailsController detailsController = loader.getController();
+                detailsController.initData(selectedStudent);
+                
+                Stage stage = new Stage();
+                stage.setTitle("Student Details: " + selectedStudent.getName());
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Error opening student details view: " + e.getMessage());
+            }
         } else {
             showAlert("Please select a student to view details.");
         }
@@ -383,9 +407,10 @@ public class StudentController {
     // Current students list - create student card
     private VBox createStudentCard(Student student) {
         VBox studentCard = new VBox();
-        studentCard.getStyleClass().add("card");
+        studentCard.getStyleClass().add("student-card");
         studentCard.setSpacing(10);
         studentCard.setPadding(new Insets(10));
+        studentCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
 
         HBox studentInfo = new HBox();
         studentInfo.setSpacing(10);
@@ -396,9 +421,6 @@ public class StudentController {
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
         Button viewEditButton = new Button("View/Edit Details");
         viewEditButton.setOnAction(event -> handleViewDetailsButtonAction());
 
@@ -407,8 +429,8 @@ public class StudentController {
         deleteButton.setOnAction(event -> handleDeleteStudentAction(student));
 
         buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
-        studentInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
-        studentCard.getChildren().addAll(studentInfo);
+        studentInfo.getChildren().addAll(nameLabel, idLabel);
+        studentCard.getChildren().addAll(studentInfo, buttonContainer);
 
         studentCard.setOnMouseClicked(event -> {
             studentListContainer.getChildren().forEach(node -> {
@@ -418,7 +440,8 @@ public class StudentController {
                 }
             });
             studentCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
-            // handleViewDetailsButtonAction(); When student card is clicked, this will open details automatically
+            // handleViewDetailsButtonAction(); When student card is clicked, this will open
+            // details automatically depends if you want this or not
         });
 
         return studentCard;

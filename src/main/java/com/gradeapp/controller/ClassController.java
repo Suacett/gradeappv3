@@ -22,8 +22,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
@@ -90,14 +88,18 @@ public class ClassController {
         } else {
             currentClassContainer.getChildren().clear();
         }
+        selectedClass = null;
+        updateClassDetailsView();
     }
 
     private void displayClasses(List<Classes> classes) {
         currentClassContainer.getChildren().clear();
+        selectedClass = null;
         for (Classes classObj : classes) {
             VBox classCard = createClassCard(classObj);
             currentClassContainer.getChildren().add(classCard);
         }
+        updateClassDetailsView();
     }
 
     @FXML
@@ -146,14 +148,19 @@ public class ClassController {
 
     @FXML
     public void handleViewClassDetailsAction(Classes classObj) {
-        selectedClass = classObj;
-        updateClassDetailsView();
+        VBox classCard = (VBox) currentClassContainer.lookup("#" + classObj.getClassId());
+        if (classCard != null) {
+            selectClass(classObj);
+        }
     }
 
     private void updateClassDetailsView() {
         if (selectedClass != null) {
             classStatisticsLabel.setText("Class Statistics: " + calculateClassStatistics());
             updateStudentListView();
+        } else {
+            classStatisticsLabel.setText("No class selected");
+            studentListView.getItems().clear();
         }
     }
 
@@ -165,12 +172,14 @@ public class ClassController {
     }
 
     private void updateStudentListView() {
-        if (selectedClass == null)
+        if (selectedClass == null) {
+            studentListView.getItems().clear();
             return;
+        }
 
-        ObservableList<Student> students = FXCollections
-                .observableArrayList(db.getStudentsInClass(selectedClass.getClassId()));
-        studentListView.setItems(students);
+        List<Student> students = db.getStudentsInClass(selectedClass.getClassId());
+        ObservableList<Student> observableStudents = FXCollections.observableArrayList(students);
+        studentListView.setItems(observableStudents);
 
         studentListView.setCellFactory(lv -> new ListCell<Student>() {
             @Override
@@ -250,38 +259,57 @@ public class ClassController {
     }
 
     // Class card, displays current classes
-    private VBox createClassCard(Classes classes) {
+    private VBox createClassCard(Classes classObj) {
         VBox classCard = new VBox();
-        classCard.getStyleClass().add("card");
-        classCard.setPadding(new Insets(10));
+        classCard.setId(classObj.getClassId());
+        classCard.getStyleClass().add("class-card");
         classCard.setSpacing(10);
-        Label classNameLabel = new Label(classes.getName());
-        Label classIdLabel = new Label(classes.getClassId());
+        classCard.setPadding(new Insets(10));
+        classCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
 
-        HBox classCardInfo = new HBox();
-        classCardInfo.setSpacing(10);
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox classInfo = new HBox();
+        classInfo.setSpacing(10);
+
+        Label nameLabel = new Label("Name: " + classObj.getName());
+        Label idLabel = new Label("ID: " + classObj.getClassId());
+
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
+
         Button viewDetailsButton = new Button("View Details");
-        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classes));
-        buttonContainer.getChildren().add(viewDetailsButton);
+        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classObj));
+
         Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> handleEditClassButtonAction(classes));
+        editButton.setOnAction(event -> handleEditClassButtonAction(classObj));
+
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
-            db.delete("classes", "classId", classes.getClassId());
-            displayCurrentClasses();
+            db.delete("classes", "classId", classObj.getClassId());
+            updateClassList();
         });
-        buttonContainer.getChildren().addAll(editButton, deleteButton);
 
-        classCardInfo.getChildren().addAll(classNameLabel, classIdLabel, spacer, buttonContainer);
+        buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
+        classInfo.getChildren().addAll(nameLabel, idLabel);
+        classCard.getChildren().addAll(classInfo, buttonContainer);
 
-        classCard.getChildren().add(classCardInfo);
-        VBox.setMargin(classCard, new Insets(0, 10, 0, 10));
+        classCard.setOnMouseClicked(event -> {
+            currentClassContainer.getChildren().forEach(node -> {
+                if (node instanceof VBox) {
+                    ((VBox) node).setStyle(
+                            "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+                }
+            });
+            classCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
+            selectClass(classObj);
+        });
+
         return classCard;
+    }
+
+    private void selectClass(Classes classObj) {
+        selectedClass = classObj;
+        updateClassDetailsView();
     }
 
     private void handleEditClassButtonAction(Classes classes) {
@@ -294,9 +322,8 @@ public class ClassController {
             String newName = classNameField.getText();
             String newId = classIdField.getText();
             if (!newName.isEmpty() && !newId.isEmpty()) {
-
                 db.updateClass(classes.getClassId(), newName, newId);
-                displayCurrentClasses();
+                updateClassList();
             } else {
                 System.out.println("The form is incomplete...");
             }
@@ -307,14 +334,7 @@ public class ClassController {
         currentClassContainer.getChildren().add(editClassBox);
     }
 
-    private void displayCurrentClasses() {
-        currentClassContainer.getChildren().clear();
-        List<Classes> classes = db.getAllClasses();
-        for (Classes classObj : classes) {
-            VBox classCard = createClassCard(classObj);
-            currentClassContainer.getChildren().add(classCard);
-        }
-    }
+
 
     @FXML
     public void handleRemoveStudentFromClassAction() {

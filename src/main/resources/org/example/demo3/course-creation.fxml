@@ -14,7 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
+<VBox prefHeight="600.0" prefWidth="800.0" stylesheets="@styles.css"
+    xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseEditController">
     <padding>
         <Insets bottom="20" left="20" right="20" top="20" />
     </padding>
@@ -23,9 +25,9 @@
         <font>
             <Font size="18.0" />
         </font>
-      <VBox.margin>
-         <Insets bottom="10.0" /> 
-      </VBox.margin>
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
     </Label>
 
     <GridPane hgap="10" vgap="10">
@@ -52,9 +54,9 @@
         <font>
             <Font size="16.0" />
         </font>
-      <VBox.margin>
-         <Insets bottom="10.0" top="20.0" />
-      </VBox.margin>
+        <VBox.margin>
+            <Insets bottom="10.0" top="20.0" />
+        </VBox.margin>
     </Label>
 
     <TableView fx:id="outcomesTable" editable="true" VBox.vgrow="ALWAYS">
@@ -64,9 +66,9 @@
             <TableColumn fx:id="outcomeDescriptionColumn" prefWidth="324.0" text="Description" />
             <TableColumn fx:id="outcomeWeightColumn" prefWidth="87.0" text="Weight (%)" />
         </columns>
-      <VBox.margin>
-         <Insets bottom="10.0" />
-      </VBox.margin>
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
     </TableView>
 
     <HBox spacing="10">
@@ -75,9 +77,10 @@
     </HBox>
 
     <Label fx:id="totalWeightLabel" text="Total Weight: 0%">
-      <VBox.margin>
-         <Insets bottom="20.0" top="10.0" />
-      </VBox.margin></Label>
+        <VBox.margin>
+            <Insets bottom="20.0" top="10.0" />
+        </VBox.margin>
+    </Label>
 
     <HBox spacing="10">
         <Button onAction="#saveCourse" text="Save" />

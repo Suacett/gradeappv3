@@ -9,6 +9,7 @@ import com.gradeapp.model.Course;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -121,19 +122,21 @@ public class CoursesController {
     private void openCourseDetailsWindow(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
-            VBox courseDetailsView = loader.load();
+            Parent root = loader.load();
 
             CourseDetailsController controller = loader.getController();
-            controller.setCourse(course, currentCourseContainer, content);
+            controller.setCourse(course);
             controller.setCoursesController(this);
 
-            content.getChildren().setAll(courseDetailsView);
+            Stage stage = new Stage();
+            stage.setTitle("Course Details: " + course.getName());
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            displayCurrentCourses();
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error loading course-details.fxml: " + e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Unexpected error: " + e.getMessage());
         }
     }
 

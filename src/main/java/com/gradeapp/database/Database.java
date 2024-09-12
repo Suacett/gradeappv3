@@ -762,8 +762,8 @@ public class Database {
     public List<Student> getStudentsInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT s.* FROM students s " +
-                "JOIN class_students cs ON s.studentId = cs.student_id " +
-                "WHERE cs.class_id = ?";
+                "JOIN student_classes sc ON s.studentId = sc.student_id " +
+                "WHERE sc.class_id = ?";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, classId);
@@ -1056,7 +1056,6 @@ public class Database {
         return assessments;
     }
 
-
     public List<Assessment> getAssessmentsForClass(String classId) {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments WHERE class_id = ?";
@@ -1085,10 +1084,6 @@ public class Database {
         }
         return assessments;
     }
-
-
-
-
 
     public Classes getClassForStudent(String studentId) {
         String sql = "SELECT c.* FROM classes c " +

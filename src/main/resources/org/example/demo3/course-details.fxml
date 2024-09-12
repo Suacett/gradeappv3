@@ -6,8 +6,8 @@
 <?import javafx.scene.text.Font?>
 
 <VBox prefHeight="600.0" prefWidth="800.0" spacing="20.0" stylesheets="@styles.css"
-      xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
+    xmlns="http://javafx.com/javafx/21"
+    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -42,14 +42,14 @@
         </font>
     </Label>
 
-<TableView fx:id="outcomesTable" editable="true" VBox.vgrow="ALWAYS">
-    <columns>
-        <TableColumn fx:id="identifierColumn" text="Identifier" />
-        <TableColumn fx:id="nameColumn" text="Name" />
-        <TableColumn fx:id="descriptionColumn" text="Description" />
-        <TableColumn fx:id="weightColumn" text="Weight" />
-    </columns>
-</TableView>
+    <TableView fx:id="outcomesTable" editable="true" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="identifierColumn" text="Identifier" />
+            <TableColumn fx:id="nameColumn" text="Name" />
+            <TableColumn fx:id="descriptionColumn" text="Description" />
+            <TableColumn fx:id="weightColumn" text="Weight" />
+        </columns>
+    </TableView>
 
     <HBox spacing="10">
         <Button onAction="#addOutcome" text="Add Outcome" />
