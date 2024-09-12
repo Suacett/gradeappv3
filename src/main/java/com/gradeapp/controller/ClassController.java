@@ -77,6 +77,9 @@ public class ClassController {
         });
 
         courseSelector.setOnAction(e -> updateClassList());
+        if (!courses.isEmpty()) { // Select first course in list
+            courseSelector.getSelectionModel().selectFirst();
+        }
     }
 
     private void updateClassList() {

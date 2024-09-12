@@ -1056,6 +1056,40 @@ public class Database {
         return assessments;
     }
 
+
+    public List<Assessment> getAssessmentsForClass(String classId) {
+        List<Assessment> assessments = new ArrayList<>();
+        String sql = "SELECT * FROM assessments WHERE class_id = ?";
+        try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    Assessment assessment = new Assessment(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("description"),
+                            rs.getDouble("weight"),
+                            rs.getDouble("maxScore"));
+                    List<AssessmentPart> parts = getAssessmentParts(assessment.getId());
+                    for (AssessmentPart part : parts) {
+                        assessment.addPart(part);
+                    }
+                    assessments.add(assessment);
+                    System.out.println(
+                            "Loaded assessment: " + assessment.getName() + " (ID: " + assessment.getId() + ")");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting assessments for course " + classId + ": " + e.getMessage());
+        }
+        return assessments;
+    }
+
+
+
+
+
     public Classes getClassForStudent(String studentId) {
         String sql = "SELECT c.* FROM classes c " +
                 "JOIN student_class sc ON c.classId = sc.classId " +
