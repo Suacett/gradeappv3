@@ -16,15 +16,18 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class StudentDetailsController {
 
+    // Declare FXML elements
     @FXML
     private TextField studentName;
     @FXML
@@ -53,9 +56,7 @@ public class StudentDetailsController {
 
     public void initialize() {
         db = new Database();
-
         if (gradeTable != null) {
-
             assessmentName.setCellValueFactory(
                     cellData -> new SimpleStringProperty(cellData.getValue().getAssessment().getName()));
             assessmentPart.setCellValueFactory(cellData -> {
@@ -64,7 +65,6 @@ public class StudentDetailsController {
             });
             grade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
         }
-
         if (cancel != null) {
             cancel.setOnAction(event -> handleCancel());
         }
@@ -81,16 +81,41 @@ public class StudentDetailsController {
         if (studentId != null) {
             studentId.setText(student.getStudentId());
         }
-
         loadCourses();
         loadClasses();
         loadGrades();
     }
 
+    // Populate the course dropdown menu with selected student's courses
     private void loadCourses() {
         if (courseSelector != null) {
             List<Course> courses = db.getCoursesForStudent(currentStudent.getStudentId());
-            courseSelector.setItems(FXCollections.observableArrayList(courses));
+            ObservableList<Course> courseList = FXCollections.observableArrayList(courses);
+            courseSelector.setItems(courseList);
+            courseSelector.setCellFactory(lv -> new ListCell<Course>() { // Display course name in ComboBox
+                @Override
+                protected void updateItem(Course course, boolean empty) {
+                    super.updateItem(course, empty);
+                    if (empty || course == null) {
+                        setText(null);
+                    } else {
+                        setText(course.getName());
+                    }
+                }
+            });
+            courseSelector.setConverter(new StringConverter<Course>() { // Use string converter to show course name
+                @Override
+                public String toString(Course course) {
+                    return course == null ? "" : course.getName();
+                }
+                @Override
+                public Course fromString(String string) {
+                    return null;
+                }
+            });
+            if (!courseList.isEmpty()) { // Display first course
+                courseSelector.getSelectionModel().selectFirst();
+            }
         }
     }
 
@@ -100,7 +125,6 @@ public class StudentDetailsController {
             classesTabPane.getTabs().clear();
             for (Classes cls : classes) {
                 Tab classTab = new Tab(cls.getName());
-
                 classesTabPane.getTabs().add(classTab);
             }
         }
@@ -116,21 +140,18 @@ public class StudentDetailsController {
 
     @FXML
     private void handleCancel() {
-
         Stage stage = (Stage) cancel.getScene().getWindow();
         stage.close();
     }
 
     @FXML
     private void handleSaveStudent() {
-
         String oldStudentId = currentStudent.getStudentId();
         currentStudent.setName(studentName.getText());
         currentStudent.setStudentId(studentId.getText());
-
         db.updateStudent(oldStudentId, currentStudent.getName(), currentStudent.getStudentId());
-
         Stage stage = (Stage) saveStudent.getScene().getWindow();
         stage.close();
     }
+
 }

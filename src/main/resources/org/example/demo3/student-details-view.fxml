@@ -23,7 +23,7 @@
          <Font size="18.0" />
       </font>
    </Label>
-   <HBox prefHeight="100.0" prefWidth="200.0" styleClass="section-style" VBox.vgrow="ALWAYS">
+   <HBox prefHeight="91.0" prefWidth="760.0" styleClass="section-style" VBox.vgrow="ALWAYS">
       <children>
          <GridPane hgap="10.0" vgap="10.0">
             <columnConstraints>
@@ -31,7 +31,6 @@
                <ColumnConstraints hgrow="SOMETIMES" maxWidth="645.0" minWidth="10.0" prefWidth="645.0" />
             </columnConstraints>
             <rowConstraints>
-               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
@@ -48,12 +47,6 @@
                </Label>
                <TextField fx:id="studentName" GridPane.columnIndex="1" />
                <TextField fx:id="studentId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-               <TextField fx:id="studentDescription" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-               <Label layoutX="10.0" layoutY="47.0" text="Description" GridPane.rowIndex="2">
-                  <font>
-                     <Font size="16.0" />
-                  </font>
-               </Label>
             </children>
          </GridPane>
       </children>
@@ -89,9 +82,9 @@
    </Label>
    <HBox prefHeight="307.0" prefWidth="760.0" styleClass="section-style">
       <children>
-         <TabPane prefHeight="138.0" prefWidth="738.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
+         <TabPane fx:id="classesTabPane" prefHeight="138.0" prefWidth="738.0" tabClosingPolicy="UNAVAILABLE" HBox.hgrow="ALWAYS">
             <tabs>
-               <Tab text="Class name - dynamic - 1">
+               <Tab styleClass="tab" text="Class name - dynamic - 1">
                   <content>
                      <GridPane>
                         <columnConstraints>
@@ -106,7 +99,7 @@
                      </GridPane>
                   </content>
                   <content>
-                     <TableView prefHeight="200.0" prefWidth="200.0">
+                     <TableView fx:id="gradeTable" prefHeight="200.0" prefWidth="200.0">
                         <columns>
                            <TableColumn fx:id="assessmentName" minWidth="120.0" prefWidth="120.0" text="Assessment name" />
                            <TableColumn fx:id="assessmentPart" prefWidth="74.0" text="Part 1" />
@@ -129,7 +122,7 @@
          <Button fx:id="saveStudent" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="Save" />
       </children>
       <VBox.margin>
-         <Insets top="20.0" />
+         <Insets />
       </VBox.margin>
    </HBox>
    <padding>

@@ -42,34 +42,32 @@ import javafx.stage.Stage;
 
 public class StudentController {
 
-    // Display current student list - card display
+    // Declare FXML elements
     @FXML
     private ScrollPane studentList;
     @FXML
     private VBox content;
-
     @FXML
     private ListView<Student> studentListView;
     @FXML
     private VBox studentDetailsContainer;
     @FXML
     private GridPane studentDetailsGrid;
-
     @FXML
     private ScrollPane studentScrollPane;
-
     @FXML
     private VBox studentListContainer;
     @FXML
-private TextField studentName;
-@FXML
-private TextField studentId;
-@FXML
-private TextField studentDescription;
-@FXML
-private ComboBox<Course> courseSelector;
-
+    private TextField studentName;
+    @FXML
+    private TextField studentId;
+    @FXML
+    private TextField studentDescription;
+    @FXML
+    private ComboBox<Course> courseSelector;
+    
     private Database db = new Database();
+
     private ObservableList<Student> students = FXCollections.observableArrayList();
 
     @FXML
@@ -132,6 +130,7 @@ private ComboBox<Course> courseSelector;
         result.ifPresent(student -> {
             db.addStudent(student.getName(), student.getStudentId());
             loadStudents();
+            displayCurrentStudents();
         });
     }
 

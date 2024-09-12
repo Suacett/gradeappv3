@@ -262,10 +262,10 @@ public class ClassController {
     private VBox createClassCard(Classes classObj) {
         VBox classCard = new VBox();
         classCard.setId(classObj.getClassId());
-        classCard.getStyleClass().add("class-card");
+        classCard.getStyleClass().add("card");
         classCard.setSpacing(10);
         classCard.setPadding(new Insets(10));
-        classCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+        
 
         HBox classInfo = new HBox();
         classInfo.setSpacing(10);
