@@ -407,10 +407,9 @@ private ComboBox<Course> courseSelector;
     // Current students list - create student card
     private VBox createStudentCard(Student student) {
         VBox studentCard = new VBox();
-        studentCard.getStyleClass().add("student-card");
+        studentCard.getStyleClass().add("card");
         studentCard.setSpacing(10);
         studentCard.setPadding(new Insets(10));
-        studentCard.setStyle("-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
 
         HBox studentInfo = new HBox();
         studentInfo.setSpacing(10);
