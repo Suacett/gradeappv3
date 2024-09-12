@@ -36,6 +36,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -416,10 +418,13 @@ public class StudentController {
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
 
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
         HBox buttonContainer = new HBox();
         buttonContainer.setSpacing(10);
 
-        Button viewEditButton = new Button("View/Edit Details");
+        Button viewEditButton = new Button("View/edit Details");
         viewEditButton.setOnAction(event -> handleViewDetailsButtonAction());
 
         Button deleteButton = new Button("Delete");
@@ -428,7 +433,7 @@ public class StudentController {
 
         buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
         studentInfo.getChildren().addAll(nameLabel, idLabel);
-        studentCard.getChildren().addAll(studentInfo, buttonContainer);
+        studentCard.getChildren().addAll(studentInfo, spacer, buttonContainer);
 
         studentCard.setOnMouseClicked(event -> {
             studentListContainer.getChildren().forEach(node -> {
