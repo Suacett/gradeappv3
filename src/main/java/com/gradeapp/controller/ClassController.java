@@ -46,6 +46,8 @@ public class ClassController {
     @FXML
     private void initialize() {
         setupCourseSelector();
+        updateClassList();
+        updateClassDetailsView();
     }
 
     private void setupCourseSelector() {

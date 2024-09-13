@@ -14,14 +14,17 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
@@ -70,6 +73,9 @@ public class StudentDetailsController {
         if (saveStudent != null) {
             saveStudent.setOnAction(event -> handleSaveStudent());
         }
+        if (courseSelector != null) {
+            courseSelector.setOnAction(event -> loadClasses());
+        }
     }
 
     public void initData(Student student) {
@@ -81,25 +87,21 @@ public class StudentDetailsController {
             studentId.setText(student.getStudentId());
         }
         loadCourses();
-        loadClasses();
-        loadGrades();
+        if (courseSelector != null) {
+            courseSelector.setOnAction(event -> loadClasses());
+        }
     }
 
-    // Populate the course dropdown menu with selected student's courses
     private void loadCourses() {
         if (courseSelector != null) {
             List<Course> courses = db.getCoursesForStudent(currentStudent.getStudentId());
             ObservableList<Course> courseList = FXCollections.observableArrayList(courses);
             courseSelector.setItems(courseList);
-            courseSelector.setCellFactory(lv -> new ListCell<Course>() { // Display course name in ComboBox
+            courseSelector.setCellFactory(lv -> new ListCell<Course>() {
                 @Override
                 protected void updateItem(Course course, boolean empty) {
                     super.updateItem(course, empty);
-                    if (empty || course == null) {
-                        setText(null);
-                    } else {
-                        setText(course.getName());
-                    }
+                    setText(empty || course == null ? null : course.getName());
                 }
             });
             courseSelector.setConverter(new StringConverter<Course>() {
@@ -107,26 +109,39 @@ public class StudentDetailsController {
                 public String toString(Course course) {
                     return course == null ? "" : course.getName();
                 }
+
                 @Override
                 public Course fromString(String string) {
                     return null;
                 }
             });
-            if (!courseList.isEmpty()) { // Display first course
+            if (!courseList.isEmpty()) {
                 courseSelector.getSelectionModel().selectFirst();
+                loadClasses();
             }
         }
     }
 
     private void loadClasses() {
-        if (classesTabPane != null) {
-            List<Classes> classes = db.getClassesForStudent(currentStudent.getStudentId());
+        if (classesTabPane != null && courseSelector.getValue() != null) {
             classesTabPane.getTabs().clear();
+            String courseId = courseSelector.getValue().getId();
+            List<Classes> classes = db.getClassesForCourse(courseId);
             for (Classes cls : classes) {
                 Tab classTab = new Tab(cls.getName());
+                classTab.setContent(createClassContent(cls));
                 classesTabPane.getTabs().add(classTab);
             }
+            System.out.println("Loaded " + classes.size() + " classes for course " + courseId);
+        } else {
+            System.out.println(
+                    "Unable to load classes: " + (classesTabPane == null ? "TabPane is null" : "No course selected"));
         }
+    }
+
+    private Node createClassContent(Classes cls) {
+        Label classInfo = new Label("Class ID: " + cls.getClassId() + "\nClass Name: " + cls.getName());
+        return new VBox(classInfo);
     }
 
     private void loadGrades() {

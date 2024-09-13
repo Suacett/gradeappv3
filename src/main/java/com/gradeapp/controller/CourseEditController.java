@@ -88,12 +88,6 @@ public class CourseEditController {
             outcome.setDescription(event.getNewValue());
             outcomesTable.refresh();
         });
-        outcomeWeightColumn.setOnEditCommit(event -> {
-            Outcome outcome = event.getRowValue();
-            outcome.setWeight(event.getNewValue());
-            outcomesTable.refresh();
-            updateTotalWeight();
-        });
         outcomeIdentifierColumn.setOnEditCommit(event -> {
             Outcome outcome = event.getRowValue();
             outcome.setId(event.getNewValue());
@@ -133,18 +127,18 @@ public class CourseEditController {
         dialog.setTitle("New Outcome");
         dialog.setHeaderText("Enter Outcome ID");
         dialog.setContentText("Please enter the outcome ID:");
-
+    
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
             newId = result.get();
         } else {
             return;
         }
-
+    
         Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
         outcomes.add(newOutcome);
-        outcomesTable.refresh();
         updateTotalWeight();
+        outcomesTable.refresh();
         System.out.println("Outcome added: " + newOutcome);
     }
 
@@ -158,9 +152,15 @@ public class CourseEditController {
     }
 
     private void updateTotalWeight() {
-        double totalWeight = outcomes.stream().mapToDouble(Outcome::getWeight).sum();
-        totalWeightLabel.setText(String.format("Total Weight: %.2f%%", totalWeight));
-        totalWeightLabel.setStyle(totalWeight == 100 ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
+        int outcomeCount = outcomes.size();
+        if (outcomeCount > 0) {
+            double equalWeight = 100.0 / outcomeCount;
+            for (Outcome outcome : outcomes) {
+                outcome.setWeight(equalWeight);
+            }
+        }
+        totalWeightLabel.setText(String.format("Total Outcomes: %d", outcomeCount));
+        totalWeightLabel.setStyle("-fx-text-fill: black;");
     }
 
     @FXML
@@ -174,6 +174,7 @@ public class CourseEditController {
                 course.setName(courseNameField.getText());
                 course.setDescription(courseDescriptionField.getText());
             }
+            updateTotalWeight();
             course.setOutcomes(new ArrayList<>(outcomes));
             try {
                 db.saveCourse(course);
@@ -194,11 +195,6 @@ public class CourseEditController {
     private boolean validateCourse() {
         if (courseNameField.getText().isEmpty() || courseIdField.getText().isEmpty()) {
             showAlert("Course name and ID are required.", null);
-            return false;
-        }
-        double totalWeight = outcomes.stream().mapToDouble(Outcome::getWeight).sum();
-        if (Math.abs(totalWeight - 100) > 0.01) {
-            showAlert("Total outcome weight must equal 100%.", null);
             return false;
         }
         return true;

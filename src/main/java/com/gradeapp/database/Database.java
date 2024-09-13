@@ -485,25 +485,11 @@ public class Database {
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
             pstmt.executeUpdate();
-
-            // Delete existing outcomes for this course
-            sql = "DELETE FROM outcomes WHERE course_id = ?";
-            try (PreparedStatement deleteStmt = conn.prepareStatement(sql)) {
-                deleteStmt.setString(1, course.getId());
-                deleteStmt.executeUpdate();
-            }
-
-            // Save new outcomes
-            sql = "INSERT INTO outcomes(id, course_id, name, description, weight) VALUES(?, ?, ?, ?, ?)";
-            try (PreparedStatement outcomeStmt = conn.prepareStatement(sql)) {
-                for (Outcome outcome : course.getOutcomes()) {
-                    outcomeStmt.setString(1, outcome.getId());
-                    outcomeStmt.setString(2, course.getId());
-                    outcomeStmt.setString(3, outcome.getName());
-                    outcomeStmt.setString(4, outcome.getDescription());
-                    outcomeStmt.setDouble(5, outcome.getWeight());
-                    outcomeStmt.executeUpdate();
-                }
+    
+            deleteOutcomesForCourse(course.getId());
+    
+            for (Outcome outcome : course.getOutcomes()) {
+                addOutcome(outcome, course.getId());
             }
             System.out.println("Course and outcomes saved successfully.");
         } catch (SQLException e) {
@@ -640,6 +626,8 @@ public class Database {
         }
         return students;
     }
+
+
 
     // CLASSES
     public void addClass(String name, String classId) {

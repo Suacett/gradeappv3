@@ -8,6 +8,8 @@ import com.gradeapp.model.Classes;
 import com.gradeapp.model.Course;
 import com.gradeapp.model.Outcome;
 
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,7 +18,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
+import javafx.util.converter.DoubleStringConverter;
 
 public class CourseDetailsController {
 
@@ -70,12 +74,46 @@ public class CourseDetailsController {
         courseDescriptionField.setText(course.getDescription());
         outcomes = FXCollections.observableArrayList(course.getOutcomes());
         outcomesTable.setItems(outcomes);
+        setupOutcomesTable();
         setupClassesTable();
         updateOutcomeWeights();
     }
 
     public void setCoursesController(CoursesController coursesController) {
         this.coursesController = coursesController;
+    }
+
+    private void setupOutcomesTable() {
+        identifierColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getId()));
+        nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
+        descriptionColumn
+                .setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
+        weightColumn
+                .setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getWeight()).asObject());
+
+        outcomesTable.setEditable(true);
+        identifierColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        descriptionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        weightColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+
+        identifierColumn.setOnEditCommit(event -> {
+            event.getRowValue().setId(event.getNewValue());
+            outcomesTable.refresh();
+        });
+        nameColumn.setOnEditCommit(event -> {
+            event.getRowValue().setName(event.getNewValue());
+            outcomesTable.refresh();
+        });
+        descriptionColumn.setOnEditCommit(event -> {
+            event.getRowValue().setDescription(event.getNewValue());
+            outcomesTable.refresh();
+        });
+        weightColumn.setOnEditCommit(event -> {
+            event.getRowValue().setWeight(event.getNewValue());
+            outcomesTable.refresh();
+            updateOutcomeWeights();
+        });
     }
 
     @FXML
@@ -147,6 +185,9 @@ public class CourseDetailsController {
             outcomes.add(newOutcome);
             updateOutcomeWeights();
             outcomesTable.refresh();
+
+            course.setOutcomes(new ArrayList<>(outcomes));
+            db.saveCourse(course);
         }
     }
 
