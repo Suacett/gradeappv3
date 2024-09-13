@@ -60,7 +60,8 @@ public class ReportController {
         report.put("assessmentName", assessment.getName());
         report.put("statistics", calculator.calculateStatistics(assessmentGrades));
         // report.put("taskCompletionRates",
-        // calculator.calculateTaskCompletionRates(assessment));
+        // calculator.calculateTaskCompletionRates(assessment)); Causing errors. Not
+        // needed right now
         report.put("gradeDistribution", calculator.calculateGradeDistribution(assessmentGrades));
         report.put("gradeDistributionChart",
                 (BarChart<String, Number>) chartGenerator.createGradeDistributionChart(assessmentGrades));

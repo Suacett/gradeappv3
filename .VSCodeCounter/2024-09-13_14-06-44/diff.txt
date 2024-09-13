@@ -1,0 +1,113 @@
+Date : 2024-09-13 14:06:44
+Directory : c:\Users\noval\Documents\GitHub\gradeappv3
+Total : 61 files,  6512 codes, 175 comments, 986 blanks, all 7673 lines
+
+Languages
++-----------------+------------+------------+------------+------------+------------+
+| language        | files      | code       | comment    | blank      | total      |
++-----------------+------------+------------+------------+------------+------------+
+| Java            |         35 |      4,811 |         93 |        835 |      5,739 |
+| XML             |         22 |      1,511 |         22 |         93 |      1,626 |
+| Batch           |          1 |        102 |         51 |         36 |        189 |
+| CSS             |          1 |         67 |          9 |          5 |         81 |
+| Markdown        |          1 |         19 |          0 |         17 |         36 |
+| Java Properties |          1 |          2 |          0 |          0 |          2 |
++-----------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                               | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                  |         61 |      6,512 |        175 |        986 |      7,673 |
+| . (Files)                                                                                                          |          3 |        317 |         56 |         59 |        432 |
+| .idea                                                                                                              |          6 |        190 |          0 |          0 |        190 |
+| .mvn                                                                                                               |          1 |          2 |          0 |          0 |          2 |
+| .mvn\wrapper                                                                                                       |          1 |          2 |          0 |          0 |          2 |
+| src                                                                                                                |         51 |      6,003 |        119 |        927 |      7,049 |
+| src\main                                                                                                           |         51 |      6,003 |        119 |        927 |      7,049 |
+| src\main\java                                                                                                      |         35 |      4,811 |         93 |        835 |      5,739 |
+| src\main\java (Files)                                                                                              |          1 |         33 |          0 |         10 |         43 |
+| src\main\java\com                                                                                                  |         33 |      4,757 |         91 |        821 |      5,669 |
+| src\main\java\com\gradeapp                                                                                         |         33 |      4,757 |         91 |        821 |      5,669 |
+| src\main\java\com\gradeapp\controller                                                                              |         16 |      2,411 |         41 |        419 |      2,871 |
+| src\main\java\com\gradeapp\database                                                                                |          1 |      1,055 |         10 |         82 |      1,147 |
+| src\main\java\com\gradeapp\model                                                                                   |         10 |        744 |         21 |        201 |        966 |
+| src\main\java\com\gradeapp\util                                                                                    |          6 |        547 |         19 |        119 |        685 |
+| src\main\java\org                                                                                                  |          1 |         21 |          2 |          4 |         27 |
+| src\main\java\org\example                                                                                          |          1 |         21 |          2 |          4 |         27 |
+| src\main\java\org\example\demo3                                                                                    |          1 |         21 |          2 |          4 |         27 |
+| src\main\resources                                                                                                 |         16 |      1,192 |         26 |         92 |      1,310 |
+| src\main\resources\org                                                                                             |         16 |      1,192 |         26 |         92 |      1,310 |
+| src\main\resources\org\example                                                                                     |         16 |      1,192 |         26 |         92 |      1,310 |
+| src\main\resources\org\example\demo3                                                                               |         16 |      1,192 |         26 |         92 |      1,310 |
+| src\main\resources\org\example\demo3 (Files)                                                                       |         15 |      1,191 |         26 |         92 |      1,309 |
+| src\main\resources\org\example\demo3\icons                                                                         |          1 |          1 |          0 |          0 |          1 |
++--------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------------------+-----------------+------------+------------+------------+------------+
+| filename                                                                                                           | language        | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------------------+-----------------+------------+------------+------------+------------+
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\dataSources.xml                                                   | XML             |         33 |          0 |          0 |         33 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\encodings.xml                                                     | XML             |          7 |          0 |          0 |          7 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\misc.xml                                                          | XML             |         14 |          0 |          0 |         14 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\sqldialects.xml                                                   | XML             |          6 |          0 |          0 |          6 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\uiDesigner.xml                                                    | XML             |        124 |          0 |          0 |        124 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.idea\vcs.xml                                                           | XML             |          6 |          0 |          0 |          6 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\.mvn\wrapper\maven-wrapper.properties                                   | Java Properties |          2 |          0 |          0 |          2 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\README.md                                                               | Markdown        |         19 |          0 |         17 |         36 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\mvnw.cmd                                                                | Batch           |        102 |         51 |         36 |        189 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\pom.xml                                                                 | XML             |        196 |          5 |          6 |        207 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\ArchiveController.java            | Java            |          7 |          2 |          7 |         16 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\AssessmentController.java         | Java            |        593 |          1 |         91 |        685 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\AssessmentCreationCallback.java   | Java            |          5 |          0 |          3 |          8 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\AssessmentCreationController.java | Java            |         96 |          0 |         17 |        113 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\ClassController.java              | Java            |        297 |          1 |         58 |        356 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\CourseDetailsController.java      | Java            |        150 |          0 |         27 |        177 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\CourseEditController.java         | Java            |        191 |          0 |         23 |        214 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\CoursesController.java            | Java            |        115 |          0 |         28 |        143 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\DataImportExportController.java   | Java            |         45 |          0 |         10 |         55 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\GradingController.java            | Java            |         97 |          2 |         21 |        120 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\HelloController.java              | Java            |         53 |          8 |         14 |         75 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\HomeController.java               | Java            |         22 |          3 |         11 |         36 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\MarkingController.java            | Java            |        121 |          9 |         15 |        145 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\ReportController.java             | Java            |         60 |          5 |         16 |         81 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\StudentController.java            | Java            |        418 |          8 |         64 |        490 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\controller\StudentDetailsController.java     | Java            |        141 |          2 |         14 |        157 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\database\Database.java                       | Java            |      1,055 |         10 |         82 |      1,147 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Assessment.java                        | Java            |        178 |         10 |         45 |        233 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\AssessmentPart.java                    | Java            |         85 |          1 |         27 |        113 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Classes.java                           | Java            |         66 |          0 |         20 |         86 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Course.java                            | Java            |         87 |          0 |         23 |        110 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Grade.java                             | Java            |         61 |          2 |         17 |         80 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\GradeBook.java                         | Java            |         65 |          3 |         14 |         82 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Outcome.java                           | Java            |         58 |          0 |         16 |         74 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Student.java                           | Java            |         66 |          3 |         17 |         86 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\StudentGrade.java                      | Java            |          9 |          0 |          4 |         13 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\model\Task.java                              | Java            |         69 |          2 |         18 |         89 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\Calculator.java                         | Java            |        118 |          0 |         21 |        139 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\ChartGenerator.java                     | Java            |         46 |          0 |         14 |         60 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\DataValidator.java                      | Java            |         56 |          0 |         14 |         70 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\FileHandler.java                        | Java            |        239 |         16 |         49 |        304 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\ReportExporter.java                     | Java            |         55 |          1 |         10 |         66 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\com\gradeapp\util\WeightedAverageGradeCalculator.java     | Java            |         33 |          2 |         11 |         46 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\module-info.java                                          | Java            |         33 |          0 |         10 |         43 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\java\org\example\demo3\HelloApplication.java                   | Java            |         21 |          2 |          4 |         27 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\add-student-view.fxml              | XML             |         60 |          0 |          4 |         64 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\archive-view.fxml                  | XML             |         20 |          0 |          4 |         24 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\assessment-creation.fxml           | XML             |         56 |          0 |         10 |         66 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\assessment-view.fxml               | XML             |        115 |          0 |          3 |        118 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\class-details-view.fxml            | XML             |        133 |          0 |          4 |        137 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\classes-view.fxml                  | XML             |         67 |          0 |          8 |         75 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\course-creation.fxml               | XML             |         78 |          0 |         12 |         90 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\course-details.fxml                | XML             |         85 |          0 |         11 |         96 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\courses-view.fxml                  | XML             |         55 |          3 |          8 |         66 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\hello-view.fxml                    | XML             |        183 |          0 |          3 |        186 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\home-view.fxml                     | XML             |         29 |          0 |          3 |         32 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\icons\assessments.svg              | XML             |          1 |          0 |          0 |          1 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\marking-view.fxml                  | XML             |         60 |          0 |          3 |         63 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\student-details-view.fxml          | XML             |        128 |          0 |          4 |        132 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\students-view.fxml                 | XML             |         55 |         14 |         10 |         79 |
+| c:\Users\noval\Documents\GitHub\gradeappv3\src\main\resources\org\example\demo3\styles.css                         | CSS             |         67 |          9 |          5 |         81 |
+| Total                                                                                                              |                 |      6,512 |        175 |        986 |      7,673 |
++--------------------------------------------------------------------------------------------------------------------+-----------------+------------+------------+------------+------------+

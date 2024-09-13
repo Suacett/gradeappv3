@@ -1,9 +1,9 @@
 package com.gradeapp.controller;
 
 import com.gradeapp.database.Database;
-import com.gradeapp.model.Course;
-import com.gradeapp.model.Classes;
 import com.gradeapp.model.Assessment;
+import com.gradeapp.model.Classes;
+import com.gradeapp.model.Course;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,7 +33,6 @@ public class MarkingController {
         // load students
     }
 
-    
     // Method to select course from dropdown
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
@@ -54,6 +53,7 @@ public class MarkingController {
             public String toString(Course course) {
                 return course == null ? "" : course.getName() + " (" + course.getId() + ")";
             }
+
             @Override
             public Course fromString(String string) {
                 return null; // No need to implement
@@ -72,7 +72,8 @@ public class MarkingController {
 
     // Method to update classSelector based on selected course
     private void updateClassSelector(Course selectedCourse) {
-        ObservableList<Classes> classes = FXCollections.observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
+        ObservableList<Classes> classes = FXCollections
+                .observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
         classSelector.setItems(classes);
         classSelector.setCellFactory(lv -> new ListCell<Classes>() {
             @Override
@@ -112,7 +113,8 @@ public class MarkingController {
 
     // Method to update assessmentSelector based on selected class
     private void updateAssessmentSelector(Classes selectedClass) {
-        ObservableList<Assessment> assessments = FXCollections.observableArrayList(db.getAssessmentsForClass(selectedClass.getClassId()));
+        ObservableList<Assessment> assessments = FXCollections
+                .observableArrayList(db.getAssessmentsForClass(selectedClass.getClassId()));
         assessmentSelector.setItems(assessments);
         assessmentSelector.setCellFactory(lv -> new ListCell<Assessment>() {
             @Override

@@ -20,7 +20,7 @@ public class DataValidator {
 
     public static boolean isValidAssessment(Assessment assessment) {
         double totalWeight = assessment.getParts().stream().mapToDouble(AssessmentPart::getWeight).sum();
-        return Math.abs(totalWeight - 100) < 0.001; // Allow for floating-point imprecision
+        return Math.abs(totalWeight - 100) < 0.001;
     }
 
     public static List<String> validateImportData(List<Student> students) {

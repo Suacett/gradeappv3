@@ -3,10 +3,12 @@
     -fx-background-color: transparent;
     -fx-background-radius: 5;
 }
+
 .nav-item:hover {
     -fx-background-color: #E0E0E0;
     -fx-background-radius: 5;
 }
+
 .nav-item:selected {
     -fx-background-color: #E0E0E0;
     -fx-background-radius: 5;
@@ -16,15 +18,16 @@
 .section-style {
     -fx-background-color: #FFF;
     -fx-border-color: #a4a4a4;
-    -fx-border-width: 1px; 
-    -fx-padding: 10px; 
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
     -fx-border-radius: 5px;
 }
+
 .assessments-section-style {
     -fx-background-color: #FFF;
     -fx-border-color: #a4a4a4;
-    -fx-border-width: 1px; 
-    -fx-padding: 20px; 
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
     -fx-border-radius: 5px;
 }
 
@@ -38,19 +41,22 @@ Button {
     -fx-padding: 5px 20px;
     -fx-text-fill: #0071E3;
 }
+
 Button:hover {
     -fx-background-color: #0071E3;
     -fx-text-fill: #FFF;
 }
+
 .delete-button {
     -fx-border-color: #ff0f0fe1;
     -fx-background-radius: 25px;
-    -fx-border-width: 1px; 
+    -fx-border-width: 1px;
     -fx-text-fill: #ff0f0fe1;
     -fx-border-radius: 25px;
 }
+
 .delete-button:hover {
-    -fx-background-color: #ff0f0fe1; 
+    -fx-background-color: #ff0f0fe1;
     -fx-text-fill: #fff;
 }
 
@@ -58,7 +64,7 @@ Button:hover {
 ComboBox {
     -fx-background-color: #FFF;
     -fx-border-color: #a4a4a4;
-    -fx-border-width: 1px; 
+    -fx-border-width: 1px;
     -fx-border-radius: 5px;
     -fx-padding: 5px;
 }
@@ -75,7 +81,7 @@ ComboBox {
 .card {
     -fx-background-color: #FFF;
     -fx-border-color: #a4a4a4;
-    -fx-border-width: 1px; 
-    -fx-padding: 10px; 
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
     -fx-border-radius: 5px;
 }

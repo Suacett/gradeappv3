@@ -19,8 +19,6 @@
          <Insets bottom="10.0" />
       </padding>
    </Label>
-
-   <!-- Add New Course Section -->
    <HBox alignment="CENTER_LEFT" prefHeight="16.0" prefWidth="519.0" spacing="10.0" styleClass="section-style" HBox.hgrow="ALWAYS">
       <children>
          <Label text="Add new Course">
@@ -42,8 +40,6 @@
          <Insets bottom="10.0" top="20.0" />
       </VBox.margin>
    </Label>
-
-   <!-- Current Courses Section -->
    <VBox prefHeight="49.0" prefWidth="519.0" styleClass="section-style" VBox.vgrow="ALWAYS">
       <children>
          <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
@@ -56,8 +52,6 @@
          </ScrollPane>
       </children>
    </VBox>
-
-   <!-- Container for New Course Input Form -->
    <VBox fx:id="newCourseInputContainer" prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />

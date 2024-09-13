@@ -27,7 +27,6 @@ import javafx.util.StringConverter;
 
 public class StudentDetailsController {
 
-    // Declare FXML elements
     @FXML
     private TextField studentName;
     @FXML
@@ -103,7 +102,7 @@ public class StudentDetailsController {
                     }
                 }
             });
-            courseSelector.setConverter(new StringConverter<Course>() { // Use string converter to show course name
+            courseSelector.setConverter(new StringConverter<Course>() {
                 @Override
                 public String toString(Course course) {
                     return course == null ? "" : course.getName();

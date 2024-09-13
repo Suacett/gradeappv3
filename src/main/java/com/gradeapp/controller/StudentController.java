@@ -44,7 +44,6 @@ import javafx.stage.Stage;
 
 public class StudentController {
 
-    // Declare FXML elements
     @FXML
     private ScrollPane studentList;
     @FXML
@@ -67,7 +66,7 @@ public class StudentController {
     private TextField studentDescription;
     @FXML
     private ComboBox<Course> courseSelector;
-    
+
     private Database db = new Database();
 
     private ObservableList<Student> students = FXCollections.observableArrayList();
@@ -167,12 +166,13 @@ public class StudentController {
         Student selectedStudent = getSelectedStudent();
         if (selectedStudent != null) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/student-details-view.fxml"));
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/org/example/demo3/student-details-view.fxml"));
                 Parent root = loader.load();
-                
+
                 StudentDetailsController detailsController = loader.getController();
                 detailsController.initData(selectedStudent);
-                
+
                 Stage stage = new Stage();
                 stage.setTitle("Student Details: " + selectedStudent.getName());
                 stage.setScene(new Scene(root));
@@ -290,17 +290,14 @@ public class StudentController {
         dialog.setTitle("Add Grade");
         dialog.setHeaderText("Add a new grade for " + student.getName());
 
-        // Set up the dialog content
         ComboBox<Assessment> assessmentComboBox = new ComboBox<>();
         ComboBox<AssessmentPart> partComboBox = new ComboBox<>();
         TextField scoreField = new TextField();
         TextArea feedbackArea = new TextArea();
 
-        // Populate assessments
         List<Assessment> assessments = db.getAssessmentsForCourse(course.getId());
         assessmentComboBox.setItems(FXCollections.observableArrayList(assessments));
 
-        // Set up assessment selection listener
         assessmentComboBox.setOnAction(e -> {
             Assessment selectedAssessment = assessmentComboBox.getValue();
             if (selectedAssessment != null) {
@@ -444,7 +441,7 @@ public class StudentController {
             });
             studentCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
             // handleViewDetailsButtonAction(); When student card is clicked, this will open
-            // details automatically depends if you want this or not
+            // details automatically depends if this is needed or not
         });
 
         return studentCard;

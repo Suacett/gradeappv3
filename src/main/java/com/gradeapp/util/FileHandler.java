@@ -42,9 +42,8 @@ public class FileHandler {
         try (InputStream inputStream = Files.newInputStream(path);
                 Workbook workbook = WorkbookFactory.create(inputStream)) {
 
-            Sheet sheet = workbook.getSheetAt(0); // Assuming data is in the first sheet
+            Sheet sheet = workbook.getSheetAt(0);
 
-            // Start iterating from the third row (index 2) to skip headers
             for (int i = 2; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row))
@@ -61,7 +60,7 @@ public class FileHandler {
 
                 // If any of the critical fields are null or empty, skip and record the row
                 if (isNullOrEmpty(studentCode) || isNullOrEmpty(firstName) || isNullOrEmpty(lastName)) {
-                    skippedRows.add(i + 1); // Add row number to skippedRows (1-based index)
+                    skippedRows.add(i + 1); // Add row number to skippedRows
                     continue; // Skip this row
                 }
 
@@ -148,7 +147,7 @@ public class FileHandler {
             case NUMERIC:
                 return String.valueOf((int) cell.getNumericCellValue());
             default:
-                return ""; // Handle unexpected types
+                return ""; 
         }
     }
 
@@ -174,7 +173,7 @@ public class FileHandler {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
                 if (row.getRowNum() == 0)
-                    continue; // Skip header
+                    continue; // Skips header
 
                 String studentId = getCellValue(row.getCell(0));
                 String assessmentName = getCellValue(row.getCell(1));
