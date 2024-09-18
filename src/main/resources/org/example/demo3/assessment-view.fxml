@@ -10,9 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="assessmentContainer" prefHeight="600.0" prefWidth="1000.0"
-    xmlns="http://javafx.com/javafx/21"
-    xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.AssessmentController">
+<VBox fx:id="assessmentContainer" prefHeight="600.0" prefWidth="1000.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.AssessmentController">
     <padding>
         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
     </padding>
@@ -41,77 +39,17 @@
             </Label>
             <TableView fx:id="assessmentTable" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="assessmentNameColumn" text="Name" />
-                    <TableColumn fx:id="assessmentDescriptionColumn" text="Description" />
-                    <TableColumn fx:id="assessmentWeightColumn" text="Weight" />
-                    <TableColumn fx:id="assessmentMaxScoreColumn" text="Max Score" />
+                    <TableColumn fx:id="assessmentNameColumn" prefWidth="195.0" text="Name" />
+                    <TableColumn fx:id="assessmentDescriptionColumn" prefWidth="488.0" text="Description" />
+                    <TableColumn fx:id="assessmentWeightColumn" prefWidth="90.0" text="Weight" />
+                    <TableColumn fx:id="assessmentMaxScoreColumn" prefWidth="109.0" text="Max Score" />
+               <TableColumn fx:id="assessmentPreviewColumn" prefWidth="97.0" text="Preview" />
                 </columns>
             </TableView>
             <HBox spacing="10">
-                <Button onAction="#handleAddAssessmentButtonAction" text="Add Assessment" />
+                <Button onAction="#handleAddAssessmentButtonAction" text="+ Add" />
                 <Button onAction="#handleDeleteAssessmentButtonAction" styleClass="delete-button" text="Delete" />
             </HBox>
         </VBox>
-        <VBox spacing="10" HBox.hgrow="ALWAYS">
-            <Label text="Linked Outcomes for Assessment">
-                <font>
-                    <Font size="16.0" />
-                </font>
-            </Label>
-            <TableView fx:id="linkedOutcomesForAssessmentTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="linkedAssessmentOutcomeIdColumn" text="ID" />
-                    <TableColumn fx:id="linkedAssessmentOutcomeNameColumn" text="Name" />
-                    <TableColumn fx:id="linkedAssessmentOutcomeWeightColumn" text="Weight" />
-                </columns>
-            </TableView>
-            <HBox spacing="10">
-                <Button onAction="#handleLinkOutcomeToAssessmentButtonAction" text="Link Outcome to Assessment" />
-                <Button onAction="#handleUnlinkOutcomeFromAssessmentButtonAction" styleClass="delete-button" text="Unlink Outcome from Assessment" />
-            </HBox>
-        </VBox>
-    </HBox>
-    <HBox prefHeight="217.0" prefWidth="980.0" spacing="10.0">
-        <children>
-            <VBox spacing="10" HBox.hgrow="ALWAYS">
-                <Label text="Assessment Parts">
-                    <font>
-                        <Font size="16.0" />
-                    </font>
-                </Label>
-                <TableView fx:id="partsTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="partNameColumn" text="Name" />
-                        <TableColumn fx:id="partWeightColumn" text="Weight" />
-                        <TableColumn fx:id="partMaxScoreColumn" text="Max Score" />
-                    </columns>
-                </TableView>
-                <HBox spacing="10">
-                    <Button onAction="#handleAddPartButtonAction" text="Add Part" />
-                    <Button onAction="#handleDeletePartButtonAction" styleClass="delete-button" text="Delete" />
-                </HBox>
-            </VBox>
-            <VBox spacing="10" HBox.hgrow="ALWAYS">
-                <Label text="Linked Outcomes for Part">
-                    <font>
-                        <Font size="16.0" />
-                    </font>
-                </Label>
-                <TableView fx:id="linkedOutcomesForPartTable" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="linkedOutcomeIdColumn" text="ID" />
-                        <TableColumn fx:id="linkedOutcomeNameColumn" text="Name" />
-                        <TableColumn fx:id="linkedOutcomeWeightColumn" text="Weight" />
-                    </columns>
-                </TableView>
-                <HBox spacing="10">
-                    <Button onAction="#handleLinkOutcomeToPartButtonAction" text="Link Outcome to Part" />
-                    <Button onAction="#handleUnlinkOutcomeFromPartButtonAction" styleClass="delete-button" text="Unlink Outcome from Part" />
-                </HBox>
-            </VBox>
-        </children>
-        <VBox.margin>
-            <Insets top="20.0" />
-        </VBox.margin>
     </HBox>
 </VBox>
