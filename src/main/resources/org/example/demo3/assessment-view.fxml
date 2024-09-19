@@ -45,6 +45,9 @@
                     <TableColumn fx:id="assessmentMaxScoreColumn" prefWidth="109.0" text="Max Score" />
                <TableColumn fx:id="assessmentPreviewColumn" prefWidth="97.0" text="Preview" />
                 </columns>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
             </TableView>
             <HBox spacing="10">
                 <Button onAction="#handleAddAssessmentButtonAction" text="+ Add" />
