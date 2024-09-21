@@ -91,7 +91,6 @@ public class AssessmentController implements AssessmentCreationCallback {
     private void initialize() {
         setupCourseSelector();
         setupAssessmentTable();
-        
         // setupPartsTable();
         // setupLinkedOutcomesForPartTable();
         // setupLinkedOutcomesForAssessmentTable();
@@ -110,40 +109,37 @@ public class AssessmentController implements AssessmentCreationCallback {
                 updateAssessmentTable();
             }
         });
-        
 
-        assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                currentAssessment = newSelection;
-                // updatePartsTable();
-            }
-        });
-        // setupAssessmentTable();
+        // assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+        //     if (newSelection != null) {
+        //         currentAssessment = newSelection;
+        //         updatePartsTable();
+        //     }
+        // });
+
         // partsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
         //     if (newSelection != null) {
         //         updateLinkedOutcomesForPartTable(newSelection);
         //     }
         // });
-
     }
 
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-        courseSelector.setConverter(new StringConverter<Course>() { // Display the course name
+
+        // Set a custom StringConverter to display the course name
+        courseSelector.setConverter(new StringConverter<Course>() {
             @Override
             public String toString(Course course) {
                 return course != null ? course.getName() : "";
             }
+
             @Override
             public Course fromString(String string) {
                 return courses.stream().filter(course -> course.getName().equals(string)).findFirst().orElse(null);
             }
         });
-        if (!courses.isEmpty()) { // On page load select first course in list
-            courseSelector.getSelectionModel().selectFirst();
-        }
-        updateAssessmentTable();
     }
 
     // private void setupLinkedOutcomesForPartTable() {
