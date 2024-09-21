@@ -73,8 +73,6 @@ public class AssessmentController implements AssessmentCreationCallback {
     @FXML
     private TableColumn<Assessment, Double> assessmentMaxScoreColumn;
     @FXML
-    private TableColumn<Assessment, String> assessmentPreviewColumn;
-    @FXML
     private TableView<Outcome> linkedOutcomesForAssessmentTable;
     @FXML
     private TableColumn<Outcome, String> linkedAssessmentOutcomeIdColumn;
@@ -91,15 +89,15 @@ public class AssessmentController implements AssessmentCreationCallback {
     private void initialize() {
         setupCourseSelector();
         setupAssessmentTable();
-        // setupPartsTable();
-        // setupLinkedOutcomesForPartTable();
-        // setupLinkedOutcomesForAssessmentTable();
+        setupPartsTable();
+        setupLinkedOutcomesForPartTable();
+        setupLinkedOutcomesForAssessmentTable();
 
         assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 currentAssessment = newSelection;
-                // updatePartsTable();
-                // updateLinkedOutcomesForAssessmentTable();
+                updatePartsTable();
+                updateLinkedOutcomesForAssessmentTable();
             }
         });
 
@@ -110,18 +108,18 @@ public class AssessmentController implements AssessmentCreationCallback {
             }
         });
 
-        // assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-        //     if (newSelection != null) {
-        //         currentAssessment = newSelection;
-        //         updatePartsTable();
-        //     }
-        // });
+        assessmentTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                currentAssessment = newSelection;
+                updatePartsTable();
+            }
+        });
 
-        // partsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-        //     if (newSelection != null) {
-        //         updateLinkedOutcomesForPartTable(newSelection);
-        //     }
-        // });
+        partsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                updateLinkedOutcomesForPartTable(newSelection);
+            }
+        });
     }
 
     private void setupCourseSelector() {
@@ -142,65 +140,64 @@ public class AssessmentController implements AssessmentCreationCallback {
         });
     }
 
-    // private void setupLinkedOutcomesForPartTable() {
-    //     linkedOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-    //     linkedOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-    //     linkedOutcomeWeightColumn.setCellValueFactory(cellData -> {
-    //         AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
-    //         if (selectedPart != null) {
-    //             double weight = db.getOutcomeWeightForPart(selectedPart.getId(), cellData.getValue().getId());
-    //             return new SimpleDoubleProperty(weight).asObject();
-    //         }
-    //         return new SimpleDoubleProperty(0).asObject();
-    //     });
-    // }
+    private void setupLinkedOutcomesForPartTable() {
+        linkedOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        linkedOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        linkedOutcomeWeightColumn.setCellValueFactory(cellData -> {
+            AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
+            if (selectedPart != null) {
+                double weight = db.getOutcomeWeightForPart(selectedPart.getId(), cellData.getValue().getId());
+                return new SimpleDoubleProperty(weight).asObject();
+            }
+            return new SimpleDoubleProperty(0).asObject();
+        });
+    }
 
-    // private void setupLinkedOutcomesForAssessmentTable() {
-    //     linkedAssessmentOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-    //     linkedAssessmentOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-    //     linkedAssessmentOutcomeWeightColumn.setCellValueFactory(cellData -> {
-    //         if (currentAssessment != null) {
-    //             double weight = db.getOutcomeWeightForAssessment(currentAssessment.getId(),
-    //                     cellData.getValue().getId());
-    //             return new SimpleDoubleProperty(weight).asObject();
-    //         }
-    //         return new SimpleDoubleProperty(0).asObject();
-    //     });
-    // }
+    private void setupLinkedOutcomesForAssessmentTable() {
+        linkedAssessmentOutcomeIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        linkedAssessmentOutcomeNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        linkedAssessmentOutcomeWeightColumn.setCellValueFactory(cellData -> {
+            if (currentAssessment != null) {
+                double weight = db.getOutcomeWeightForAssessment(currentAssessment.getId(),
+                        cellData.getValue().getId());
+                return new SimpleDoubleProperty(weight).asObject();
+            }
+            return new SimpleDoubleProperty(0).asObject();
+        });
+    }
 
-    // private void updateLinkedOutcomesForPartTable(AssessmentPart part) {
-    //     if (part != null) {
-    //         List<Outcome> linkedOutcomes = db.getLinkedOutcomesForPart(part.getId());
-    //         linkedOutcomesForPartTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
-    //         linkedOutcomesForPartTable.refresh();
-    //     } else {
-    //         linkedOutcomesForPartTable.getItems().clear();
-    //     }
-    // }
+    private void updateLinkedOutcomesForPartTable(AssessmentPart part) {
+        if (part != null) {
+            List<Outcome> linkedOutcomes = db.getLinkedOutcomesForPart(part.getId());
+            linkedOutcomesForPartTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
+            linkedOutcomesForPartTable.refresh();
+        } else {
+            linkedOutcomesForPartTable.getItems().clear();
+        }
+    }
 
-    // private void updateLinkedOutcomesForAssessmentTable() {
-    //     if (currentAssessment != null) {
-    //         List<Outcome> linkedOutcomes = db.getLinkedOutcomesForAssessment(currentAssessment.getId());
-    //         linkedOutcomesForAssessmentTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
-    //         linkedOutcomesForAssessmentTable.refresh();
-    //     } else {
-    //         linkedOutcomesForAssessmentTable.getItems().clear();
-    //     }
-    // }
+    private void updateLinkedOutcomesForAssessmentTable() {
+        if (currentAssessment != null) {
+            List<Outcome> linkedOutcomes = db.getLinkedOutcomesForAssessment(currentAssessment.getId());
+            linkedOutcomesForAssessmentTable.setItems(FXCollections.observableArrayList(linkedOutcomes));
+            linkedOutcomesForAssessmentTable.refresh();
+        } else {
+            linkedOutcomesForAssessmentTable.getItems().clear();
+        }
+    }
 
     private void setupAssessmentTable() {
         assessmentNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         assessmentDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
         assessmentWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
         assessmentMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
-        assessmentPreviewColumn.setCellValueFactory(new PropertyValueFactory<>("preview"));
     }
 
-    // private void setupPartsTable() {
-    //     partNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-    //     partWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
-    //     partMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
-    // }
+    private void setupPartsTable() {
+        partNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        partWeightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
+        partMaxScoreColumn.setCellValueFactory(new PropertyValueFactory<>("maxScore"));
+    }
 
     @FXML
     private void handleAddAssessmentButtonAction() {
@@ -236,14 +233,14 @@ public class AssessmentController implements AssessmentCreationCallback {
         }
     }
 
-    // private void updatePartsTable() {
-    //     if (currentAssessment != null) {
-    //         List<AssessmentPart> parts = db.getAssessmentParts(currentAssessment.getId());
-    //         partsTable.setItems(FXCollections.observableArrayList(parts));
-    //     } else {
-    //         partsTable.getItems().clear();
-    //     }
-    // }
+    private void updatePartsTable() {
+        if (currentAssessment != null) {
+            List<AssessmentPart> parts = db.getAssessmentParts(currentAssessment.getId());
+            partsTable.setItems(FXCollections.observableArrayList(parts));
+        } else {
+            partsTable.getItems().clear();
+        }
+    }
 
     @Override
     public void onAssessmentCreated(Assessment newAssessment) {
@@ -251,99 +248,99 @@ public class AssessmentController implements AssessmentCreationCallback {
                 .println("New assessment created: " + newAssessment.getName() + " (ID: " + newAssessment.getId() + ")");
         refreshAssessmentTable();
         assessmentTable.getSelectionModel().select(newAssessment);
-        // updatePartsTable();
+        updatePartsTable();
     }
 
-    // @FXML
-    // private void handleLinkOutcomeToAssessmentButtonAction() {
-    //     if (currentAssessment == null) {
-    //         showAlert("Please select an assessment first.");
-    //         return;
-    //     }
+    @FXML
+    private void handleLinkOutcomeToAssessmentButtonAction() {
+        if (currentAssessment == null) {
+            showAlert("Please select an assessment first.");
+            return;
+        }
 
-    //     Dialog<Void> dialog = new Dialog<>();
-    //     dialog.setTitle("Link Outcome to Assessment");
-    //     dialog.setHeaderText("Link an outcome to " + currentAssessment.getName());
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Link Outcome to Assessment");
+        dialog.setHeaderText("Link an outcome to " + currentAssessment.getName());
 
-    //     ComboBox<Outcome> outcomeComboBox = new ComboBox<>();
-    //     outcomeComboBox.setItems(FXCollections.observableArrayList(selectedCourse.getOutcomes()));
-    //     TextField weightField = new TextField();
+        ComboBox<Outcome> outcomeComboBox = new ComboBox<>();
+        outcomeComboBox.setItems(FXCollections.observableArrayList(selectedCourse.getOutcomes()));
+        TextField weightField = new TextField();
 
-    //     dialog.getDialogPane().setContent(new VBox(10,
-    //             new Label("Select Outcome:"), outcomeComboBox,
-    //             new Label("Weight (%):"), weightField));
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Select Outcome:"), outcomeComboBox,
+                new Label("Weight (%):"), weightField));
 
-    //     ButtonType linkButtonType = new ButtonType("Link", ButtonBar.ButtonData.OK_DONE);
-    //     dialog.getDialogPane().getButtonTypes().addAll(linkButtonType, ButtonType.CANCEL);
+        ButtonType linkButtonType = new ButtonType("Link", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(linkButtonType, ButtonType.CANCEL);
 
-    //     dialog.setResultConverter(dialogButton -> {
-    //         if (dialogButton == linkButtonType) {
-    //             try {
-    //                 Outcome selectedOutcome = outcomeComboBox.getValue();
-    //                 double weight = Double.parseDouble(weightField.getText());
-    //                 if (selectedOutcome != null) {
-    //                     db.linkOutcomeToAssessment(currentAssessment.getId(), selectedOutcome.getId(), weight);
-    //                     updateLinkedOutcomesForAssessmentTable();
-    //                 }
-    //             } catch (NumberFormatException e) {
-    //                 showAlert("Invalid input. Please enter a valid number for weight.");
-    //             }
-    //         }
-    //         return null;
-    //     });
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == linkButtonType) {
+                try {
+                    Outcome selectedOutcome = outcomeComboBox.getValue();
+                    double weight = Double.parseDouble(weightField.getText());
+                    if (selectedOutcome != null) {
+                        db.linkOutcomeToAssessment(currentAssessment.getId(), selectedOutcome.getId(), weight);
+                        updateLinkedOutcomesForAssessmentTable();
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter a valid number for weight.");
+                }
+            }
+            return null;
+        });
 
-    //     dialog.showAndWait();
-    // }
+        dialog.showAndWait();
+    }
 
-    // @FXML
-    // private void handleUnlinkOutcomeFromAssessmentButtonAction() {
-    //     if (currentAssessment == null) {
-    //         showAlert("Please select an assessment first.");
-    //         return;
-    //     }
+    @FXML
+    private void handleUnlinkOutcomeFromAssessmentButtonAction() {
+        if (currentAssessment == null) {
+            showAlert("Please select an assessment first.");
+            return;
+        }
 
-    //     Outcome selectedOutcome = linkedOutcomesForAssessmentTable.getSelectionModel().getSelectedItem();
-    //     if (selectedOutcome == null) {
-    //         showAlert("Please select an outcome to unlink.");
-    //         return;
-    //     }
+        Outcome selectedOutcome = linkedOutcomesForAssessmentTable.getSelectionModel().getSelectedItem();
+        if (selectedOutcome == null) {
+            showAlert("Please select an outcome to unlink.");
+            return;
+        }
 
-    //     if (showConfirmationDialog("Are you sure you want to unlink this outcome from the assessment?")) {
-    //         db.unlinkOutcomeFromAssessment(currentAssessment.getId(), selectedOutcome.getId());
-    //         updateLinkedOutcomesForAssessmentTable();
-    //     }
-    // }
+        if (showConfirmationDialog("Are you sure you want to unlink this outcome from the assessment?")) {
+            db.unlinkOutcomeFromAssessment(currentAssessment.getId(), selectedOutcome.getId());
+            updateLinkedOutcomesForAssessmentTable();
+        }
+    }
 
-    // @FXML
-    // private void setupOutcomeTable() {
-    //     TableColumn<Outcome, String> idColumn = new TableColumn<>("ID");
-    //     idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+    @FXML
+    private void setupOutcomeTable() {
+        TableColumn<Outcome, String> idColumn = new TableColumn<>("ID");
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-    //     TableColumn<Outcome, String> nameColumn = new TableColumn<>("Name");
-    //     nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn<Outcome, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-    //     TableColumn<Outcome, String> descriptionColumn = new TableColumn<>("Description");
-    //     descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
+        TableColumn<Outcome, String> descriptionColumn = new TableColumn<>("Description");
+        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-    //     TableColumn<Outcome, Number> weightColumn = new TableColumn<>("Weight");
-    //     weightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
+        TableColumn<Outcome, Number> weightColumn = new TableColumn<>("Weight");
+        weightColumn.setCellValueFactory(new PropertyValueFactory<>("weight"));
 
-    //     outcomeTable.getColumns().addAll(idColumn, nameColumn, descriptionColumn, weightColumn);
-    // }
+        outcomeTable.getColumns().addAll(idColumn, nameColumn, descriptionColumn, weightColumn);
+    }
 
-    // @FXML
-    // private void handleUnlinkOutcomeFromPartButtonAction() {
-    //     AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
-    //     Outcome selectedOutcome = linkedOutcomesForPartTable.getSelectionModel().getSelectedItem();
-    //     if (selectedPart != null && selectedOutcome != null) {
-    //         if (showConfirmationDialog("Are you sure you want to unlink this outcome from the part?")) {
-    //             db.unlinkOutcomeFromAssessmentPart(selectedPart.getId(), selectedOutcome.getId());
-    //             updateLinkedOutcomesForPartTable(selectedPart);
-    //         }
-    //     } else {
-    //         showAlert("Please select a part and an outcome to unlink.");
-    //     }
-    // }
+    @FXML
+    private void handleUnlinkOutcomeFromPartButtonAction() {
+        AssessmentPart selectedPart = partsTable.getSelectionModel().getSelectedItem();
+        Outcome selectedOutcome = linkedOutcomesForPartTable.getSelectionModel().getSelectedItem();
+        if (selectedPart != null && selectedOutcome != null) {
+            if (showConfirmationDialog("Are you sure you want to unlink this outcome from the part?")) {
+                db.unlinkOutcomeFromAssessmentPart(selectedPart.getId(), selectedOutcome.getId());
+                updateLinkedOutcomesForPartTable(selectedPart);
+            }
+        } else {
+            showAlert("Please select a part and an outcome to unlink.");
+        }
+    }
 
     private void refreshAssessmentTable() {
         if (selectedCourse != null) {
@@ -353,102 +350,102 @@ public class AssessmentController implements AssessmentCreationCallback {
         }
     }
 
-    // @FXML
-    // private void handleAddChildAssessmentButtonAction() {
-    //     Assessment selectedAssessment = assessmentTable.getSelectionModel().getSelectedItem();
-    //     if (selectedAssessment == null) {
-    //         showAlert("Please select a parent assessment first.");
-    //         return;
-    //     }
+    @FXML
+    private void handleAddChildAssessmentButtonAction() {
+        Assessment selectedAssessment = assessmentTable.getSelectionModel().getSelectedItem();
+        if (selectedAssessment == null) {
+            showAlert("Please select a parent assessment first.");
+            return;
+        }
 
-    //     Dialog<Assessment> dialog = new Dialog<>();
-    //     dialog.setTitle("Add Child Assessment");
-    //     dialog.setHeaderText("Create a new child assessment for " + selectedAssessment.getName());
+        Dialog<Assessment> dialog = new Dialog<>();
+        dialog.setTitle("Add Child Assessment");
+        dialog.setHeaderText("Create a new child assessment for " + selectedAssessment.getName());
 
-    //     TextField nameField = new TextField();
-    //     TextField descriptionField = new TextField();
-    //     TextField weightField = new TextField();
-    //     TextField maxScoreField = new TextField();
+        TextField nameField = new TextField();
+        TextField descriptionField = new TextField();
+        TextField weightField = new TextField();
+        TextField maxScoreField = new TextField();
 
-    //     dialog.getDialogPane().setContent(new VBox(10,
-    //             new Label("Name:"), nameField,
-    //             new Label("Description:"), descriptionField,
-    //             new Label("Weight:"), weightField,
-    //             new Label("Max Score:"), maxScoreField));
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Name:"), nameField,
+                new Label("Description:"), descriptionField,
+                new Label("Weight:"), weightField,
+                new Label("Max Score:"), maxScoreField));
 
-    //     ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-    //     dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-    //     dialog.setResultConverter(dialogButton -> {
-    //         if (dialogButton == addButtonType) {
-    //             try {
-    //                 String name = nameField.getText();
-    //                 String description = descriptionField.getText();
-    //                 double weight = Double.parseDouble(weightField.getText());
-    //                 double maxScore = Double.parseDouble(maxScoreField.getText());
-    //                 Assessment childAssessment = new Assessment(name, description, weight, maxScore);
-    //                 selectedAssessment.addChildAssessment(childAssessment);
-    //                 db.addAssessment(childAssessment, description);
-    //                 return childAssessment;
-    //             } catch (NumberFormatException e) {
-    //                 showAlert("Invalid input. Please enter valid numbers for weight and max score.");
-    //                 return null;
-    //             }
-    //         }
-    //         return null;
-    //     });
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                try {
+                    String name = nameField.getText();
+                    String description = descriptionField.getText();
+                    double weight = Double.parseDouble(weightField.getText());
+                    double maxScore = Double.parseDouble(maxScoreField.getText());
+                    Assessment childAssessment = new Assessment(name, description, weight, maxScore);
+                    selectedAssessment.addChildAssessment(childAssessment);
+                    db.addAssessment(childAssessment, description);
+                    return childAssessment;
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter valid numbers for weight and max score.");
+                    return null;
+                }
+            }
+            return null;
+        });
 
-    //     dialog.showAndWait().ifPresent(childAssessment -> {
-    //         updateAssessmentTable();
-    //     });
-    // }
+        dialog.showAndWait().ifPresent(childAssessment -> {
+            updateAssessmentTable();
+        });
+    }
 
-    // @FXML
-    // private void handleAddPartButtonAction() {
-    //     if (currentAssessment == null) {
-    //         showAlert("Please select an assessment first.");
-    //         return;
-    //     }
+    @FXML
+    private void handleAddPartButtonAction() {
+        if (currentAssessment == null) {
+            showAlert("Please select an assessment first.");
+            return;
+        }
 
-    //     Dialog<AssessmentPart> dialog = new Dialog<>();
-    //     dialog.setTitle("Add Assessment Part");
-    //     dialog.setHeaderText("Create a new part for " + currentAssessment.getName());
+        Dialog<AssessmentPart> dialog = new Dialog<>();
+        dialog.setTitle("Add Assessment Part");
+        dialog.setHeaderText("Create a new part for " + currentAssessment.getName());
 
-    //     TextField nameField = new TextField();
-    //     TextField weightField = new TextField();
-    //     TextField maxScoreField = new TextField();
+        TextField nameField = new TextField();
+        TextField weightField = new TextField();
+        TextField maxScoreField = new TextField();
 
-    //     dialog.getDialogPane().setContent(new VBox(10,
-    //             new Label("Name:"), nameField,
-    //             new Label("Weight:"), weightField,
-    //             new Label("Max Score:"), maxScoreField));
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Name:"), nameField,
+                new Label("Weight:"), weightField,
+                new Label("Max Score:"), maxScoreField));
 
-    //     ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
-    //     dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-    //     dialog.setResultConverter(dialogButton -> {
-    //         if (dialogButton == addButtonType) {
-    //             try {
-    //                 String name = nameField.getText();
-    //                 double weight = Double.parseDouble(weightField.getText());
-    //                 double maxScore = Double.parseDouble(maxScoreField.getText());
-    //                 AssessmentPart newPart = new AssessmentPart(-1, name, weight, maxScore);
-    //                 int partId = db.addAssessmentPart(newPart, currentAssessment.getId());
-    //                 newPart.setId(partId);
-    //                 currentAssessment.addPart(newPart);
-    //                 return newPart;
-    //             } catch (NumberFormatException e) {
-    //                 showAlert("Invalid input. Please enter valid numbers for weight and max score.");
-    //                 return null;
-    //             }
-    //         }
-    //         return null;
-    //     });
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == addButtonType) {
+                try {
+                    String name = nameField.getText();
+                    double weight = Double.parseDouble(weightField.getText());
+                    double maxScore = Double.parseDouble(maxScoreField.getText());
+                    AssessmentPart newPart = new AssessmentPart(-1, name, weight, maxScore);
+                    int partId = db.addAssessmentPart(newPart, currentAssessment.getId());
+                    newPart.setId(partId);
+                    currentAssessment.addPart(newPart);
+                    return newPart;
+                } catch (NumberFormatException e) {
+                    showAlert("Invalid input. Please enter valid numbers for weight and max score.");
+                    return null;
+                }
+            }
+            return null;
+        });
 
-    //     dialog.showAndWait().ifPresent(part -> {
-    //         updatePartsTable();
-    //     });
-    // }
+        dialog.showAndWait().ifPresent(part -> {
+            updatePartsTable();
+        });
+    }
 
     private void updateOutcomeTableForAssessment(Assessment assessment) {
         if (assessment != null) {
@@ -490,7 +487,7 @@ public class AssessmentController implements AssessmentCreationCallback {
                     double weight = Double.parseDouble(weightField.getText());
                     if (selectedOutcome != null) {
                         db.linkOutcomeToAssessmentPart(selectedPart.getId(), selectedOutcome.getId(), weight);
-                        // updatePartsTable();
+                        updatePartsTable();
                     }
                 } catch (NumberFormatException e) {
                     showAlert("Invalid input. Please enter a valid number for weight.");
@@ -572,7 +569,7 @@ public class AssessmentController implements AssessmentCreationCallback {
         if (selectedPart != null) {
             if (showConfirmationDialog("Are you sure you want to delete this assessment part?")) {
                 db.deleteAssessmentPart(selectedPart.getId());
-                // updatePartsTable();
+                updatePartsTable();
             }
         } else {
             showAlert("Please select a part to delete.");
