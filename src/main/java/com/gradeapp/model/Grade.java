@@ -1,56 +1,55 @@
 package com.gradeapp.model;
 
 import java.time.LocalDate;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 
 public class Grade {
     private Student student;
     private Assessment assessment;
-    private AssessmentPart part;
-    private double score;
+    private AssessmentPart assessmentPart;
+    private DoubleProperty score;
     private String feedback;
     private LocalDate date;
 
-    public Grade(Student student, Assessment assessment, double score, String feedback) {
-        this(student, assessment, null, score, feedback);
-    }
-
-    public Grade(Student student, Assessment assessment, AssessmentPart part, double score, String feedback) {
+    // Constructor with AssessmentPart
+    public Grade(Student student, Assessment assessment, AssessmentPart assessmentPart, double score, String feedback) {
         this.student = student;
         this.assessment = assessment;
-        this.part = part;
-        this.score = score;
+        this.assessmentPart = assessmentPart;
+        this.score = new SimpleDoubleProperty(score);
         this.feedback = feedback;
         this.date = LocalDate.now();
     }
 
-    // Methods for managing the grade book
-    public void addToGradeBook() {
-        student.getGradeBook().addGrade(this);
+    // Constructor without AssessmentPart
+    public Grade(Student student, Assessment assessment, double score, String feedback) {
+        this(student, assessment, null, score, feedback);
     }
 
-    public void removeFromGradeBook() {
-        student.getGradeBook().removeGrade(this);
-    }
-
-    // Getters and Setters
-    public double getScore() {
-        return score;
-    }
-
-    public void setScore(double score) {
-        this.score = score;
+    // Getters and setters
+    public Student getStudent() {
+        return student;
     }
 
     public Assessment getAssessment() {
         return assessment;
     }
 
-    public AssessmentPart getPart() {
-        return part;
+    public AssessmentPart getAssessmentPart() {
+        return assessmentPart;
     }
 
-    public Student getStudent() {
-        return student;
+    public double getScore() {
+        return score.get();
+    }
+
+    public void setScore(double score) {
+        this.score.set(score);
+    }
+
+    public DoubleProperty scoreProperty() {
+        return score;
     }
 
     public String getFeedback() {
@@ -67,13 +66,5 @@ public class Grade {
 
     public void setDate(LocalDate date) {
         this.date = date;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Grade(student=%s, assessment=%s, part=%s, score=%.2f, feedback=%s, date=%s)",
-                student.getName(), assessment.getName(),
-                (part != null ? part.getName() : "N/A"),
-                score, feedback, date);
     }
 }

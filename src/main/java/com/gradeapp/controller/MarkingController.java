@@ -1,5 +1,7 @@
 package com.gradeapp.controller;
 
+import java.io.IOException;
+
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Assessment;
 import com.gradeapp.model.Classes;
@@ -15,15 +17,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import java.io.IOException;
 
 public class MarkingController {
 
@@ -64,14 +63,14 @@ public class MarkingController {
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-            courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-                if (newSelection != null) {
-                    selectedCourse = newSelection; // Store selected course
-                    updateClassSelector(newSelection);
-                    updateAssessmentSelector(); // Update assessments based on selected course
-                }
-            });
-        
+        courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                selectedCourse = newSelection; // Store selected course
+                updateClassSelector(newSelection);
+                updateAssessmentSelector(); // Update assessments based on selected course
+            }
+        });
+
         courseSelector.setConverter(new StringConverter<Course>() {
             @Override
             public String toString(Course course) {
@@ -96,7 +95,8 @@ public class MarkingController {
 
     // Method to update classSelector based on selected course
     private void updateClassSelector(Course selectedCourse) {
-        ObservableList<Classes> classes = FXCollections.observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
+        ObservableList<Classes> classes = FXCollections
+                .observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
         classSelector.setItems(classes);
         classSelector.getSelectionModel().selectFirst();
     }
@@ -105,7 +105,8 @@ public class MarkingController {
     private void updateAssessmentSelector() {
         Course selectedCourse = courseSelector.getSelectionModel().getSelectedItem();
         if (selectedCourse != null) {
-            ObservableList<Assessment> assessments = FXCollections.observableArrayList(db.getAssessmentsForCourse(selectedCourse.getId()));
+            ObservableList<Assessment> assessments = FXCollections
+                    .observableArrayList(db.getAssessmentsForCourse(selectedCourse.getId()));
             assessmentSelector.setItems(assessments);
             assessmentSelector.getSelectionModel().selectFirst();
         }
@@ -113,7 +114,8 @@ public class MarkingController {
 
     // Method to update the student list based on the selected class
     private void updateStudentList(Classes selectedClass) {
-        ObservableList<Student> students = FXCollections.observableArrayList(db.getStudentsInClass(selectedClass.getClassId()));
+        ObservableList<Student> students = FXCollections
+                .observableArrayList(db.getStudentsInClass(selectedClass.getClassId()));
         studentsInClass.getChildren().clear();
         for (Student student : students) {
             HBox studentCard = createStudentCard(student);
@@ -146,14 +148,15 @@ public class MarkingController {
                 showAlert("Please select an assessment.");
                 return;
             }
-
+    
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/student-markbook.fxml"));
             VBox studentMarkBook = loader.load();
-
+    
             StudentMarkbookController controller = loader.getController();
-            controller.setStudent(student);
-            controller.setAssessment(selectedAssessment);
-
+    
+            // Initialize both student and assessment together
+            controller.initializeData(student, selectedAssessment);
+    
             Stage stage = new Stage();
             stage.setTitle("Mark Book for " + student.getName());
             stage.setScene(new Scene(studentMarkBook));
@@ -163,8 +166,8 @@ public class MarkingController {
             showAlert("Error loading student's MarkBook: " + e.getMessage());
         }
     }
-
     
+
     // Method to set details in student-markbook.fxml
     private void setStudent(Student student) {
         studentName.setText(student.getName());

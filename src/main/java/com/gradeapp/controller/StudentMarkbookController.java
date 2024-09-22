@@ -1,33 +1,52 @@
 package com.gradeapp.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.gradeapp.database.Database;
-import com.gradeapp.model.*;
-import javafx.beans.property.SimpleDoubleProperty;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
+import com.gradeapp.model.Grade;
+import com.gradeapp.model.Outcome;
+import com.gradeapp.model.Student;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.converter.DoubleStringConverter;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class StudentMarkbookController {
 
-    @FXML private Label studentName;
-    @FXML private Label studentId;
-    @FXML private TableView<Grade> gradeTable;
-    @FXML private TableColumn<Grade, String> assessmentColumn;
-    @FXML private TableColumn<Grade, String> partColumn;
-    @FXML private TableColumn<Grade, String> outcomeColumn;
-    @FXML private TableColumn<Grade, Double> scoreColumn;
-    @FXML private TableColumn<Grade, String> percentageColumn;
-    @FXML private Label percentageLabel;
-    @FXML private Button saveStudent;
-    @FXML private Button cancel;
+    @FXML
+    private Label studentName;
+    @FXML
+    private Label studentId;
+    @FXML
+    private TableView<Grade> gradeTable;
+    @FXML
+    private TableColumn<Grade, String> assessmentColumn;
+    @FXML
+    private TableColumn<Grade, String> partColumn;
+    @FXML
+    private TableColumn<Grade, String> outcomeColumn;
+    @FXML
+    private TableColumn<Grade, Double> scoreColumn;
+    @FXML
+    private TableColumn<Grade, String> percentageColumn;
+    @FXML
+    private Label percentageLabel;
+    @FXML
+    private Button saveStudent;
+    @FXML
+    private Button cancel;
 
     private Student student;
     private Assessment assessment;
@@ -35,20 +54,23 @@ public class StudentMarkbookController {
 
     @FXML
     private void initialize() {
-        assessmentColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAssessment().getName()));
-        partColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAssessmentPart() != null ? cellData.getValue().getAssessmentPart().getName() : "N/A"));
+        assessmentColumn.setCellValueFactory(
+                cellData -> new SimpleStringProperty(cellData.getValue().getAssessment().getName()));
+        partColumn.setCellValueFactory(cellData -> new SimpleStringProperty(
+                cellData.getValue().getAssessmentPart() != null ? cellData.getValue().getAssessmentPart().getName()
+                        : "N/A"));
         outcomeColumn.setCellValueFactory(cellData -> {
-            List<Outcome> outcomes = cellData.getValue().getAssessmentPart() != null ?
-                db.getOutcomesForAssessmentPart(cellData.getValue().getAssessmentPart().getId()) :
-                db.getOutcomesForAssessment(cellData.getValue().getAssessment().getId());
+            List<Outcome> outcomes = cellData.getValue().getAssessmentPart() != null
+                    ? db.getOutcomesForAssessmentPart(cellData.getValue().getAssessmentPart().getId())
+                    : db.getOutcomesForAssessment(cellData.getValue().getAssessment().getId());
             return new SimpleStringProperty(outcomes.stream().map(Outcome::getName).collect(Collectors.joining(", ")));
         });
         scoreColumn.setCellValueFactory(cellData -> cellData.getValue().scoreProperty().asObject());
         percentageColumn.setCellValueFactory(cellData -> {
             double score = cellData.getValue().getScore();
-            double maxScore = cellData.getValue().getAssessmentPart() != null ?
-                cellData.getValue().getAssessmentPart().getMaxScore() :
-                cellData.getValue().getAssessment().getMaxScore();
+            double maxScore = cellData.getValue().getAssessmentPart() != null
+                    ? cellData.getValue().getAssessmentPart().getMaxScore()
+                    : assessment.getMaxScore();
             double percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
             return new SimpleStringProperty(String.format("%.2f%%", percentage));
         });
@@ -68,14 +90,27 @@ public class StudentMarkbookController {
         this.student = student;
         studentName.setText(student.getName());
         studentId.setText(student.getStudentId());
+
     }
 
     public void setAssessment(Assessment assessment) {
         this.assessment = assessment;
+    }
+
+    public void initializeData(Student student, Assessment assessment) {
+        this.student = student;
+        this.assessment = assessment;
+        studentName.setText(student.getName());
+        studentId.setText(student.getStudentId());
         loadGrades();
     }
 
     private void loadGrades() {
+        if (student == null || assessment == null) {
+            System.err.println("Cannot load grades. Student or Assessment is not set.");
+            return;
+        }
+
         ObservableList<Grade> gradesList = FXCollections.observableArrayList();
 
         if (assessment.getParts() != null && !assessment.getParts().isEmpty()) {
@@ -104,7 +139,8 @@ public class StudentMarkbookController {
 
         for (Grade grade : gradeTable.getItems()) {
             totalScore += grade.getScore();
-            totalMaxScore += (grade.getAssessmentPart() != null) ? grade.getAssessmentPart().getMaxScore() : assessment.getMaxScore();
+            totalMaxScore += (grade.getAssessmentPart() != null) ? grade.getAssessmentPart().getMaxScore()
+                    : assessment.getMaxScore();
         }
 
         double percentage = totalMaxScore != 0 ? (totalScore / totalMaxScore) * 100 : 0;
