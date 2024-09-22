@@ -62,7 +62,7 @@ public class StudentDetailsController {
             assessmentName.setCellValueFactory(
                     cellData -> new SimpleStringProperty(cellData.getValue().getAssessment().getName()));
             assessmentPart.setCellValueFactory(cellData -> {
-                AssessmentPart part = cellData.getValue().getPart();
+                AssessmentPart part = cellData.getValue().getAssessmentPart();
                 return new SimpleStringProperty(part != null ? part.getName() : "");
             });
             grade.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getScore()).asObject());

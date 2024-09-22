@@ -176,6 +176,7 @@ public class AssessmentController implements AssessmentCreationCallback {
         }
     }
 
+    
     private void updateLinkedOutcomesForAssessmentTable() {
         if (currentAssessment != null) {
             List<Outcome> linkedOutcomes = db.getLinkedOutcomesForAssessment(currentAssessment.getId());

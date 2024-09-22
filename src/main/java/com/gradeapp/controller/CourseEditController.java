@@ -49,6 +49,7 @@ public class CourseEditController {
     @FXML
     private TableColumn<Classes, String> classIdColumn;
 
+    @SuppressWarnings("unused")
     private CoursesController coursesController;
 
     private Course course;
