@@ -115,6 +115,15 @@ public class Database {
                 + "FOREIGN KEY (student_id) REFERENCES students(studentId),"
                 + "FOREIGN KEY (class_id) REFERENCES classes(classId)"
                 + ");";
+        String createStudentMarkBookTable = "CREATE TABLE IF NOT EXISTS student_markbook ("
+                + "student_id TEXT PRIMARY KEY AUTOINCREMENT,"
+                + "assessment FOREIGN KEY (assessment_id) REFERENCES assessments(id),"
+                + "part TEXT NOT NULL,"
+                + "outcome TEXT NOT NULL,"
+                + "weight INTEGER NOT NULL,"
+                + "score INTEGER NOT NULL,"
+                + "percentage INTEGER NOT NULL,"
+                + ");";
         try (Connection conn = this.connect();
                 Statement stmt = conn.createStatement()) {
             stmt.execute(createCoursesTable);
@@ -128,6 +137,7 @@ public class Database {
             stmt.execute(createGradesTable);
             stmt.execute(createStudentClassesTable);
             stmt.execute(createAssessmentPartOutcomesTable);
+            stmt.execute(createStudentMarkBookTable);
 
             try {
                 stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
@@ -155,8 +165,27 @@ public class Database {
         }
     }
 
-    // ASSESSMENT PARTS
+    // STUDENT MARKBOOOK
+    public void saveStudentMarkBook(String studentId, int assessmentId, int partId, String outcomeId, double weight,
+            double score, double percentage) {
+        String sql = "INSERT OR REPLACE INTO student_markbook (student_id, assessment_id, part_id, outcome_id, weight, score, percentage) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setInt(2, assessmentId);
+            pstmt.setInt(3, partId);
+            pstmt.setString(4, outcomeId);
+            pstmt.setDouble(5, weight);
+            pstmt.setDouble(6, score);
+            pstmt.setDouble(7, percentage);
+            pstmt.executeUpdate();
+            System.out.println("Student markbook saved successfully.");
+        } catch (SQLException e) {
+            System.out.println("Error saving student markbook: " + e.getMessage());
+        }
+    }
 
+    // ASSESSMENT PARTS
     public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
         try (Connection conn = this.connect();

@@ -54,6 +54,11 @@ public class StudentMarkbookController {
 
     @FXML
     private void initialize() {
+        setupGradeTable();
+        loadGrades();
+    }
+
+    public void setupGradeTable() {
         assessmentColumn.setCellValueFactory(
                 cellData -> new SimpleStringProperty(cellData.getValue().getAssessment().getName()));
         partColumn.setCellValueFactory(cellData -> new SimpleStringProperty(
@@ -74,15 +79,14 @@ public class StudentMarkbookController {
             double percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
             return new SimpleStringProperty(String.format("%.2f%%", percentage));
         });
-
         scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         scoreColumn.setOnEditCommit(event -> {
             Grade grade = event.getRowValue();
             grade.setScore(event.getNewValue());
             gradeTable.refresh();
             calculatePercentages();
+            saveGrade(grade); // Save the edited score to the database
         });
-
         gradeTable.setEditable(true);
     }
 
@@ -90,7 +94,6 @@ public class StudentMarkbookController {
         this.student = student;
         studentName.setText(student.getName());
         studentId.setText(student.getStudentId());
-
     }
 
     public void setAssessment(Assessment assessment) {
@@ -110,14 +113,14 @@ public class StudentMarkbookController {
             System.err.println("Cannot load grades. Student or Assessment is not set.");
             return;
         }
-
         ObservableList<Grade> gradesList = FXCollections.observableArrayList();
-
         if (assessment.getParts() != null && !assessment.getParts().isEmpty()) {
             for (AssessmentPart part : assessment.getParts()) {
                 Grade grade = db.getGrade(student.getStudentId(), assessment.getId(), part.getId());
                 if (grade == null) {
                     grade = new Grade(student, assessment, part, 0.0, "");
+                } else {
+                    System.out.println("Loaded grade from database: " + grade);
                 }
                 gradesList.add(grade);
             }
@@ -125,10 +128,11 @@ public class StudentMarkbookController {
             Grade grade = db.getGrade(student.getStudentId(), assessment.getId(), null);
             if (grade == null) {
                 grade = new Grade(student, assessment, null, 0.0, "");
+            } else {
+                System.out.println("Loaded grade from database: " + grade);
             }
             gradesList.add(grade);
         }
-
         gradeTable.setItems(gradesList);
         calculatePercentages();
     }
@@ -136,23 +140,51 @@ public class StudentMarkbookController {
     private void calculatePercentages() {
         double totalScore = 0;
         double totalMaxScore = 0;
-
         for (Grade grade : gradeTable.getItems()) {
             totalScore += grade.getScore();
             totalMaxScore += (grade.getAssessmentPart() != null) ? grade.getAssessmentPart().getMaxScore()
                     : assessment.getMaxScore();
         }
-
         double percentage = totalMaxScore != 0 ? (totalScore / totalMaxScore) * 100 : 0;
         percentageLabel.setText(String.format("Total Percentage: %.2f%%", percentage));
     }
 
     @FXML
     private void saveStudent() {
-        for (Grade grade : gradeTable.getItems()) {
-            db.saveGrade(grade);
+        try {
+            for (Grade grade : gradeTable.getItems()) {
+                saveGrade(grade);
+            }
+            showAlert("Grades saved successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error saving grades: " + e.getMessage());
         }
-        showAlert("Grades saved successfully.");
+        loadGrades();
+    }
+
+    private void saveGrade(Grade grade) {
+        try {
+            String studentId = grade.getStudent() != null ? grade.getStudent().getStudentId() : "null";
+            int assessmentId = grade.getAssessment() != null ? grade.getAssessment().getId() : -1;
+            int partId = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : 0;
+            String outcomeId = grade.getAssessmentPart() != null && !grade.getAssessmentPart().getLinkedOutcomes().isEmpty() ? grade.getAssessmentPart().getLinkedOutcomes().keySet().iterator().next().getId() : "null";
+            double weight = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getWeight() : 1.0;
+            double score = grade.getScore();
+            double percentage = grade.getAssessmentPart() != null ? (score / grade.getAssessmentPart().getMaxScore()) * 100 : 0.0;
+
+            System.out.println("Saving grade for studentId: " + studentId + ", assessmentId: " + assessmentId + ", partId: " + partId + ", outcomeId: " + outcomeId + ", weight: " + weight + ", score: " + score + ", percentage: " + percentage);
+
+            if (studentId.equals("null") || assessmentId == -1 || outcomeId.equals("null")) {
+                System.out.println("Error: Missing required data. studentId: " + studentId + ", assessmentId: " + assessmentId + ", outcomeId: " + outcomeId);
+                return;
+            }
+            db.saveStudentMarkBook(studentId, assessmentId, partId, outcomeId, weight, score, percentage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error saving grade: " + e.getMessage());
+            loadGrades();
+        }
     }
 
     @FXML
