@@ -76,8 +76,8 @@
    <Label fx:id="percentageLabel" text="Total Percentage: 0%" />
    <HBox prefHeight="18.0" prefWidth="760.0" spacing="10.0">
       <children>
-         <Button fx:id="cancel" mnemonicParsing="false" styleClass="delete-button" text="Cancel" onAction="#cancel" />
-         <Button fx:id="saveStudent" mnemonicParsing="false" text="Save" onAction="#saveStudent" />
+         <Button fx:id="cancelButton" mnemonicParsing="false" styleClass="delete-button" text="Cancel" onAction="#cancel" />
+         <Button fx:id="saveButton" mnemonicParsing="false" text="Save" onAction="#saveGrades" />
       </children>
       <VBox.margin>
          <Insets />

@@ -10,6 +10,7 @@ import com.gradeapp.model.Grade;
 import com.gradeapp.model.Outcome;
 import com.gradeapp.model.Student;
 
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,9 +45,9 @@ public class StudentMarkbookController {
     @FXML
     private Label percentageLabel;
     @FXML
-    private Button saveStudent;
+    private Button saveButton;
     @FXML
-    private Button cancel;
+    private Button cancelButton;
 
     private Student student;
     private Assessment assessment;
@@ -55,7 +56,6 @@ public class StudentMarkbookController {
     @FXML
     private void initialize() {
         setupGradeTable();
-        loadGrades();
     }
 
     public void setupGradeTable() {
@@ -70,34 +70,26 @@ public class StudentMarkbookController {
                     : db.getOutcomesForAssessment(cellData.getValue().getAssessment().getId());
             return new SimpleStringProperty(outcomes.stream().map(Outcome::getName).collect(Collectors.joining(", ")));
         });
-        scoreColumn.setCellValueFactory(cellData -> cellData.getValue().scoreProperty().asObject());
+        scoreColumn
+                .setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
         percentageColumn.setCellValueFactory(cellData -> {
             double score = cellData.getValue().getScore();
             double maxScore = cellData.getValue().getAssessmentPart() != null
                     ? cellData.getValue().getAssessmentPart().getMaxScore()
-                    : assessment.getMaxScore();
+                    : cellData.getValue().getAssessment().getMaxScore();
             double percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
             return new SimpleStringProperty(String.format("%.2f%%", percentage));
         });
+
         scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         scoreColumn.setOnEditCommit(event -> {
             Grade grade = event.getRowValue();
             grade.setScore(event.getNewValue());
             gradeTable.refresh();
             calculatePercentages();
-            saveGrade(grade); // Save the edited score to the database
         });
+
         gradeTable.setEditable(true);
-    }
-
-    public void setStudent(Student student) {
-        this.student = student;
-        studentName.setText(student.getName());
-        studentId.setText(student.getStudentId());
-    }
-
-    public void setAssessment(Assessment assessment) {
-        this.assessment = assessment;
     }
 
     public void initializeData(Student student, Assessment assessment) {
@@ -119,8 +111,6 @@ public class StudentMarkbookController {
                 Grade grade = db.getGrade(student.getStudentId(), assessment.getId(), part.getId());
                 if (grade == null) {
                     grade = new Grade(student, assessment, part, 0.0, "");
-                } else {
-                    System.out.println("Loaded grade from database: " + grade);
                 }
                 gradesList.add(grade);
             }
@@ -128,8 +118,6 @@ public class StudentMarkbookController {
             Grade grade = db.getGrade(student.getStudentId(), assessment.getId(), null);
             if (grade == null) {
                 grade = new Grade(student, assessment, null, 0.0, "");
-            } else {
-                System.out.println("Loaded grade from database: " + grade);
             }
             gradesList.add(grade);
         }
@@ -150,46 +138,23 @@ public class StudentMarkbookController {
     }
 
     @FXML
-    private void saveStudent() {
+    private void saveGrades() {
         try {
             for (Grade grade : gradeTable.getItems()) {
-                saveGrade(grade);
+                db.saveGrade(grade);
             }
             showAlert("Grades saved successfully.");
+            Stage stage = (Stage) saveButton.getScene().getWindow();
+            stage.close();
         } catch (Exception e) {
             e.printStackTrace();
             showAlert("Error saving grades: " + e.getMessage());
-        }
-        loadGrades();
-    }
-
-    private void saveGrade(Grade grade) {
-        try {
-            String studentId = grade.getStudent() != null ? grade.getStudent().getStudentId() : "null";
-            int assessmentId = grade.getAssessment() != null ? grade.getAssessment().getId() : -1;
-            int partId = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : 0;
-            String outcomeId = grade.getAssessmentPart() != null && !grade.getAssessmentPart().getLinkedOutcomes().isEmpty() ? grade.getAssessmentPart().getLinkedOutcomes().keySet().iterator().next().getId() : "null";
-            double weight = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getWeight() : 1.0;
-            double score = grade.getScore();
-            double percentage = grade.getAssessmentPart() != null ? (score / grade.getAssessmentPart().getMaxScore()) * 100 : 0.0;
-
-            System.out.println("Saving grade for studentId: " + studentId + ", assessmentId: " + assessmentId + ", partId: " + partId + ", outcomeId: " + outcomeId + ", weight: " + weight + ", score: " + score + ", percentage: " + percentage);
-
-            if (studentId.equals("null") || assessmentId == -1 || outcomeId.equals("null")) {
-                System.out.println("Error: Missing required data. studentId: " + studentId + ", assessmentId: " + assessmentId + ", outcomeId: " + outcomeId);
-                return;
-            }
-            db.saveStudentMarkBook(studentId, assessmentId, partId, outcomeId, weight, score, percentage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showAlert("Error saving grade: " + e.getMessage());
-            loadGrades();
         }
     }
 
     @FXML
     private void cancel() {
-        Stage stage = (Stage) cancel.getScene().getWindow();
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
 

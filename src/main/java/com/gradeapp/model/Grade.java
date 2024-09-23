@@ -32,6 +32,11 @@ public class Grade {
         return student;
     }
 
+    public double getPercentage() {
+        double maxScore = assessmentPart != null ? assessmentPart.getMaxScore() : assessment.getMaxScore();
+        return maxScore > 0 ? (getScore() / maxScore) * 100 : 0;
+    }
+
     public Assessment getAssessment() {
         return assessment;
     }
