@@ -10,9 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="classContainer" prefHeight="732.0" prefWidth="765.0" spacing="10"
-   xmlns="http://javafx.com/javafx/21"
-   xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.ClassController">
+<VBox fx:id="classContainer" prefHeight="732.0" prefWidth="765.0" spacing="10" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.ClassController">
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
@@ -53,13 +51,13 @@
    <VBox prefHeight="280.0" prefWidth="745.0" styleClass="section-style">
       <children>
          <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-            <VBox fx:id="currentClassContainer" spacing="10" />
+            <VBox fx:id="currentClassContainer" spacing="10">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding></VBox>
             <VBox.margin>
                <Insets bottom="10.0" />
             </VBox.margin>
-            <padding>
-               <Insets bottom="10.0" top="10.0" />
-            </padding>
          </ScrollPane>
       </children>
    </VBox>

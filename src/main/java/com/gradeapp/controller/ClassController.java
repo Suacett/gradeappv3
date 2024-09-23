@@ -22,8 +22,12 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
+import javafx.scene.layout.Region;
+import javafx.scene.text.TextAlignment;
 
 public class ClassController {
 
@@ -260,54 +264,69 @@ public class ClassController {
         dialog.showAndWait().ifPresent(result -> updateStudentListView());
     }
 
-    // Class card, displays current classes
+// Create class card
     private VBox createClassCard(Classes classObj) {
-        VBox classCard = new VBox();
-        classCard.setId(classObj.getClassId());
-        classCard.getStyleClass().add("card");
-        classCard.setSpacing(10);
-        classCard.setPadding(new Insets(10));
-        
+    VBox classCard = new VBox();
+    classCard.setId(classObj.getClassId());
+    classCard.getStyleClass().add("card");
+    classCard.setSpacing(10);
+    classCard.setPadding(new Insets(10));
+    // classCard.setTextAlignment(TextAlignment.CENTER);
+    
+    HBox classInfo = new HBox();
+    classInfo.setSpacing(10);
 
-        HBox classInfo = new HBox();
-        classInfo.setSpacing(10);
+    Label staticText = new Label("Class name: ");
+    Label classNameText = new Label(classObj.getName());
+    classNameText.getStyleClass().add("card-text");
 
-        Label nameLabel = new Label("Name: " + classObj.getName());
-        Label idLabel = new Label("ID: " + classObj.getClassId());
+    Region textSpacer = new Region();
+    textSpacer.setMinWidth(20); 
 
-        HBox buttonContainer = new HBox();
-        buttonContainer.setSpacing(10);
+    // Label idLabel = new Label("Class ID: " + classObj.getClassId());
+    Label staticIdText = new Label("Class ID: ");
+    Label classIdText = new Label(classObj.getClassId());
+    classIdText.getStyleClass().add("card-text");
 
-        Button viewDetailsButton = new Button("View Details");
-        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classObj));
+    // Create TextFlow and add Text nodes
+    TextFlow nameTextFlow = new TextFlow(staticText, classNameText, textSpacer, staticIdText, classIdText);
+    
+    Region spacer = new Region();
+    HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Button editButton = new Button("Edit");
-        editButton.setOnAction(event -> handleEditClassButtonAction(classObj));
+    HBox buttonContainer = new HBox();
+    buttonContainer.setSpacing(10);
 
-        Button deleteButton = new Button("Delete");
-        deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setOnAction(event -> {
-            db.delete("classes", "classId", classObj.getClassId());
-            updateClassList();
+    Button viewDetailsButton = new Button("View Details");
+    viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classObj));
+
+    Button editButton = new Button("Edit");
+    editButton.setOnAction(event -> handleEditClassButtonAction(classObj));
+
+    Button deleteButton = new Button("Delete");
+    deleteButton.getStyleClass().add("delete-button");
+    deleteButton.setOnAction(event -> {
+        db.delete("classes", "classId", classObj.getClassId());
+        updateClassList();
+    });
+
+    buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
+    classInfo.getChildren().addAll(nameTextFlow, spacer, buttonContainer);
+    classCard.getChildren().addAll(classInfo);
+
+    classCard.setOnMouseClicked(event -> {
+        currentClassContainer.getChildren().forEach(node -> {
+            if (node instanceof VBox) {
+                ((VBox) node).setStyle(
+                        "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+            }
         });
+        classCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
+        selectClass(classObj);
+    });
 
-        buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
-        classInfo.getChildren().addAll(nameLabel, idLabel);
-        classCard.getChildren().addAll(classInfo, buttonContainer);
-
-        classCard.setOnMouseClicked(event -> {
-            currentClassContainer.getChildren().forEach(node -> {
-                if (node instanceof VBox) {
-                    ((VBox) node).setStyle(
-                            "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
-                }
-            });
-            classCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
-            selectClass(classObj);
-        });
-
-        return classCard;
-    }
+    return classCard;
+}
 
     private void selectClass(Classes classObj) {
         selectedClass = classObj;

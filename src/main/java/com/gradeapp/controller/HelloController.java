@@ -59,6 +59,12 @@ public class HelloController {
         loadContent("/org/example/demo3/marking-view.fxml", "marking-view.fxml");
     }
 
+    // Export category click event
+    @FXML
+    public void showExportContent() {
+        loadContent("/org/example/demo3/export-view.fxml", "export-view.fxml");
+    }
+
     // Loads FXML content into the center content area
     private void loadContent(String fxmlPath, String viewName) {
         try {
