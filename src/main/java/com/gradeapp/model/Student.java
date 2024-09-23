@@ -3,14 +3,17 @@ package com.gradeapp.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 public class Student {
-    private String name;
+    private final StringProperty nameProperty;
     private String studentId;
     private Course course;
     private List<Grade> grades;
 
     public Student(String name, String studentId) {
-        this.name = name;
+        this.nameProperty = new SimpleStringProperty(name);
         this.studentId = studentId;
         this.grades = new ArrayList<>();
     }
@@ -33,7 +36,7 @@ public class Student {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.nameProperty.set(name);
     }
 
     public void setStudentId(String studentId) {
@@ -64,7 +67,7 @@ public class Student {
 
     // Getters and Setters
     public String getName() {
-        return name;
+        return nameProperty.get();
     }
 
     public String getStudentId() {
@@ -81,5 +84,9 @@ public class Student {
 
     public GradeBook getGradeBook() {
         return course != null ? course.getGradeBook() : null;
+    }
+
+    public StringProperty nameProperty() {
+        return nameProperty;
     }
 }

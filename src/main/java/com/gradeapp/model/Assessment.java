@@ -3,13 +3,15 @@ package com.gradeapp.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
 public class Assessment {
     private int id;
-    private String name;
+    private StringProperty nameProperty;
     private String description;
     private double weight;
     private double maxScore;
@@ -21,7 +23,7 @@ public class Assessment {
     // Constructor with id
     public Assessment(int id, String name, String description, double weight, double maxScore) {
         this.id = id;
-        this.name = name;
+        this.nameProperty = new SimpleStringProperty(name);
         this.description = description;
         setWeight(weight);
         this.maxScore = maxScore;
@@ -59,7 +61,7 @@ public class Assessment {
     public Map<String, Object> generateDetailedReport() {
         Map<String, Object> report = new HashMap<>();
         report.put("id", id);
-        report.put("name", name);
+        report.put("name", nameProperty.get());
         report.put("description", description);
         report.put("weight", weight);
         report.put("maxScore", maxScore);
@@ -103,11 +105,15 @@ public class Assessment {
 
     // Getters and Setters for other fields
     public String getName() {
-        return name;
+        return nameProperty.get();
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.nameProperty.set(name);
+    }
+
+    public StringProperty nameProperty() {
+        return nameProperty;
     }
 
     public String getDescription() {

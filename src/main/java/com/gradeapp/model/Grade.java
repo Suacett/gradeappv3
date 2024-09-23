@@ -11,6 +11,7 @@ public class Grade {
     private DoubleProperty score;
     private String feedback;
     private LocalDate date;
+    private DoubleProperty percentage;
 
     // Constructor with AssessmentPart
     public Grade(Student student, Assessment assessment, AssessmentPart assessmentPart, double score, String feedback) {
@@ -20,6 +21,7 @@ public class Grade {
         this.score = new SimpleDoubleProperty(score);
         this.feedback = feedback;
         this.date = LocalDate.now();
+        this.percentage = new SimpleDoubleProperty(calculatePercentage());
     }
 
     // Constructor without AssessmentPart
@@ -33,6 +35,14 @@ public class Grade {
     }
 
     public double getPercentage() {
+        return percentage.get();
+    }
+
+    public DoubleProperty percentageProperty() {
+        return percentage;
+    }
+
+    private double calculatePercentage() {
         double maxScore = assessmentPart != null ? assessmentPart.getMaxScore() : assessment.getMaxScore();
         return maxScore > 0 ? (getScore() / maxScore) * 100 : 0;
     }
@@ -51,6 +61,7 @@ public class Grade {
 
     public void setScore(double score) {
         this.score.set(score);
+        this.percentage.set(calculatePercentage());
     }
 
     public DoubleProperty scoreProperty() {
