@@ -1,9 +1,8 @@
 package com.gradeapp.controller;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,11 +22,23 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import java.sql.SQLException;
 
 public class StudentController {
 
@@ -53,9 +64,13 @@ public class StudentController {
     private TextField studentDescription;
     @FXML
     private ComboBox<Course> courseSelector;
+    @FXML
+    private Button viewDetailsButton;
+    @FXML
+    private Button deleteStudentButton;
 
     private Database db;
-
+    private Student selectedStudent;
     private ObservableList<Student> students = FXCollections.observableArrayList();
 
     @FXML
@@ -81,6 +96,22 @@ public class StudentController {
         } else {
             showAlert("Please select a student to edit.");
         }
+    }
+
+    private void highlightSelectedStudent(HBox selectedHbox) {
+        for (javafx.scene.Node node : studentListContainer.getChildren()) {
+            if (node instanceof HBox) {
+                ((HBox) node)
+                        .setStyle("-fx-border-color: lightgray; -fx-border-width: 1px; -fx-background-color: white;");
+            }
+        }
+        selectedHbox.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0f7fa;");
+    }
+
+    private void updateActionButtons() {
+        boolean isSelected = selectedStudent != null;
+        viewDetailsButton.setDisable(!isSelected);
+        deleteStudentButton.setDisable(!isSelected);
     }
 
     @FXML
@@ -142,48 +173,36 @@ public class StudentController {
         }
     }
 
-    private void importStudentsFromCSV(File file) {
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            int importedCount = 0;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                if (values.length >= 2) {
-                    String studentName = values[0].trim();
-                    String studentId = values[1].trim();
-                    try {
-                        db.addStudent(studentName, studentId);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                    importedCount++;
-                }
-            }
-            showAlert(importedCount + " students imported successfully.");
-        } catch (IOException e) {
-            showAlert("Error reading file: " + e.getMessage());
-        }
-    }
-
     @FXML
     private void handleViewDetailsButtonAction() {
-        Student selectedStudent = getSelectedStudent();
         if (selectedStudent != null) {
             try {
                 FXMLLoader loader = new FXMLLoader(
                         getClass().getResource("/org/example/demo3/student-details-view.fxml"));
+
+                if (loader.getLocation() == null) {
+                    System.out.println("FXML file not found at specified path.");
+                    showAlert("Error: FXML file not found at specified path.");
+                    return;
+                }
+
                 Parent root = loader.load();
 
-                StudentDetailsController detailsController = loader.getController();
-                detailsController.initData(selectedStudent);
+                StudentDetailsController controller = loader.getController();
+                controller.initData(selectedStudent);
 
                 Stage stage = new Stage();
-                stage.setTitle("Student Details: " + selectedStudent.getName());
+                stage.setTitle("Student Details");
                 stage.setScene(new Scene(root));
-                stage.show();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.showAndWait();
+
+                loadStudents();
+                displayCurrentStudents();
+                updateActionButtons();
             } catch (IOException e) {
                 e.printStackTrace();
-                showAlert("Error opening student details view: " + e.getMessage());
+                showAlert("Error loading student details view: " + e.getMessage());
             }
         } else {
             showAlert("Please select a student to view details.");
@@ -223,20 +242,24 @@ public class StudentController {
 
     @FXML
     private void handleDeleteStudentButtonAction() {
-        Student selectedStudent = getSelectedStudent();
         if (selectedStudent != null) {
-            if (showConfirmationDialog("Are you sure you want to delete this student?")) {
+            Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmation.setTitle("Delete Student");
+            confirmation.setHeaderText(null);
+            confirmation.setContentText("Are you sure you want to delete " + selectedStudent.getName() + "?");
+
+            Optional<ButtonType> result = confirmation.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
                 boolean deleted = db.deleteStudent(selectedStudent.getStudentId());
                 if (deleted) {
-                    loadStudents();
-                    displayCurrentStudents();
                     showAlert("Student deleted successfully.");
+                    selectedStudent = null;
+                    loadStudents();
+                    updateActionButtons();
                 } else {
                     showAlert("Failed to delete student. Please try again.");
                 }
             }
-        } else {
-            showAlert("Please select a student to delete.");
         }
     }
 
@@ -350,6 +373,21 @@ public class StudentController {
         dialog.showAndWait();
     }
 
+    private void selectStudent(Student student, VBox selectedCard) {
+        selectedStudent = student;
+        updateActionButtons();
+        highlightSelectedStudent(selectedCard);
+    }
+
+    private void highlightSelectedStudent(VBox selectedCard) {
+        for (Node node : studentListContainer.getChildren()) {
+            if (node instanceof VBox) {
+                node.setStyle("-fx-border-color: lightgray; -fx-border-width: 1px; -fx-background-color: white;");
+            }
+        }
+        selectedCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0f7fa;");
+    }
+
     private void showEditStudentDialog(Student student) {
         Dialog<Student> dialog = new Dialog<>();
         dialog.setTitle("Edit Student");
@@ -419,33 +457,11 @@ public class StudentController {
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        HBox buttonContainer = new HBox();
-        buttonContainer.setSpacing(10);
-
-        Button viewEditButton = new Button("View/edit Details");
-        viewEditButton.setOnAction(event -> handleViewDetailsButtonAction());
-
-        Button deleteButton = new Button("Delete");
-        deleteButton.getStyleClass().add("delete-button");
-        deleteButton.setOnAction(event -> handleDeleteStudentAction(student));
-
-        buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
         studentInfo.getChildren().addAll(nameLabel, idLabel);
-        studentCard.getChildren().addAll(studentInfo, spacer, buttonContainer);
+        studentCard.getChildren().add(studentInfo);
 
         studentCard.setOnMouseClicked(event -> {
-            studentListContainer.getChildren().forEach(node -> {
-                if (node instanceof VBox) {
-                    ((VBox) node).setStyle(
-                            "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
-                }
-            });
-            studentCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
-            // handleViewDetailsButtonAction(); When student card is clicked, this will open
-            // details automatically depends if this is needed or not
+            selectStudent(student, studentCard);
         });
 
         return studentCard;

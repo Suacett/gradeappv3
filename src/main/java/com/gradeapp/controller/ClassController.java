@@ -4,9 +4,13 @@ import java.sql.SQLException;
 import java.util.List;
 
 import com.gradeapp.database.Database;
+import com.gradeapp.model.Assessment;
+import com.gradeapp.model.AssessmentPart;
 import com.gradeapp.model.Classes;
 import com.gradeapp.model.Course;
+import com.gradeapp.model.Grade;
 import com.gradeapp.model.Student;
+import com.gradeapp.util.ChartGenerator;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -23,11 +27,14 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
-import javafx.scene.layout.Region;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 public class ClassController {
 
@@ -43,15 +50,36 @@ public class ClassController {
     private ListView<Student> studentListView;
     @FXML
     private Label classStatisticsLabel;
+    @FXML
+    private ComboBox<Assessment> assessmentComboBox;
+    @FXML
+    private VBox classDetailsContainer;
+    @FXML
+    private ComboBox<AssessmentPart> partComboBox;
+    @FXML
+    private BarChart<String, Number> gradeBarChart;
+
 
     private Database db = new Database();
     private Classes selectedClass;
+    private ChartGenerator chartGenerator = new ChartGenerator();
 
     @FXML
     private void initialize() {
         setupCourseSelector();
         updateClassList();
         updateClassDetailsView();
+
+        // Hide class details container initially
+        classDetailsContainer.setVisible(false);
+        classDetailsContainer.setManaged(false);
+
+        assessmentComboBox.setOnAction(event -> {
+            populateParts();
+            updateGradeChart();
+        });
+
+        partComboBox.setOnAction(event -> updateGradeChart());
     }
 
     private void setupCourseSelector() {
@@ -152,6 +180,36 @@ public class ClassController {
         dialog.showAndWait().ifPresent(result -> updateClassList());
     }
 
+    private void updateGradeChart() {
+        gradeBarChart.getData().clear();
+    
+        if (selectedClass == null) {
+            return;
+        }
+    
+        Assessment selectedAssessment = assessmentComboBox.getValue();
+        AssessmentPart selectedPart = partComboBox.getValue();
+    
+        List<Grade> grades = null;
+    
+        if (selectedAssessment == null) {
+            grades = db.getAllGradesForClass(selectedClass.getClassId());
+        } else if (selectedPart == null) {
+            grades = db.getGradesForClassAndAssessment(selectedClass.getClassId(), selectedAssessment.getId());
+        } else {
+            grades = db.getGradesForClassAssessmentAndPart(
+                    selectedClass.getClassId(), selectedAssessment.getId(), selectedPart.getId());
+        }
+    
+        if (grades != null && !grades.isEmpty()) {
+            XYChart.Series<String, Number> series = chartGenerator.createGradeDistributionSeries(grades);
+            gradeBarChart.getData().add(series);
+        } else {
+            gradeBarChart.setTitle("No grades available for the selected options.");
+        }
+    }
+    
+
     @FXML
     public void handleViewClassDetailsAction(Classes classObj) {
         VBox classCard = (VBox) currentClassContainer.lookup("#" + classObj.getClassId());
@@ -160,13 +218,33 @@ public class ClassController {
         }
     }
 
+    private void populateAssessments() {
+        assessmentComboBox.getItems().clear();
+        partComboBox.getItems().clear();
+
+        if (selectedClass != null) {
+            Course course = courseSelector.getValue();
+            if (course != null) {
+                List<Assessment> assessments = db.getAssessmentsForCourse(course.getId());
+                assessmentComboBox.setItems(FXCollections.observableArrayList(assessments));
+            }
+        }
+    }
+
+    private void populateParts() {
+        partComboBox.getItems().clear();
+        Assessment selectedAssessment = assessmentComboBox.getValue();
+        if (selectedAssessment != null) {
+            List<AssessmentPart> parts = db.getAssessmentParts(selectedAssessment.getId());
+            partComboBox.setItems(FXCollections.observableArrayList(parts));
+        }
+    }
+
     private void updateClassDetailsView() {
         if (selectedClass != null) {
-            classStatisticsLabel.setText("Class Statistics: " + calculateClassStatistics());
-            updateStudentListView();
+            classStatisticsLabel.setText("Class Details: " + selectedClass.getName());
         } else {
             classStatisticsLabel.setText("No class selected");
-            studentListView.getItems().clear();
         }
     }
 
@@ -264,73 +342,78 @@ public class ClassController {
         dialog.showAndWait().ifPresent(result -> updateStudentListView());
     }
 
-// Create class card
+    // Create class card
     private VBox createClassCard(Classes classObj) {
-    VBox classCard = new VBox();
-    classCard.setId(classObj.getClassId());
-    classCard.getStyleClass().add("card");
-    classCard.setSpacing(10);
-    classCard.setPadding(new Insets(10));
-    // classCard.setTextAlignment(TextAlignment.CENTER);
-    
-    HBox classInfo = new HBox();
-    classInfo.setSpacing(10);
+        VBox classCard = new VBox();
+        classCard.setId(classObj.getClassId());
+        classCard.getStyleClass().add("card");
+        classCard.setSpacing(10);
+        classCard.setPadding(new Insets(10));
+        // classCard.setTextAlignment(TextAlignment.CENTER);
 
-    Label staticText = new Label("Class name: ");
-    Label classNameText = new Label(classObj.getName());
-    classNameText.getStyleClass().add("card-text");
+        HBox classInfo = new HBox();
+        classInfo.setSpacing(10);
 
-    Region textSpacer = new Region();
-    textSpacer.setMinWidth(20); 
+        Label staticText = new Label("Class name: ");
+        Label classNameText = new Label(classObj.getName());
+        classNameText.getStyleClass().add("card-text");
 
-    // Label idLabel = new Label("Class ID: " + classObj.getClassId());
-    Label staticIdText = new Label("Class ID: ");
-    Label classIdText = new Label(classObj.getClassId());
-    classIdText.getStyleClass().add("card-text");
+        Region textSpacer = new Region();
+        textSpacer.setMinWidth(20);
 
-    // Create TextFlow and add Text nodes
-    TextFlow nameTextFlow = new TextFlow(staticText, classNameText, textSpacer, staticIdText, classIdText);
-    
-    Region spacer = new Region();
-    HBox.setHgrow(spacer, Priority.ALWAYS);
+        // Label idLabel = new Label("Class ID: " + classObj.getClassId());
+        Label staticIdText = new Label("Class ID: ");
+        Label classIdText = new Label(classObj.getClassId());
+        classIdText.getStyleClass().add("card-text");
 
-    HBox buttonContainer = new HBox();
-    buttonContainer.setSpacing(10);
+        // Create TextFlow and add Text nodes
+        TextFlow nameTextFlow = new TextFlow(staticText, classNameText, textSpacer, staticIdText, classIdText);
 
-    Button viewDetailsButton = new Button("View Details");
-    viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classObj));
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
 
-    Button editButton = new Button("Edit");
-    editButton.setOnAction(event -> handleEditClassButtonAction(classObj));
+        HBox buttonContainer = new HBox();
+        buttonContainer.setSpacing(10);
 
-    Button deleteButton = new Button("Delete");
-    deleteButton.getStyleClass().add("delete-button");
-    deleteButton.setOnAction(event -> {
-        db.delete("classes", "classId", classObj.getClassId());
-        updateClassList();
-    });
+        Button viewDetailsButton = new Button("View Details");
+        viewDetailsButton.setOnAction(event -> handleViewClassDetailsAction(classObj));
 
-    buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
-    classInfo.getChildren().addAll(nameTextFlow, spacer, buttonContainer);
-    classCard.getChildren().addAll(classInfo);
+        Button editButton = new Button("Edit");
+        editButton.setOnAction(event -> handleEditClassButtonAction(classObj));
 
-    classCard.setOnMouseClicked(event -> {
-        currentClassContainer.getChildren().forEach(node -> {
-            if (node instanceof VBox) {
-                ((VBox) node).setStyle(
-                        "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
-            }
+        Button deleteButton = new Button("Delete");
+        deleteButton.getStyleClass().add("delete-button");
+        deleteButton.setOnAction(event -> {
+            db.delete("classes", "classId", classObj.getClassId());
+            updateClassList();
         });
-        classCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
-        selectClass(classObj);
-    });
 
-    return classCard;
-}
+        buttonContainer.getChildren().addAll(viewDetailsButton, editButton, deleteButton);
+        classInfo.getChildren().addAll(nameTextFlow, spacer, buttonContainer);
+        classCard.getChildren().addAll(classInfo);
+
+        classCard.setOnMouseClicked(event -> {
+            currentClassContainer.getChildren().forEach(node -> {
+                if (node instanceof VBox) {
+                    ((VBox) node).setStyle(
+                            "-fx-border-color: transparent; -fx-border-width: 2px; -fx-background-color: white;");
+                }
+            });
+            classCard.setStyle("-fx-border-color: #2196F3; -fx-border-width: 2px; -fx-background-color: #e0e0e0;");
+            selectClass(classObj);
+        });
+
+        return classCard;
+    }
 
     private void selectClass(Classes classObj) {
         selectedClass = classObj;
+        classDetailsContainer.setVisible(true);
+        classDetailsContainer.setManaged(true);
+        populateAssessments();
         updateClassDetailsView();
+        updateStudentListView();
+        updateGradeChart();
     }
 
     private void handleEditClassButtonAction(Classes classes) {
@@ -346,16 +429,22 @@ public class ClassController {
                 db.updateClass(classes.getClassId(), newName, newId);
                 updateClassList();
             } else {
-                System.out.println("The form is incomplete...");
+                showError("Please fill in all fields.");
             }
         });
 
-        VBox editClassBox = new VBox(10, new Label("Edit Class"), classNameField, classIdField, saveButton);
-        currentClassContainer.getChildren().clear();
-        currentClassContainer.getChildren().add(editClassBox);
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Edit Class");
+
+        dialog.getDialogPane().setContent(new VBox(10,
+                new Label("Edit Class"),
+                new Label("Class Name:"), classNameField,
+                new Label("Class ID:"), classIdField,
+                saveButton));
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
+        dialog.showAndWait();
     }
-
-
 
     @FXML
     public void handleRemoveStudentFromClassAction() {
@@ -367,10 +456,11 @@ public class ClassController {
     }
 
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 }

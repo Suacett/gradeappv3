@@ -1,8 +1,6 @@
 package com.gradeapp.util;
 
 import java.util.List;
-import java.util.Map;
-
 import com.gradeapp.model.Grade;
 import com.gradeapp.model.Student;
 
@@ -23,19 +21,33 @@ public class ChartGenerator {
         NumberAxis yAxis = new NumberAxis();
         BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
         barChart.setTitle("Grade Distribution");
-        xAxis.setLabel("Grade");
-        yAxis.setLabel("Number of Students");
+        xAxis.setLabel("Student ID");
+        yAxis.setLabel("Grade");
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Grades");
 
-        Map<String, Integer> distribution = calculator.calculateGradeDistribution(grades);
-        for (Map.Entry<String, Integer> entry : distribution.entrySet()) {
-            series.getData().add(new XYChart.Data<>(entry.getKey(), entry.getValue()));
+        for (Grade grade : grades) {
+            String studentId = grade.getStudent().getStudentId();
+            double score = grade.getScore();
+            series.getData().add(new XYChart.Data<>(studentId, score));
         }
 
         barChart.getData().add(series);
         return barChart;
+    }
+
+    public XYChart.Series<String, Number> createGradeDistributionSeries(List<Grade> grades) {
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Scores");
+
+        for (Grade grade : grades) {
+            String studentId = grade.getStudent().getStudentId();
+            double score = grade.getScore();
+            series.getData().add(new XYChart.Data<>(studentId, score));
+        }
+
+        return series;
     }
 
     public BarChart<String, Number> createStudentPerformanceChart(Student student) {

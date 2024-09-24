@@ -162,6 +162,15 @@ public class Database {
                 }
             }
 
+            try {
+
+           stmt.execute("ALTER TABLE grades DROP COLUMN date");
+       } catch (SQLException e) {
+           // Ignore if the column doesn't exist
+           if (!e.getMessage().contains("no such column: date")) {
+               System.out.println("Error removing date column: " + e.getMessage());
+           }
+       }
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
@@ -178,6 +187,7 @@ public class Database {
             System.out.println("Error connecting to database: " + e.getMessage());
             return null;
         }
+
     }
 
     // STUDENT MARKBOOOK
@@ -746,6 +756,27 @@ public class Database {
         return classes;
     }
 
+    public List<Classes> getClassesForStudentInCourse(String studentId, String courseId) {
+        List<Classes> classes = new ArrayList<>();
+        String sql = "SELECT c.* FROM classes c " +
+                "JOIN student_classes sc ON c.classId = sc.class_id " +
+                "WHERE sc.student_id = ? AND c.course_id = ?";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, courseId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String classId = rs.getString("classId");
+                classes.add(new Classes(name, classId));
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting classes for student in course: " + e.getMessage());
+        }
+        return classes;
+    }
+
     public void updateClass(String oldClassId, String newName, String newClassId) {
         String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
         try (Connection conn = this.connect();
@@ -931,32 +962,41 @@ public class Database {
         }
         String insertSql = "INSERT INTO grades (student_id, assessment_id, part_id, score, feedback) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = this.connect()) {
-            PreparedStatement pstmt = conn.prepareStatement(updateSql);
-            pstmt.setDouble(1, grade.getScore());
-            pstmt.setString(2, grade.getFeedback());
-            pstmt.setString(3, grade.getStudent().getStudentId());
-            pstmt.setInt(4, grade.getAssessment().getId());
-            if (grade.getAssessmentPart() != null) {
-                pstmt.setInt(5, grade.getAssessmentPart().getId());
-            }
-            int affectedRows = pstmt.executeUpdate();
-            if (affectedRows == 0) {
-                pstmt = conn.prepareStatement(insertSql);
-                pstmt.setString(1, grade.getStudent().getStudentId());
-                pstmt.setInt(2, grade.getAssessment().getId());
+            conn.setAutoCommit(false);
+            try {
+                PreparedStatement pstmt = conn.prepareStatement(updateSql);
+                pstmt.setDouble(1, grade.getScore());
+                pstmt.setString(2, grade.getFeedback());
+                pstmt.setString(3, grade.getStudent().getStudentId());
+                pstmt.setInt(4, grade.getAssessment().getId());
                 if (grade.getAssessmentPart() != null) {
-                    pstmt.setInt(3, grade.getAssessmentPart().getId());
-                } else {
-                    pstmt.setNull(3, java.sql.Types.INTEGER);
+                    pstmt.setInt(5, grade.getAssessmentPart().getId());
                 }
-                pstmt.setDouble(4, grade.getScore());
-                pstmt.setString(5, grade.getFeedback());
-                pstmt.executeUpdate();
+                int affectedRows = pstmt.executeUpdate();
+                if (affectedRows == 0) {
+                    pstmt = conn.prepareStatement(insertSql);
+                    pstmt.setString(1, grade.getStudent().getStudentId());
+                    pstmt.setInt(2, grade.getAssessment().getId());
+                    if (grade.getAssessmentPart() != null) {
+                        pstmt.setInt(3, grade.getAssessmentPart().getId());
+                    } else {
+                        pstmt.setNull(3, java.sql.Types.INTEGER);
+                    }
+                    pstmt.setDouble(4, grade.getScore());
+                    pstmt.setString(5, grade.getFeedback());
+                    pstmt.executeUpdate();
+                }
+                conn.commit();
+                System.out.println("Grade saved for Student: " + grade.getStudent().getStudentId() +
+                        ", Assessment: " + grade.getAssessment().getId() +
+                        ", Part: " + (grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : "null") +
+                        ", Score: " + grade.getScore());
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
-            System.out.println("Grade saved for Student: " + grade.getStudent().getStudentId() +
-                    ", Assessment: " + grade.getAssessment().getId() +
-                    ", Part: " + (grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : "null") +
-                    ", Score: " + grade.getScore());
         } catch (SQLException e) {
             System.out.println("Error saving grade: " + e.getMessage());
             e.printStackTrace();
@@ -985,6 +1025,48 @@ public class Database {
             }
         } catch (SQLException e) {
             System.out.println("Error getting grades for student: " + e.getMessage());
+        }
+        return grades;
+    }
+
+    public List<Grade> getGradesForStudentInClass(String studentId, String classId) {
+        List<Grade> grades = new ArrayList<>();
+        String sql = "SELECT g.*, a.name as assessment_name, ap.name as part_name " +
+                "FROM grades g " +
+                "JOIN assessments a ON g.assessment_id = a.id " +
+                "JOIN classes c ON a.course_id = c.course_id " +
+                "LEFT JOIN assessment_parts ap ON g.part_id = ap.id " +
+                "JOIN student_classes sc ON sc.student_id = g.student_id AND sc.class_id = c.classId " +
+                "WHERE g.student_id = ? AND c.classId = ?";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, classId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                Student student = getStudentById(rs.getString("student_id"));
+                Assessment assessment = new Assessment(
+                        rs.getInt("assessment_id"),
+                        rs.getString("assessment_name"),
+                        "",
+                        0,
+                        0);
+                AssessmentPart part = null;
+                if (rs.getObject("part_id") != null) {
+                    part = new AssessmentPart(
+                            rs.getInt("part_id"),
+                            rs.getString("part_name"),
+                            0,
+                            0);
+                }
+                double score = rs.getDouble("score");
+                String feedback = rs.getString("feedback");
+                Grade grade = new Grade(student, assessment, part, score, feedback);
+                grades.add(grade);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting grades for student in class: " + e.getMessage());
+            e.printStackTrace();
         }
         return grades;
     }
@@ -1097,6 +1179,95 @@ public class Database {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<Grade> getGradesForClassAndAssessment(String classId, int assessmentId) {
+        List<Grade> grades = new ArrayList<>();
+        String sql = "SELECT g.*, s.name AS student_name, a.name AS assessment_name, ap.name AS part_name " +
+                "FROM grades g " +
+                "JOIN students s ON g.student_id = s.studentId " +
+                "JOIN student_classes sc ON s.studentId = sc.student_id " +
+                "JOIN assessments a ON g.assessment_id = a.id " +
+                "LEFT JOIN assessment_parts ap ON g.part_id = ap.id " +
+                "WHERE sc.class_id = ? AND g.assessment_id = ?";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classId);
+            pstmt.setInt(2, assessmentId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                // Retrieve student information
+                String studentId = rs.getString("student_id");
+                String studentName = rs.getString("student_name");
+                Student student = new Student(studentName, studentId);
+
+                // Retrieve assessment information
+                String assessmentName = rs.getString("assessment_name");
+                double assessmentMaxScore = getAssessmentById(assessmentId).getMaxScore();
+                Assessment assessment = new Assessment(assessmentId, assessmentName, "", 0, assessmentMaxScore);
+
+                // Retrieve assessment part information if available
+                AssessmentPart part = null;
+                if (rs.getObject("part_id") != null) {
+                    int partId = rs.getInt("part_id");
+                    String partName = rs.getString("part_name");
+                    double partMaxScore = getAssessmentPartById(partId).getMaxScore();
+                    part = new AssessmentPart(partId, partName, 0, partMaxScore);
+                }
+
+                // Retrieve grade information
+                double score = rs.getDouble("score");
+                String feedback = rs.getString("feedback");
+                Grade grade = new Grade(student, assessment, part, score, feedback);
+                grades.add(grade);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting grades for class and assessment: " + e.getMessage());
+        }
+        return grades;
+    }
+
+    public List<Grade> getGradesForClassAssessmentAndPart(String classId, int assessmentId, int partId) {
+        List<Grade> grades = new ArrayList<>();
+        String sql = "SELECT g.*, s.name AS student_name, a.name AS assessment_name, ap.name AS part_name " +
+                "FROM grades g " +
+                "JOIN students s ON g.student_id = s.studentId " +
+                "JOIN student_classes sc ON s.studentId = sc.student_id " +
+                "JOIN assessments a ON g.assessment_id = a.id " +
+                "JOIN assessment_parts ap ON g.part_id = ap.id " +
+                "WHERE sc.class_id = ? AND g.assessment_id = ? AND g.part_id = ?";
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, classId);
+            pstmt.setInt(2, assessmentId);
+            pstmt.setInt(3, partId);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                // Retrieve student information
+                String studentId = rs.getString("student_id");
+                String studentName = rs.getString("student_name");
+                Student student = new Student(studentName, studentId);
+
+                // Retrieve assessment information
+                String assessmentName = rs.getString("assessment_name");
+                double assessmentMaxScore = getAssessmentById(assessmentId).getMaxScore();
+                Assessment assessment = new Assessment(assessmentId, assessmentName, "", 0, assessmentMaxScore);
+
+                // Retrieve assessment part information
+                String partName = rs.getString("part_name");
+                double partMaxScore = getAssessmentPartById(partId).getMaxScore();
+                AssessmentPart part = new AssessmentPart(partId, partName, 0, partMaxScore);
+
+                // Retrieve grade information
+                double score = rs.getDouble("score");
+                String feedback = rs.getString("feedback");
+                Grade grade = new Grade(student, assessment, part, score, feedback);
+                grades.add(grade);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting grades for class, assessment, and part: " + e.getMessage());
+        }
+        return grades;
     }
 
     // ASSESSMENTS

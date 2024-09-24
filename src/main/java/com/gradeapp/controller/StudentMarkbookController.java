@@ -10,7 +10,6 @@ import com.gradeapp.model.Grade;
 import com.gradeapp.model.Outcome;
 import com.gradeapp.model.Student;
 
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +21,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import javafx.util.converter.DoubleStringConverter;
 
 public class StudentMarkbookController {
 

@@ -57,7 +57,7 @@ public class Outcome {
     public double getWeight() {
         return weight.get();
     }
-    
+
     public void setWeight(double weight) {
         this.weight.set(weight);
     }

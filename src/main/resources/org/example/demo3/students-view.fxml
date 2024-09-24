@@ -5,74 +5,72 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="studentsContainer" prefHeight="684.0" prefWidth="606.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.StudentController">
+<VBox fx:id="studentsContainer" prefHeight="684.0" prefWidth="606.0" stylesheets="@styles.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gradeapp.controller.StudentController">
 
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding>
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+    </padding>
 
-   <Label text="Students">
-      <font>
-         <Font size="20.0" />
-      </font>
-      <VBox.margin>
-         <Insets bottom="10.0" />
-      </VBox.margin>
-   </Label>
+    <!-- Header -->
+    <Label text="Students">
+        <font>
+            <Font size="20.0" />
+        </font>
+        <VBox.margin>
+            <Insets bottom="10.0" />
+        </VBox.margin>
+    </Label>
 
-   <HBox alignment="CENTER_LEFT" spacing="15" styleClass="section-style" HBox.hgrow="ALWAYS">
-      <Label text="Add individual student">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <Button onAction="#handleAddStudentButtonAction" text="Add Student" />
-      <Label text="Import students from file">
-         <font>
-            <Font size="16.0" />
-         </font>
-      </Label>
-      <Button onAction="#handleImportStudentsFromFile" text="Import file" />
-      <VBox.margin>
-         <Insets />
-      </VBox.margin>
-   </HBox>
+    <!-- Action Buttons for Adding and Importing Students -->
+    <HBox alignment="CENTER_LEFT" spacing="15" styleClass="section-style" HBox.hgrow="ALWAYS">
+        <Label text="Add individual student">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Label>
+        <Button onAction="#handleAddStudentButtonAction" text="Add Student" />
+        <Label text="Import students from file">
+            <font>
+                <Font size="16.0" />
+            </font>
+        </Label>
+        <Button onAction="#handleImportStudentsFromFile" text="Import file" />
+    </HBox>
 
-   <Label text="Current students">
-      <font>
-         <Font size="18.0" />
-      </font>
-      <VBox.margin>
-         <Insets bottom="10.0" top="20.0" />
-      </VBox.margin>
-   </Label>
+    <!-- Current Students Section -->
+    <Label text="Current Students">
+        <font>
+            <Font size="18.0" />
+        </font>
+        <VBox.margin>
+            <Insets bottom="10.0" top="20.0" />
+        </VBox.margin>
+    </Label>
 
-   <VBox prefHeight="200.0" prefWidth="500.0" styleClass="section-style" VBox.vgrow="ALWAYS">
-      <ScrollPane fx:id="studentScrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-         <VBox fx:id="studentListContainer" spacing="10">
-            <padding>
-               <Insets bottom="10.0" top="10.0" />
-            </padding>
-         </VBox>
-      </ScrollPane>
-   </VBox>
+    <!-- Student List -->
+    <VBox prefHeight="200.0" prefWidth="500.0" styleClass="section-style" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="studentScrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+            <VBox fx:id="studentListContainer" spacing="10">
+                <padding>
+                    <Insets bottom="10.0" top="10.0" />
+                </padding>
+            </VBox>
+        </ScrollPane>
+    </VBox>
 
-   <!-- <HBox alignment="CENTER_LEFT" spacing="15" HBox.hgrow="ALWAYS">
-      <Button onAction="#handleViewDetailsButtonAction" text="View Details" />
-      <Button onAction="#handleAddGradeButtonAction" text="Add Grade" />
-      <Button onAction="#handleEditStudentButtonAction" text="Edit Student" />
-      <Button onAction="#handleDeleteStudentButtonAction" text="Delete Student" />
-   </HBox> -->
+    <!-- Single Action Box for All Students -->
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="action-box" HBox.hgrow="ALWAYS">
+        <Button onAction="#handleViewDetailsButtonAction" text="View Details" disable="true" fx:id="viewDetailsButton" />
+        <Button onAction="#handleDeleteStudentButtonAction" text="Delete Student" disable="true" fx:id="deleteStudentButton" />
+    </HBox>
 
-   <!-- <VBox fx:id="studentDetailsContainer" managed="false" spacing="10" visible="false">
-      <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Student Details" />
-      <GridPane fx:id="studentDetailsGrid" hgap="10" vgap="10" />
-   </VBox>
-
-   <padding>
-      <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-   </padding> -->
+    <!-- New Class Input Container -->
+    <VBox fx:id="newClassInputContainer" spacing="10" />
 </VBox>

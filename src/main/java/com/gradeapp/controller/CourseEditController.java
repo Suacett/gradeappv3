@@ -128,14 +128,14 @@ public class CourseEditController {
         dialog.setTitle("New Outcome");
         dialog.setHeaderText("Enter Outcome ID");
         dialog.setContentText("Please enter the outcome ID:");
-    
+
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
             newId = result.get();
         } else {
             return;
         }
-    
+
         Outcome newOutcome = new Outcome(newId, "New Outcome", "Description", 0.0);
         outcomes.add(newOutcome);
         updateTotalWeight();

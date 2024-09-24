@@ -61,7 +61,6 @@
    <TableView fx:id="gradeTable" prefHeight="200.0" prefWidth="200.0">
       <columns>
          <TableColumn fx:id="studentColumn" prefWidth="75.0" text="Student" />
-         <!-- Class Column -->
          <TableColumn fx:id="classColumn" prefWidth="75.0" text="Class" />
          <TableColumn fx:id="assessmentColumn" prefWidth="75.0" text="Assessment" />
          <TableColumn fx:id="partColumn" prefWidth="75.0" text="Part" />

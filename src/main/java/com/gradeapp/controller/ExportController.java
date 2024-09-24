@@ -1,6 +1,12 @@
 
 package com.gradeapp.controller;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Assessment;
 import com.gradeapp.model.Classes;
@@ -19,16 +25,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.StringConverter;
-
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.List;
+import javafx.util.StringConverter;
 
 public class ExportController {
 

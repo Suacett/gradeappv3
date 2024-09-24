@@ -1,16 +1,15 @@
 package com.gradeapp.controller;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.sql.SQLException;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Student;
 import com.gradeapp.util.FileHandler;
 
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 
 public class DataImportExportController {
     private FileHandler fileHandler;

@@ -1,6 +1,8 @@
 package com.gradeapp.controller;
 
 import java.io.IOException;
+import java.util.List;
+
 import com.gradeapp.database.Database;
 import com.gradeapp.model.Assessment;
 import com.gradeapp.model.Classes;
@@ -20,11 +22,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import java.util.List; 
+
 public class MarkingController {
 
     // FXML elements
@@ -44,32 +45,32 @@ public class MarkingController {
     private Database db = new Database();
     private Course selectedCourse;
 
-
     @FXML
     private void initialize() {
         setupCourseSelector();
         setupClassSelector();
         setupAssessmentSelector();
-    
+
         courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateClassSelector(newSelection);
                 updateAssessmentSelector();
             }
         });
-    
+
         classSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateStudentList(newSelection);
             }
         });
-    
+
         assessmentSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateStudentList(classSelector.getSelectionModel().getSelectedItem());
             }
         });
     }
+
     // Method to select course from dropdown
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
@@ -155,50 +156,53 @@ public class MarkingController {
             public String toString(Assessment assessment) {
                 return assessment == null ? "" : assessment.getName();
             }
-    
+
             @Override
             public Assessment fromString(String string) {
                 return null;
             }
         });
     }
-    
+
     // Method to create a student card
     private HBox createStudentCard(Student student) {
         HBox studentCard = new HBox();
         studentCard.getStyleClass().add("student-card");
         studentCard.setSpacing(10);
-    
+
         VBox infoBox = new VBox(5);
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
         infoBox.getChildren().addAll(nameLabel, idLabel);
-    
+
         VBox gradeBox = new VBox(5);
         gradeBox.getStyleClass().add("grade-box");
         Assessment selectedAssessment = assessmentSelector.getSelectionModel().getSelectedItem();
         if (selectedAssessment != null) {
-            List<Grade> grades = db.getGradesForStudentAndAssessment(student.getStudentId(), selectedAssessment.getId());
+            List<Grade> grades = db.getGradesForStudentAndAssessment(student.getStudentId(),
+                    selectedAssessment.getId());
             if (grades.isEmpty()) {
                 gradeBox.getChildren().add(new Label("No grades available"));
             } else {
                 double totalWeightedScore = 0;
                 double totalWeight = 0;
-                
+
                 for (Grade grade : grades) {
                     HBox gradeRow = new HBox(10);
-                    Label partLabel = new Label(grade.getAssessmentPart() != null ? grade.getAssessmentPart().getName() : "Overall");
-                    double maxScore = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getMaxScore() : selectedAssessment.getMaxScore();
+                    Label partLabel = new Label(
+                            grade.getAssessmentPart() != null ? grade.getAssessmentPart().getName() : "Overall");
+                    double maxScore = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getMaxScore()
+                            : selectedAssessment.getMaxScore();
                     Label scoreLabel = new Label(String.format("%.2f / %.2f", grade.getScore(), maxScore));
                     Label percentageLabel = new Label(String.format("%.2f%%", (grade.getScore() / maxScore) * 100));
                     gradeRow.getChildren().addAll(partLabel, scoreLabel, percentageLabel);
                     gradeBox.getChildren().add(gradeRow);
-                    
+
                     double weight = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getWeight() : 1;
                     totalWeightedScore += (grade.getScore() / maxScore) * weight;
                     totalWeight += weight;
                 }
-                
+
                 double overallPercentage = (totalWeightedScore / totalWeight) * 100;
                 Label overallLabel = new Label(String.format("Overall: %.2f%%", overallPercentage));
                 gradeBox.getChildren().add(overallLabel);
@@ -206,17 +210,17 @@ public class MarkingController {
         } else {
             gradeBox.getChildren().add(new Label("No assessment selected"));
         }
-    
+
         Button markBookButton = new Button("Mark Book");
         markBookButton.setOnAction(event -> openMarkBook(student));
-    
+
         HBox.setHgrow(infoBox, Priority.ALWAYS);
         HBox.setHgrow(gradeBox, Priority.ALWAYS);
-    
+
         studentCard.getChildren().addAll(infoBox, gradeBox, markBookButton);
         return studentCard;
     }
-    
+
     // Method to open the Mark Book view
     private void openMarkBook(Student student) {
         try {
@@ -251,7 +255,7 @@ public class MarkingController {
             public String toString(Classes classObj) {
                 return classObj == null ? "" : classObj.getName();
             }
-    
+
             @Override
             public Classes fromString(String string) {
                 return null;
