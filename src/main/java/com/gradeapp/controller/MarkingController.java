@@ -168,12 +168,12 @@ public class MarkingController {
         HBox studentCard = new HBox();
         studentCard.getStyleClass().add("student-card");
         studentCard.setSpacing(10);
-
+    
         VBox infoBox = new VBox(5);
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
         infoBox.getChildren().addAll(nameLabel, idLabel);
-
+    
         VBox gradeBox = new VBox(5);
         gradeBox.getStyleClass().add("grade-box");
         Assessment selectedAssessment = assessmentSelector.getSelectionModel().getSelectedItem();
@@ -182,26 +182,37 @@ public class MarkingController {
             if (grades.isEmpty()) {
                 gradeBox.getChildren().add(new Label("No grades available"));
             } else {
+                double totalWeightedScore = 0;
+                double totalWeight = 0;
+                
                 for (Grade grade : grades) {
                     HBox gradeRow = new HBox(10);
                     Label partLabel = new Label(grade.getAssessmentPart() != null ? grade.getAssessmentPart().getName() : "Overall");
-                    Label scoreLabel = new Label(String.format("%.2f / %.2f", grade.getScore(), 
-                        grade.getAssessmentPart() != null ? grade.getAssessmentPart().getMaxScore() : selectedAssessment.getMaxScore()));
-                    Label percentageLabel = new Label(String.format("%.2f%%", grade.getPercentage()));
+                    double maxScore = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getMaxScore() : selectedAssessment.getMaxScore();
+                    Label scoreLabel = new Label(String.format("%.2f / %.2f", grade.getScore(), maxScore));
+                    Label percentageLabel = new Label(String.format("%.2f%%", (grade.getScore() / maxScore) * 100));
                     gradeRow.getChildren().addAll(partLabel, scoreLabel, percentageLabel);
                     gradeBox.getChildren().add(gradeRow);
+                    
+                    double weight = grade.getAssessmentPart() != null ? grade.getAssessmentPart().getWeight() : 1;
+                    totalWeightedScore += (grade.getScore() / maxScore) * weight;
+                    totalWeight += weight;
                 }
+                
+                double overallPercentage = (totalWeightedScore / totalWeight) * 100;
+                Label overallLabel = new Label(String.format("Overall: %.2f%%", overallPercentage));
+                gradeBox.getChildren().add(overallLabel);
             }
         } else {
             gradeBox.getChildren().add(new Label("No assessment selected"));
         }
-
+    
         Button markBookButton = new Button("Mark Book");
         markBookButton.setOnAction(event -> openMarkBook(student));
-
+    
         HBox.setHgrow(infoBox, Priority.ALWAYS);
         HBox.setHgrow(gradeBox, Priority.ALWAYS);
-
+    
         studentCard.getChildren().addAll(infoBox, gradeBox, markBookButton);
         return studentCard;
     }

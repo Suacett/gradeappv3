@@ -1,32 +1,14 @@
 package com.gradeapp.util;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.nio.file.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.gradeapp.model.Assessment;
-import com.gradeapp.model.Grade;
-import com.gradeapp.model.Student;
-import com.gradeapp.model.StudentGrade;
+import com.gradeapp.model.*;
 
 import javafx.scene.control.Alert;
 
@@ -35,6 +17,30 @@ public class FileHandler {
     private Map<String, Assessment> assessmentMap = new HashMap<>();
 
     public List<Student> importStudents(String filePath) throws IOException {
+        if (filePath.endsWith(".csv")) {
+            return importStudentsFromCsv(filePath);
+        } else if (filePath.endsWith(".xlsx")) {
+            return importStudentsFromXlsx(filePath);
+        } else {
+            throw new IllegalArgumentException("Unsupported file format. Please use CSV or XLSX.");
+        }
+    }
+
+    private List<Student> importStudentsFromCsv(String filePath) throws IOException {
+        List<Student> students = new ArrayList<>();
+        try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length >= 2) {
+                    students.add(new Student(data[1], data[0]));
+                }
+            }
+        }
+        return students;
+    }
+
+    private List<Student> importStudentsFromXlsx(String filePath) throws IOException {
         List<Student> students = new ArrayList<>();
         List<Integer> skippedRows = new ArrayList<>();
         Path path = Paths.get(filePath);
@@ -49,30 +55,24 @@ public class FileHandler {
                 if (row == null || isRowEmpty(row))
                     continue;
 
-                String studentCode = getCellValue(row.getCell(0)); // "Student Code" column
-                String firstName = getCellValue(row.getCell(1)); // "Student First Name" column
-                String lastName = getCellValue(row.getCell(2)); // "Student Surname" column
+                String studentCode = getCellValue(row.getCell(0));
+                String firstName = getCellValue(row.getCell(1));
+                String lastName = getCellValue(row.getCell(2));
 
-                // Check if the relevant cells are all empty
                 if (isNullOrEmpty(studentCode) && isNullOrEmpty(firstName) && isNullOrEmpty(lastName)) {
-                    continue; // Skip this row
+                    continue;
                 }
 
-                // If any of the critical fields are null or empty, skip and record the row
                 if (isNullOrEmpty(studentCode) || isNullOrEmpty(firstName) || isNullOrEmpty(lastName)) {
-                    skippedRows.add(i + 1); // Add row number to skippedRows
-                    continue; // Skip this row
+                    skippedRows.add(i + 1);
+                    continue;
                 }
 
-                // Combine first and last names for the full name
                 String fullName = firstName + " " + lastName;
-
-                Student student = new Student(fullName, studentCode);
-                students.add(student);
+                students.add(new Student(fullName, studentCode));
             }
         }
 
-        // If there are skipped rows, show an error dialog
         if (!skippedRows.isEmpty()) {
             String skippedRowsStr = skippedRows.stream()
                     .map(String::valueOf)
@@ -83,40 +83,14 @@ public class FileHandler {
         return students;
     }
 
-    private boolean isRowEmpty(Row row) {
-        // Check if all cells in a row are empty
-        for (int cellNum = 0; cellNum < row.getLastCellNum(); cellNum++) {
-            Cell cell = row.getCell(cellNum);
-            if (cell != null && cell.getCellType() != CellType.BLANK && !getCellValue(cell).isEmpty()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean isNullOrEmpty(String value) {
-        return value == null || value.trim().isEmpty();
-    }
-
-    private void showErrorDialog(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Import Error");
-        alert.setHeaderText(
-                "Some rows were skipped due to null values, please check that all the cells are correct and that there are no null values.");
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
     public void exportStudents(List<Student> students, String filePath) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Students");
 
-            // Create header row
             Row headerRow = sheet.createRow(0);
             headerRow.createCell(0).setCellValue("Student ID");
             headerRow.createCell(1).setCellValue("Name");
 
-            // Add data rows
             int rowNum = 1;
             for (Student student : students) {
                 Row row = sheet.createRow(rowNum++);
@@ -124,45 +98,14 @@ public class FileHandler {
                 row.createCell(1).setCellValue(student.getName());
             }
 
-            // Auto-size columns for better readability
             for (int i = 0; i < 2; i++) {
                 sheet.autoSizeColumn(i);
             }
 
-            // Write the workbook to the file
             try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
                 workbook.write(outputStream);
             }
         }
-    }
-
-    // Utility method to get cell value
-    private String getCellValue(Cell cell) {
-        if (cell == null)
-            return null;
-
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue();
-            case NUMERIC:
-                return String.valueOf((int) cell.getNumericCellValue());
-            default:
-                return ""; 
-        }
-    }
-
-    public List<Student> importFromCsv(String filePath) throws IOException {
-        List<Student> students = new ArrayList<>();
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(filePath))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 2) {
-                    students.add(new Student(data[1], data[0]));
-                }
-            }
-        }
-        return students;
     }
 
     public List<StudentGrade> importGrades(String filePath) throws IOException {
@@ -173,7 +116,7 @@ public class FileHandler {
             Sheet sheet = workbook.getSheetAt(0);
             for (Row row : sheet) {
                 if (row.getRowNum() == 0)
-                    continue; // Skips header
+                    continue;
 
                 String studentId = getCellValue(row.getCell(0));
                 String assessmentName = getCellValue(row.getCell(1));
@@ -190,20 +133,6 @@ public class FileHandler {
         return grades;
     }
 
-    // Data export methods
-    public void exportToCsv(List<Student> students, String filePath) throws IOException {
-        try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
-            writer.write("Student ID,Name,Grade\n");
-            for (Student student : students) {
-                for (Grade grade : student.getGrades()) {
-                    writer.write(String.format("%s,%s,%f\n",
-                            student.getStudentId(), student.getName(), grade.getScore()));
-                }
-            }
-        }
-    }
-
-    // Updated exportGrades method
     public void exportGrades(List<Student> students, String filePath, FileFormat format) throws IOException {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Grades");
@@ -254,6 +183,43 @@ public class FileHandler {
                 workbook.write(outputStream);
             }
         }
+    }
+
+    // Utility methods
+    private boolean isRowEmpty(Row row) {
+        for (int cellNum = 0; cellNum < row.getLastCellNum(); cellNum++) {
+            Cell cell = row.getCell(cellNum);
+            if (cell != null && cell.getCellType() != CellType.BLANK && !getCellValue(cell).isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private String getCellValue(Cell cell) {
+        if (cell == null)
+            return null;
+
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue();
+            case NUMERIC:
+                return String.valueOf((int) cell.getNumericCellValue());
+            default:
+                return "";
+        }
+    }
+
+    private void showErrorDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Import Error");
+        alert.setHeaderText("Some rows were skipped due to null values");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     // File operations methods

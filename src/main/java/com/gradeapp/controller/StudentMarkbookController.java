@@ -39,7 +39,7 @@ public class StudentMarkbookController {
     @FXML
     private TableColumn<Grade, String> outcomeColumn;
     @FXML
-    private TableColumn<Grade, Double> scoreColumn;
+    private TableColumn<Grade, String> scoreColumn;
     @FXML
     private TableColumn<Grade, String> percentageColumn;
     @FXML
@@ -70,23 +70,38 @@ public class StudentMarkbookController {
                     : db.getOutcomesForAssessment(cellData.getValue().getAssessment().getId());
             return new SimpleStringProperty(outcomes.stream().map(Outcome::getName).collect(Collectors.joining(", ")));
         });
-        scoreColumn
-                .setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getScore()).asObject());
+
+        scoreColumn.setCellValueFactory(cellData -> {
+            Grade grade = cellData.getValue();
+            double score = grade.getScore();
+            double maxScore = grade.getAssessmentPart() != null
+                    ? grade.getAssessmentPart().getMaxScore()
+                    : grade.getAssessment().getMaxScore();
+            return new SimpleStringProperty(String.format("%.2f / %.2f", score, maxScore));
+        });
+
         percentageColumn.setCellValueFactory(cellData -> {
-            double score = cellData.getValue().getScore();
-            double maxScore = cellData.getValue().getAssessmentPart() != null
-                    ? cellData.getValue().getAssessmentPart().getMaxScore()
-                    : cellData.getValue().getAssessment().getMaxScore();
+            Grade grade = cellData.getValue();
+            double score = grade.getScore();
+            double maxScore = grade.getAssessmentPart() != null
+                    ? grade.getAssessmentPart().getMaxScore()
+                    : grade.getAssessment().getMaxScore();
             double percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
             return new SimpleStringProperty(String.format("%.2f%%", percentage));
         });
 
-        scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         scoreColumn.setOnEditCommit(event -> {
             Grade grade = event.getRowValue();
-            grade.setScore(event.getNewValue());
-            gradeTable.refresh();
-            calculatePercentages();
+            try {
+                String[] parts = event.getNewValue().split("/");
+                double newScore = Double.parseDouble(parts[0].trim());
+                grade.setScore(newScore);
+                gradeTable.refresh();
+                calculatePercentages();
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                gradeTable.refresh();
+            }
         });
 
         gradeTable.setEditable(true);
@@ -98,6 +113,23 @@ public class StudentMarkbookController {
         studentName.setText(student.getName());
         studentId.setText(student.getStudentId());
         loadGrades();
+    }
+
+    private void calculateOverallGrade() {
+        double totalWeightedScore = 0;
+        double totalWeight = 0;
+        for (Grade grade : gradeTable.getItems()) {
+            double maxScore = grade.getAssessmentPart() != null
+                    ? grade.getAssessmentPart().getMaxScore()
+                    : assessment.getMaxScore();
+            double weight = grade.getAssessmentPart() != null
+                    ? grade.getAssessmentPart().getWeight()
+                    : 1;
+            totalWeightedScore += (grade.getScore() / maxScore) * weight;
+            totalWeight += weight;
+        }
+        double overallPercentage = (totalWeightedScore / totalWeight) * 100;
+        percentageLabel.setText(String.format("Overall Grade: %.2f%%", overallPercentage));
     }
 
     private void loadGrades() {
@@ -135,6 +167,7 @@ public class StudentMarkbookController {
         }
         double percentage = totalMaxScore != 0 ? (totalScore / totalMaxScore) * 100 : 0;
         percentageLabel.setText(String.format("Total Percentage: %.2f%%", percentage));
+        calculateOverallGrade();
     }
 
     @FXML
@@ -142,7 +175,13 @@ public class StudentMarkbookController {
         try {
             for (Grade grade : gradeTable.getItems()) {
                 db.saveGrade(grade);
+
+                System.out.println("Saving grade: " + grade.getStudent().getStudentId() +
+                        ", Assessment: " + grade.getAssessment().getId() +
+                        ", Part: " + (grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : "null") +
+                        ", Score: " + grade.getScore());
             }
+
             showAlert("Grades saved successfully.");
             Stage stage = (Stage) saveButton.getScene().getWindow();
             stage.close();

@@ -1,6 +1,6 @@
+
 package com.gradeapp.model;
 
-import java.time.LocalDate;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -10,7 +10,6 @@ public class Grade {
     private AssessmentPart assessmentPart;
     private DoubleProperty score;
     private String feedback;
-    private LocalDate date;
     private DoubleProperty percentage;
 
     // Constructor with AssessmentPart
@@ -20,7 +19,6 @@ public class Grade {
         this.assessmentPart = assessmentPart;
         this.score = new SimpleDoubleProperty(score);
         this.feedback = feedback;
-        this.date = LocalDate.now();
         this.percentage = new SimpleDoubleProperty(calculatePercentage());
     }
 
@@ -74,13 +72,5 @@ public class Grade {
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
     }
 }

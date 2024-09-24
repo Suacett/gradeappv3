@@ -23,24 +23,11 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import java.sql.SQLException;
 
 public class StudentController {
 
@@ -67,18 +54,17 @@ public class StudentController {
     @FXML
     private ComboBox<Course> courseSelector;
 
-    private Database db = new Database();
+    private Database db;
 
     private ObservableList<Student> students = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
-        loadStudents();
-        displayCurrentStudents();
         studentListContainer = new VBox();
         studentListContainer.setSpacing(10);
         studentListContainer.setPadding(new Insets(10));
         studentScrollPane.setContent(studentListContainer);
+        db = new Database();
         loadStudents();
         displayCurrentStudents();
     }
@@ -129,7 +115,11 @@ public class StudentController {
 
         Optional<Student> result = dialog.showAndWait();
         result.ifPresent(student -> {
-            db.addStudent(student.getName(), student.getStudentId());
+            try {
+                db.addStudent(student.getName(), student.getStudentId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
             loadStudents();
             displayCurrentStudents();
         });
@@ -138,26 +128,40 @@ public class StudentController {
     @FXML
     private void handleImportStudentsFromFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Student CSV File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV Files", "*.csv"));
-        File file = fileChooser.showOpenDialog(null);
+        fileChooser.setTitle("Select Student File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv"),
+                new FileChooser.ExtensionFilter("Excel Files", "*.xlsx"));
+        File file = fileChooser.showOpenDialog(studentScrollPane.getScene().getWindow());
 
         if (file != null) {
-            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    String[] data = line.split(",");
-                    if (data.length >= 2) {
-                        String name = data[0].trim();
-                        String id = data[1].trim();
-                        db.addStudent(name, id);
+            DataImportExportController importExportController = new DataImportExportController();
+            importExportController.importData(file.getAbsolutePath());
+            loadStudents();
+            displayCurrentStudents();
+        }
+    }
+
+    private void importStudentsFromCSV(File file) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            int importedCount = 0;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length >= 2) {
+                    String studentName = values[0].trim();
+                    String studentId = values[1].trim();
+                    try {
+                        db.addStudent(studentName, studentId);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
                     }
+                    importedCount++;
                 }
-                loadStudents();
-                showAlert("Students imported successfully.");
-            } catch (Exception e) {
-                showAlert("Error importing students: " + e.getMessage());
             }
+            showAlert(importedCount + " students imported successfully.");
+        } catch (IOException e) {
+            showAlert("Error reading file: " + e.getMessage());
         }
     }
 
