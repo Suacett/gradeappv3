@@ -8,45 +8,51 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="assessmentContainer" prefHeight="600.0" prefWidth="1000.0" spacing="10"
-   xmlns="http://javafx.com/javafx/21"
-   xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.MarkingController">
+<VBox fx:id="assessmentContainer" prefHeight="600.0" prefWidth="1000.0" spacing="10" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.MarkingController">
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
 
-   <Label text="Assessment" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+   <Label text="Assessment">
+      <font>
+         <Font size="18.0" />
+      </font></Label>
 
-   <HBox spacing="20.0" alignment="CENTER_LEFT" styleClass="section-style">
+   <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="section-style">
       <Label text="Select a course">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <ComboBox fx:id="courseSelector" promptText="Select a course" prefWidth="200.0"/>
+      <ComboBox fx:id="courseSelector" prefWidth="200.0" promptText="Select a course" />
 
       <Label text="Select a class">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <ComboBox fx:id="classSelector" promptText="Select a class" prefWidth="200.0"/>
+      <ComboBox fx:id="classSelector" prefWidth="200.0" promptText="Select a class" />
 
       <Label text="Select assessment">
          <font>
             <Font size="16.0" />
          </font>
       </Label>
-      <ComboBox fx:id="assessmentSelector" promptText="Select assessment" prefWidth="200.0"/>
+      <ComboBox fx:id="assessmentSelector" prefWidth="200.0" promptText="Select assessment" />
    </HBox>
 
-   <Label text="Students" style="-fx-font-size: 18px; -fx-font-weight: bold;">
+   <Label text="Students">
       <VBox.margin>
-         <Insets top="20.0" bottom="10.0" />
+         <Insets top="10.0" />
       </VBox.margin>
+      <font>
+         <Font size="18.0" />
+      </font>
    </Label>
-
-   <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-      <VBox fx:id="studentsInClass" spacing="10" styleClass="section-style"/>
-   </ScrollPane>
+   <VBox fx:id="studentsInClass" prefHeight="458.0" prefWidth="960.0" spacing="10.0" styleClass="section-style" stylesheets="@styles.css">
+      <children>
+      
+         <ScrollPane fitToWidth="true" prefHeight="530.0" prefWidth="960.0" VBox.vgrow="ALWAYS" />
+      </children>
+   </VBox>
 </VBox>

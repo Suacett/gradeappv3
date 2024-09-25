@@ -10,15 +10,10 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
-<VBox fx:id="classContainer" prefHeight="732.0" prefWidth="765.0" spacing="10"
-   xmlns="http://javafx.com/javafx/21"
-   xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.ClassController">
+<VBox fx:id="classContainer" prefHeight="732.0" prefWidth="765.0" spacing="10" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.ClassController">
    <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
    </padding>
@@ -61,60 +56,76 @@
          <Font size="18.0" />
       </font>
    </Label>
-   <VBox prefHeight="280.0" prefWidth="745.0" styleClass="section-style">
+   <VBox prefHeight="226.0" prefWidth="745.0" styleClass="section-style">
       <children>
          <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-            <VBox fx:id="currentClassContainer" spacing="10">
+            <VBox fx:id="currentClassContainer" minHeight="-Infinity" spacing="10">
                <padding>
                   <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                </padding>
             </VBox>
             <VBox.margin>
-               <Insets bottom="10.0" />
+               <Insets />
             </VBox.margin>
          </ScrollPane>
       </children>
    </VBox>
-
-   <!-- Class Details Section (Initially Hidden) -->
-   <VBox fx:id="classDetailsContainer" spacing="10" styleClass="section-style" visible="false" managed="false">
-      <!-- Class Statistics Label -->
-      <Label fx:id="classStatisticsLabel" text="Class Statistics">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-
-      <!-- Assessment and Part Selection -->
-      <HBox spacing="10" alignment="CENTER_LEFT">
-         <Label text="Select Assessment:" />
-         <ComboBox fx:id="assessmentComboBox" prefWidth="200.0" />
-         <Label text="Select Part:" />
-         <ComboBox fx:id="partComboBox" prefWidth="200.0" />
-      </HBox>
-
-      <!-- Grade Bar Chart -->
-      <BarChart fx:id="gradeBarChart" VBox.vgrow="ALWAYS" prefHeight="300.0">
-         <padding>
-            <Insets top="10" right="10" bottom="10" left="10"/>
-         </padding>
-         <xAxis>
-            <CategoryAxis label="Students" />
-         </xAxis>
-         <yAxis>
-            <NumberAxis label="Grades" />
-         </yAxis>
-      </BarChart>
-
-
-      <!-- Students in Class -->
-      <Label text="Students in Class">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <ListView fx:id="studentListView" prefWidth="745.0" VBox.vgrow="ALWAYS" />
-   </VBox>
+   <Label text="Class statistics">
+      <font>
+         <Font size="18.0" />
+      </font>
+      <VBox.margin>
+         <Insets top="10.0" />
+      </VBox.margin>
+   </Label>
+   <HBox prefHeight="348.0" prefWidth="745.0" spacing="10.0">
+      <children>
+         <VBox prefHeight="350.0" spacing="10.0" styleClass="section-style" HBox.hgrow="ALWAYS">
+            <children>
+         
+               
+                     <!-- Students in Class -->
+               <Label text="Students in Class">
+                  <font>
+                     <Font size="18.0" />
+                  </font>
+               </Label>
+               <ListView fx:id="studentListView" prefWidth="745.0" />
+            </children>
+         </VBox>
+      
+               <!-- Class Details Section (Initially Hidden) -->
+         <VBox fx:id="classDetailsContainer" managed="false" minWidth="-Infinity" spacing="10" styleClass="section-style" visible="false">
+            <!-- Class Statistics Label -->
+            <Label fx:id="classStatisticsLabel" text="Class Statistics">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Label>
+      
+                  <!-- Assessment and Part Selection -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+               <Label text="Assessment:" />
+               <ComboBox fx:id="assessmentComboBox" prefWidth="200.0" />
+               <Label text="Part:" />
+               <ComboBox fx:id="partComboBox" prefWidth="200.0" />
+            </HBox>
+      
+                  <!-- Grade Bar Chart -->
+            <BarChart fx:id="gradeBarChart" prefHeight="300.0" VBox.vgrow="ALWAYS">
+               <padding>
+                  <Insets bottom="10" left="10" right="10" top="10" />
+               </padding>
+               <xAxis>
+                  <CategoryAxis label="Students" />
+               </xAxis>
+               <yAxis>
+                  <NumberAxis label="Grades" />
+               </yAxis>
+            </BarChart>
+         </VBox>
+      </children>
+   </HBox>
 
    <!-- New Class Input Container -->
    <VBox fx:id="newClassInputContainer" spacing="10" />

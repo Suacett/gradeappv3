@@ -167,7 +167,7 @@ public class MarkingController {
     // Method to create a student card
     private HBox createStudentCard(Student student) {
         HBox studentCard = new HBox();
-        studentCard.getStyleClass().add("student-card");
+        studentCard.getStyleClass().add("card");
         studentCard.setSpacing(10);
 
         VBox infoBox = new VBox(5);
@@ -211,7 +211,7 @@ public class MarkingController {
             gradeBox.getChildren().add(new Label("No assessment selected"));
         }
 
-        Button markBookButton = new Button("Mark Book");
+        Button markBookButton = new Button("MarkBook");
         markBookButton.setOnAction(event -> openMarkBook(student));
 
         HBox.setHgrow(infoBox, Priority.ALWAYS);
