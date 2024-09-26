@@ -1,4 +1,3 @@
-
 package com.gradeapp.controller;
 
 import java.io.BufferedWriter;
@@ -29,43 +28,75 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
+/**
+ * Controller class responsible for exporting grade data.
+ * Allows users to select courses, classes, assessments, and export grades to a
+ * CSV file.
+ */
 public class ExportController {
+
+    // ----------------------------- FXML UI Components
+    // -----------------------------
 
     @FXML
     private ComboBox<Course> courseSelector;
+
     @FXML
     private ComboBox<Classes> classSelector;
+
     @FXML
     private ComboBox<Assessment> assessmentSelector;
+
     @FXML
     private TableView<Grade> gradeTable;
+
     @FXML
     private TableColumn<Grade, String> studentColumn;
+
     @FXML
     private TableColumn<Grade, String> assessmentColumn;
+
     @FXML
     private TableColumn<Grade, String> partColumn;
+
     @FXML
     private TableColumn<Grade, String> scoreColumn;
+
     @FXML
     private TableColumn<Grade, Double> percentageColumn;
+
     @FXML
     private TableColumn<Grade, String> feedbackColumn;
+
     @FXML
     private Button exportButton;
+
     @FXML
     private ComboBox<String> exportTypeSelector;
+
     @FXML
     private TableColumn<Grade, String> classColumn;
+
+    // ----------------------------- Non-UI Fields -----------------------------
 
     private Database db = new Database();
     private Course selectedCourse;
     private ExportType currentExportType;
 
+    /**
+     * Enum representing the types of exports available.
+     */
     private enum ExportType {
         COURSE, CLASS, ASSESSMENT
     }
 
+    // ----------------------------- Initialization -----------------------------
+
+    /**
+     * Initializes the controller after its root element has been completely
+     * processed.
+     * Sets up selectors and the grade table.
+     */
     @FXML
     private void initialize() {
         setupExportTypeSelector();
@@ -73,10 +104,13 @@ public class ExportController {
         setupClassSelector();
         setupAssessmentSelector();
         setupGradeTable();
+
+        // Listener for export type changes
         exportTypeSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             updateExportType(newVal);
         });
 
+        // Listener for course selection changes
         courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 selectedCourse = newSelection;
@@ -86,12 +120,14 @@ public class ExportController {
             }
         });
 
+        // Listener for class selection changes
         classSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateGradeTable();
             }
         });
 
+        // Listener for assessment selection changes
         assessmentSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateGradeTable();
@@ -99,7 +135,11 @@ public class ExportController {
         });
     }
 
-    // Method to select course from dropdown
+    // ----------------------------- Setup Methods -----------------------------
+
+    /**
+     * Configures the course selector with available courses from the database.
+     */
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
@@ -119,12 +159,21 @@ public class ExportController {
         }
     }
 
+    /**
+     * Configures the export type selector with predefined export options.
+     */
     private void setupExportTypeSelector() {
         exportTypeSelector.setItems(FXCollections.observableArrayList("Course", "Class", "Assessment"));
         exportTypeSelector.getSelectionModel().selectFirst();
         updateExportType("Course");
     }
 
+    /**
+     * Updates the export type based on user selection and adjusts UI components
+     * accordingly.
+     *
+     * @param type The selected export type as a string.
+     */
     private void updateExportType(String type) {
         switch (type) {
             case "Course":
@@ -146,6 +195,9 @@ public class ExportController {
         updateGradeTable();
     }
 
+    /**
+     * Updates the grade table based on the selected course, class, and assessment.
+     */
     private void updateGradeTable() {
         ObservableList<Grade> grades = FXCollections.observableArrayList();
         Course selectedCourse = courseSelector.getSelectionModel().getSelectedItem();
@@ -177,6 +229,10 @@ public class ExportController {
         gradeTable.setItems(grades);
     }
 
+    /**
+     * Configures the assessment selector with available assessments from the
+     * database.
+     */
     private void setupAssessmentSelector() {
         assessmentSelector.setConverter(new StringConverter<Assessment>() {
             @Override
@@ -191,32 +247,9 @@ public class ExportController {
         });
     }
 
-    // Method to update classSelector based on selected course
-    private void updateClassSelector(Course selectedCourse) {
-        ObservableList<Classes> classes = FXCollections
-                .observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
-        classSelector.setItems(classes);
-        if (!classes.isEmpty()) {
-            classSelector.getSelectionModel().selectFirst();
-            updateGradeTable(classes.get(0));
-        } else {
-            gradeTable.setItems(FXCollections.observableArrayList());
-        }
-    }
-
-    // Method to update assessmentSelector based on selected course
-    private void updateAssessmentSelector() {
-        Course selectedCourse = courseSelector.getSelectionModel().getSelectedItem();
-        if (selectedCourse != null) {
-            ObservableList<Assessment> assessments = FXCollections
-                    .observableArrayList(db.getAssessmentsForCourse(selectedCourse.getId()));
-            assessmentSelector.setItems(assessments);
-            if (!assessments.isEmpty()) {
-                assessmentSelector.getSelectionModel().selectFirst();
-            }
-        }
-    }
-
+    /**
+     * Configures the class selector with available classes from the database.
+     */
     private void setupClassSelector() {
         classSelector.setConverter(new StringConverter<Classes>() {
             @Override
@@ -231,33 +264,41 @@ public class ExportController {
         });
     }
 
+    /**
+     * Configures the grade table with appropriate columns and editing capabilities.
+     */
     private void setupGradeTable() {
+        // Set up table columns
         studentColumn.setCellValueFactory(cellData -> cellData.getValue().getStudent().nameProperty());
-        TableColumn<Grade, String> classColumn = new TableColumn<>("Class");
+
         classColumn.setCellValueFactory(cellData -> {
             Student student = cellData.getValue().getStudent();
             Classes studentClass = db.getClassForStudent(student.getStudentId());
             return new SimpleStringProperty(studentClass != null ? studentClass.getName() : "N/A");
         });
-        gradeTable.getColumns().add(1, classColumn);
+
         assessmentColumn.setCellValueFactory(cellData -> cellData.getValue().getAssessment().nameProperty());
+
         partColumn.setCellValueFactory(cellData -> {
             if (cellData.getValue().getAssessmentPart() != null) {
                 return cellData.getValue().getAssessmentPart().nameProperty();
             } else {
-                return new javafx.beans.property.SimpleStringProperty("N/A");
+                return new SimpleStringProperty("N/A");
             }
         });
+
         scoreColumn.setCellValueFactory(cellData -> {
             double score = cellData.getValue().getScore();
             double maxScore = cellData.getValue().getAssessmentPart() != null
                     ? cellData.getValue().getAssessmentPart().getMaxScore()
                     : cellData.getValue().getAssessment().getMaxScore();
-            return new javafx.beans.property.SimpleStringProperty(String.format("%.2f/%.2f", score, maxScore));
+            return new SimpleStringProperty(String.format("%.2f/%.2f", score, maxScore));
         });
+
         percentageColumn.setCellValueFactory(cellData -> cellData.getValue().percentageProperty().asObject());
         feedbackColumn.setCellValueFactory(new PropertyValueFactory<>("feedback"));
 
+        // Enable editing for the score column
         scoreColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         scoreColumn.setOnEditCommit(event -> {
             Grade grade = event.getRowValue();
@@ -273,7 +314,7 @@ public class ExportController {
                 gradeTable.refresh();
                 calculatePercentages();
             } catch (NumberFormatException e) {
-                // Handle invalid input
+                // Handle invalid input by refreshing the table
                 gradeTable.refresh();
             }
         });
@@ -281,6 +322,43 @@ public class ExportController {
         gradeTable.setEditable(true);
     }
 
+    /**
+     * Updates the class selector based on the selected course.
+     *
+     * @param selectedCourse The course selected by the user.
+     */
+    private void updateClassSelector(Course selectedCourse) {
+        ObservableList<Classes> classes = FXCollections
+                .observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
+        classSelector.setItems(classes);
+        if (!classes.isEmpty()) {
+            classSelector.getSelectionModel().selectFirst();
+            updateGradeTable(classes.get(0));
+        } else {
+            gradeTable.setItems(FXCollections.observableArrayList());
+        }
+    }
+
+    /**
+     * Updates the assessment selector based on the selected course.
+     */
+    private void updateAssessmentSelector() {
+        Course selectedCourse = courseSelector.getSelectionModel().getSelectedItem();
+        if (selectedCourse != null) {
+            ObservableList<Assessment> assessments = FXCollections
+                    .observableArrayList(db.getAssessmentsForCourse(selectedCourse.getId()));
+            assessmentSelector.setItems(assessments);
+            if (!assessments.isEmpty()) {
+                assessmentSelector.getSelectionModel().selectFirst();
+            }
+        }
+    }
+
+    /**
+     * Updates the grade table based on the selected class.
+     *
+     * @param selectedClass The class selected by the user.
+     */
     private void updateGradeTable(Classes selectedClass) {
         ObservableList<Grade> grades = FXCollections.observableArrayList();
         List<Student> students = db.getStudentsInClass(selectedClass.getClassId());
@@ -297,6 +375,12 @@ public class ExportController {
         gradeTable.setItems(grades);
     }
 
+    // ----------------------------- Export Handling -----------------------------
+
+    /**
+     * Handles the export action when the export button is clicked.
+     * Exports the displayed grades to a CSV file chosen by the user.
+     */
     @FXML
     private void handleExportAction() {
         FileChooser fileChooser = new FileChooser();
@@ -306,8 +390,11 @@ public class ExportController {
         File file = fileChooser.showSaveDialog(stage);
         if (file != null) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                // Write CSV header
                 writer.write("Student,Class,Assessment,Part,Score,Percentage,Feedback");
                 writer.newLine();
+
+                // Write grade data
                 for (Grade grade : gradeTable.getItems()) {
                     String studentName = grade.getStudent().getName();
                     String className = db.getClassForStudent(grade.getStudent().getStudentId()).getName();
@@ -317,7 +404,8 @@ public class ExportController {
                             (grade.getAssessmentPart() != null) ? grade.getAssessmentPart().getMaxScore()
                                     : grade.getAssessment().getMaxScore());
                     double percentage = grade.getPercentage();
-                    String feedback = grade.getFeedback().replace(",", " ");
+                    String feedback = grade.getFeedback().replace(",", " "); // Avoid CSV issues
+
                     String line = String.join(",",
                             escapeCSV(studentName),
                             escapeCSV(className),
@@ -337,6 +425,12 @@ public class ExportController {
         }
     }
 
+    /**
+     * Escapes CSV fields by enclosing in quotes if necessary.
+     *
+     * @param value The field value to escape.
+     * @return The escaped field value.
+     */
     private String escapeCSV(String value) {
         if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
             value = value.replace("\"", "\"\"");
@@ -345,6 +439,11 @@ public class ExportController {
         return value;
     }
 
+    /**
+     * Displays an informational alert to the user.
+     *
+     * @param message The message to display.
+     */
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Export");
@@ -353,6 +452,9 @@ public class ExportController {
         alert.showAndWait();
     }
 
+    /**
+     * Calculates and updates the percentages based on the current grades.
+     */
     private void calculatePercentages() {
         double totalScore = 0;
         double totalMaxScore = 0;

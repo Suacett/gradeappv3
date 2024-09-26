@@ -26,31 +26,51 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
+/**
+ * Controller class for managing the marking process.
+ * Handles course, class, and assessment selection, and displays student grades.
+ */
 public class MarkingController {
 
-    // FXML elements
+    // ----------------------------- FXML UI Components -----------------------------
+
     @FXML
     private ComboBox<Course> courseSelector;
+
     @FXML
     private ComboBox<Classes> classSelector;
+
     @FXML
     private ComboBox<Assessment> assessmentSelector;
+
     @FXML
     private VBox studentsInClass;
+
     @FXML
     private Label studentName;
+
     @FXML
     private Label studentId;
+
+    // ----------------------------- Non-UI Fields -----------------------------
 
     private Database db = new Database();
     private Course selectedCourse;
 
+    // ----------------------------- Initialization -----------------------------
+
+    /**
+     * Initializes the controller after its root element has been completely
+     * processed.
+     * Sets up selectors and their listeners.
+     */
     @FXML
     private void initialize() {
         setupCourseSelector();
         setupClassSelector();
         setupAssessmentSelector();
 
+        // Listener for course selection changes
         courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateClassSelector(newSelection);
@@ -58,12 +78,14 @@ public class MarkingController {
             }
         });
 
+        // Listener for class selection changes
         classSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateStudentList(newSelection);
             }
         });
 
+        // Listener for assessment selection changes
         assessmentSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 updateStudentList(classSelector.getSelectionModel().getSelectedItem());
@@ -71,18 +93,14 @@ public class MarkingController {
         });
     }
 
-    // Method to select course from dropdown
+    // ----------------------------- Setup Methods -----------------------------
+
+    /**
+     * Configures the course selector with available courses from the database.
+     */
     private void setupCourseSelector() {
         ObservableList<Course> courses = FXCollections.observableArrayList(db.getAllCourses());
         courseSelector.setItems(courses);
-        courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                selectedCourse = newSelection; // Store selected course
-                updateClassSelector(newSelection);
-                updateAssessmentSelector(); // Update assessments based on selected course
-            }
-        });
-
         courseSelector.setConverter(new StringConverter<Course>() {
             @Override
             public String toString(Course course) {
@@ -94,18 +112,18 @@ public class MarkingController {
                 return null;
             }
         });
-        // Update classSelector when course is selected
-        courseSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null) {
-                updateClassSelector(newSelection);
-            }
-        });
-        if (!courses.isEmpty()) { // Select first course in list
+
+        // Select the first course by default if available
+        if (!courses.isEmpty()) {
             courseSelector.getSelectionModel().selectFirst();
         }
     }
 
-    // Method to update classSelector based on selected course
+    /**
+     * Configures the class selector based on the selected course.
+     *
+     * @param selectedCourse The course selected by the user.
+     */
     private void updateClassSelector(Course selectedCourse) {
         ObservableList<Classes> classes = FXCollections
                 .observableArrayList(db.getClassesForCourse(selectedCourse.getId()));
@@ -116,18 +134,62 @@ public class MarkingController {
         }
     }
 
-    // Method to update assessmentSelector based on selected class
+    /**
+     * Configures the assessment selector based on the selected course.
+     */
     private void updateAssessmentSelector() {
         Course selectedCourse = courseSelector.getSelectionModel().getSelectedItem();
         if (selectedCourse != null) {
             ObservableList<Assessment> assessments = FXCollections
                     .observableArrayList(db.getAssessmentsForCourse(selectedCourse.getId()));
             assessmentSelector.setItems(assessments);
-            assessmentSelector.getSelectionModel().selectFirst();
+            if (!assessments.isEmpty()) {
+                assessmentSelector.getSelectionModel().selectFirst();
+            }
         }
     }
 
-    // Method to update the student list based on the selected class
+    /**
+     * Configures the class selector's display format.
+     */
+    private void setupClassSelector() {
+        classSelector.setConverter(new StringConverter<Classes>() {
+            @Override
+            public String toString(Classes classObj) {
+                return classObj == null ? "" : classObj.getName();
+            }
+
+            @Override
+            public Classes fromString(String string) {
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Configures the assessment selector's display format.
+     */
+    private void setupAssessmentSelector() {
+        assessmentSelector.setConverter(new StringConverter<Assessment>() {
+            @Override
+            public String toString(Assessment assessment) {
+                return assessment == null ? "" : assessment.getName();
+            }
+
+            @Override
+            public Assessment fromString(String string) {
+                return null;
+            }
+        });
+    }
+
+    // ----------------------------- Update Methods -----------------------------
+
+    /**
+     * Updates the student list based on the selected class.
+     *
+     * @param selectedClass The class selected by the user.
+     */
     private void updateStudentList(Classes selectedClass) {
         if (selectedClass == null) {
             System.out.println("No class selected.");
@@ -150,31 +212,27 @@ public class MarkingController {
         System.out.println("Found " + students.size() + " students for class: " + selectedClass.getName());
     }
 
-    private void setupAssessmentSelector() {
-        assessmentSelector.setConverter(new StringConverter<Assessment>() {
-            @Override
-            public String toString(Assessment assessment) {
-                return assessment == null ? "" : assessment.getName();
-            }
+    // ----------------------------- UI Creation Methods -----------------------------
 
-            @Override
-            public Assessment fromString(String string) {
-                return null;
-            }
-        });
-    }
-
-    // Method to create a student card
+    /**
+     * Creates a visual representation (card) for a student.
+     *
+     * @param student The student for whom the card is created.
+     * @return An HBox containing student information and a button to open the Mark
+     *         Book.
+     */
     private HBox createStudentCard(Student student) {
         HBox studentCard = new HBox();
         studentCard.getStyleClass().add("card");
         studentCard.setSpacing(10);
 
+        // Student Information
         VBox infoBox = new VBox(5);
         Label nameLabel = new Label("Name: " + student.getName());
         Label idLabel = new Label("ID: " + student.getStudentId());
         infoBox.getChildren().addAll(nameLabel, idLabel);
 
+        // Grades Information
         VBox gradeBox = new VBox(5);
         gradeBox.getStyleClass().add("grade-box");
         Assessment selectedAssessment = assessmentSelector.getSelectionModel().getSelectedItem();
@@ -211,9 +269,11 @@ public class MarkingController {
             gradeBox.getChildren().add(new Label("No assessment selected"));
         }
 
+        // Button to open Mark Book
         Button markBookButton = new Button("MarkBook");
         markBookButton.setOnAction(event -> openMarkBook(student));
 
+        // Adjust layout priorities
         HBox.setHgrow(infoBox, Priority.ALWAYS);
         HBox.setHgrow(gradeBox, Priority.ALWAYS);
 
@@ -221,7 +281,13 @@ public class MarkingController {
         return studentCard;
     }
 
-    // Method to open the Mark Book view
+    // ----------------------------- Navigation Methods -----------------------------
+
+    /**
+     * Opens the Mark Book view for a specific student.
+     *
+     * @param student The student whose Mark Book is to be opened.
+     */
     private void openMarkBook(Student student) {
         try {
             Assessment selectedAssessment = assessmentSelector.getSelectionModel().getSelectedItem();
@@ -249,27 +315,13 @@ public class MarkingController {
         }
     }
 
-    private void setupClassSelector() {
-        classSelector.setConverter(new StringConverter<Classes>() {
-            @Override
-            public String toString(Classes classObj) {
-                return classObj == null ? "" : classObj.getName();
-            }
+    // ----------------------------- Utility Methods -----------------------------
 
-            @Override
-            public Classes fromString(String string) {
-                return null;
-            }
-        });
-    }
-
-    // Method to set details in student-markbook.fxml
-    private void setStudent(Student student) {
-        studentName.setText(student.getName());
-        studentId.setText(student.getStudentId());
-    }
-
-    // Method to show an alert
+    /**
+     * Displays an informational alert to the user.
+     *
+     * @param message The message to display.
+     */
     private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information");

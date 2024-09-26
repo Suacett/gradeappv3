@@ -1,9 +1,12 @@
-
 package com.gradeapp.model;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
+/**
+ * Represents a grade assigned to a student for a specific assessment or assessment part.
+ * Contains information about the student's score, feedback, and calculated percentage.
+ */
 public class Grade {
     private Student student;
     private Assessment assessment;
@@ -12,7 +15,15 @@ public class Grade {
     private String feedback;
     private DoubleProperty percentage;
 
-    // Constructor with AssessmentPart
+    /**
+     * Constructs a Grade with the specified student, assessment part, score, and feedback.
+     *
+     * @param student          The Student who received the grade.
+     * @param assessment       The Assessment associated with the grade.
+     * @param assessmentPart   The AssessmentPart associated with the grade (nullable).
+     * @param score            The score achieved by the student.
+     * @param feedback         Feedback provided for the grade.
+     */
     public Grade(Student student, Assessment assessment, AssessmentPart assessmentPart, double score, String feedback) {
         this.student = student;
         this.assessment = assessment;
@@ -22,12 +33,21 @@ public class Grade {
         this.percentage = new SimpleDoubleProperty(calculatePercentage());
     }
 
-    // Constructor without AssessmentPart
+    /**
+     * Constructs a Grade with the specified student, assessment, score, and feedback.
+     * This constructor is used when there is no specific assessment part.
+     *
+     * @param student    The Student who received the grade.
+     * @param assessment The Assessment associated with the grade.
+     * @param score      The score achieved by the student.
+     * @param feedback   Feedback provided for the grade.
+     */
     public Grade(Student student, Assessment assessment, double score, String feedback) {
         this(student, assessment, null, score, feedback);
     }
 
-    // Getters and setters
+    // ----------------------------- Getters and Setters -----------------------------
+
     public Student getStudent() {
         return student;
     }
@@ -38,11 +58,6 @@ public class Grade {
 
     public DoubleProperty percentageProperty() {
         return percentage;
-    }
-
-    private double calculatePercentage() {
-        double maxScore = assessmentPart != null ? assessmentPart.getMaxScore() : assessment.getMaxScore();
-        return maxScore > 0 ? (getScore() / maxScore) * 100 : 0;
     }
 
     public Assessment getAssessment() {
@@ -72,5 +87,17 @@ public class Grade {
 
     public void setFeedback(String feedback) {
         this.feedback = feedback;
+    }
+
+    // ----------------------------- Utility Methods -----------------------------
+
+    /**
+     * Calculates the percentage score based on the achieved score and the maximum possible score.
+     *
+     * @return The calculated percentage.
+     */
+    private double calculatePercentage() {
+        double maxScore = assessmentPart != null ? assessmentPart.getMaxScore() : assessment.getMaxScore();
+        return maxScore > 0 ? (getScore() / maxScore) * 100 : 0;
     }
 }

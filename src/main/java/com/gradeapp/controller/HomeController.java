@@ -27,7 +27,6 @@ public class HomeController {
 
     // Dummy method to fetch recent activities from the database
     private List<String> fetchRecentActivities() {
-        // This is a placeholder. Replace with actual database logic.
         return List.of(
 
         );

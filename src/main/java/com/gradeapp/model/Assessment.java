@@ -9,6 +9,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
+/**
+ * Represents an assessment within the grading application.
+ * An assessment can have multiple parts and is associated with various outcomes.
+ */
 public class Assessment {
     private int id;
     private StringProperty nameProperty;
@@ -20,7 +24,15 @@ public class Assessment {
     private ObservableList<Assessment> childAssessments;
     private Assessment parentAssessment;
 
-    // Constructor with id
+    /**
+     * Constructs an Assessment with the specified details.
+     *
+     * @param id          The unique identifier of the assessment.
+     * @param name        The name of the assessment.
+     * @param description A brief description of the assessment.
+     * @param weight      The weight of the assessment in the overall grade.
+     * @param maxScore    The maximum possible score for the assessment.
+     */
     public Assessment(int id, String name, String description, double weight, double maxScore) {
         this.id = id;
         this.nameProperty = new SimpleStringProperty(name);
@@ -32,13 +44,22 @@ public class Assessment {
         this.childAssessments = FXCollections.observableArrayList();
     }
 
-    // Constructor without id
+    /**
+     * Constructs an Assessment without specifying an ID.
+     * Useful for creating new assessments before assigning an ID.
+     *
+     * @param name        The name of the assessment.
+     * @param description A brief description of the assessment.
+     * @param weight      The weight of the assessment in the overall grade.
+     * @param maxScore    The maximum possible score for the assessment.
+     */
     public Assessment(String name, String description, double weight, double maxScore) {
         this(-1, name, description, weight, maxScore); // Use -1 as a temporary id
         this.outcomeWeights = FXCollections.observableHashMap();
     }
 
-    // Getters and setters for id
+    // ----------------------------- Getters and Setters -----------------------------
+
     public int getId() {
         return id;
     }
@@ -47,63 +68,6 @@ public class Assessment {
         this.id = id;
     }
 
-    // Methods for managing nested assessments
-    public static void createNestedAssessment(Assessment parentAssessment, Assessment childAssessment) {
-        parentAssessment.addChildAssessment(childAssessment);
-    }
-
-    public void addChildAssessment(Assessment child) {
-        childAssessments.add(child);
-        child.parentAssessment = this;
-    }
-
-    // Methods for generating reports
-    public Map<String, Object> generateDetailedReport() {
-        Map<String, Object> report = new HashMap<>();
-        report.put("id", id);
-        report.put("name", nameProperty.get());
-        report.put("description", description);
-        report.put("weight", weight);
-        report.put("maxScore", maxScore);
-        report.put("partsCount", parts.size());
-        report.put("parts", parts.stream().map(AssessmentPart::getName).toList());
-        report.put("outcomeCount", outcomeWeights.size());
-        report.put("outcomes", outcomeWeights.keySet().stream().map(Outcome::getName).toList());
-        report.put("childAssessmentCount", childAssessments.size());
-        report.put("childAssessments", childAssessments.stream().map(Assessment::getName).toList());
-        return report;
-    }
-
-    // Methods for calculating values
-    public double calculateTotalWeight() {
-        return weight + childAssessments.stream()
-                .mapToDouble(Assessment::calculateTotalWeight)
-                .sum();
-    }
-
-    public double calculateGrade(Map<AssessmentPart, Double> partScores) {
-        return parts.stream()
-                .mapToDouble(part -> {
-                    double score = partScores.getOrDefault(part, 0.0);
-                    return (score / part.getMaxScore()) * part.getWeight();
-                })
-                .sum();
-    }
-
-    // Methods for managing tasks
-    public void addTask(AssessmentPart task) {
-        this.parts.add(task);
-    }
-
-    public void removeTask(AssessmentPart task) {
-        this.parts.remove(task);
-    }
-
-    public Map<Outcome, Double> getOutcomes() {
-        return new HashMap<>(outcomeWeights);
-    }
-
-    // Getters and Setters for other fields
     public String getName() {
         return nameProperty.get();
     }
@@ -166,6 +130,10 @@ public class Assessment {
         this.outcomeWeights.put(outcome, weight);
     }
 
+    public Map<Outcome, Double> getOutcomes() {
+        return new HashMap<>(outcomeWeights);
+    }
+
     public ObservableList<Assessment> getChildAssessments() {
         return childAssessments;
     }
@@ -203,18 +171,62 @@ public class Assessment {
         return new HashMap<>(outcomeWeights);
     }
 
-    // Method to calculate total score
+    // ----------------------------- Calculations -----------------------------
+
+    /**
+     * Calculates the total weight of the assessment, including its child assessments.
+     *
+     * @return The total weight.
+     */
+    public double calculateTotalWeight() {
+        return weight + childAssessments.stream()
+                .mapToDouble(Assessment::calculateTotalWeight)
+                .sum();
+    }
+
+    /**
+     * Calculates the grade based on the provided part scores.
+     *
+     * @param partScores A map of AssessmentPart to the student's score for that part.
+     * @return The calculated grade.
+     */
+    public double calculateGrade(Map<AssessmentPart, Double> partScores) {
+        return parts.stream()
+                .mapToDouble(part -> {
+                    double score = partScores.getOrDefault(part, 0.0);
+                    return (score / part.getMaxScore()) * part.getWeight();
+                })
+                .sum();
+    }
+
+    /**
+     * Calculates the total score of the assessment based on its parts.
+     *
+     * @return The total score.
+     */
     public double calculateTotalScore() {
         return parts.stream().mapToDouble(part -> part.getWeight() * part.getMaxScore()).sum();
     }
 
-    // Method to calculate grade based on part scores
+    /**
+     * Calculates the grade based on the provided part scores.
+     *
+     * @param partScores An observable map of AssessmentPart to the student's score for that part.
+     * @return The calculated grade.
+     */
     public double calculateGrade(ObservableMap<AssessmentPart, Double> partScores) {
         return parts.stream()
                 .mapToDouble(part -> (partScores.getOrDefault(part, 0.0) / part.getMaxScore()) * part.getWeight())
                 .sum();
     }
 
+    /**
+     * Calculates the outcome-specific grade based on part scores.
+     *
+     * @param outcome    The Outcome to calculate the grade for.
+     * @param partScores A map of AssessmentPart to the student's score for that part.
+     * @return The outcome-specific grade as a percentage.
+     */
     public double calculateOutcomeGrade(Outcome outcome, Map<AssessmentPart, Double> partScores) {
         double totalScore = 0.0;
         double maxPossibleScore = 0.0;
@@ -231,6 +243,33 @@ public class Assessment {
         return maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
     }
 
+    // ----------------------------- Task Management -----------------------------
+
+    /**
+     * Adds a new task (assessment part) to the assessment.
+     *
+     * @param task The AssessmentPart to add.
+     */
+    public void addTask(AssessmentPart task) {
+        this.parts.add(task);
+    }
+
+    /**
+     * Removes a task (assessment part) from the assessment.
+     *
+     * @param task The AssessmentPart to remove.
+     */
+    public void removeTask(AssessmentPart task) {
+        this.parts.remove(task);
+    }
+
+    // ----------------------------- toString Override -----------------------------
+
+    /**
+     * Returns the string representation of the assessment, which is its name.
+     *
+     * @return The name of the assessment.
+     */
     @Override
     public String toString() {
         return getName();

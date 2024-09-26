@@ -19,27 +19,58 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ * Controller class for managing courses in the GradeApp.
+ * Handles displaying current courses, adding new courses,
+ * viewing/editing course details, and deleting courses.
+ */
 public class CoursesController {
 
-    @FXML
-    private VBox currentCourseContainer;
-    @FXML
-    private VBox content;
-    @FXML
-    private HBox buttons;
+    // ----------------------------- FXML UI Components --------------------
 
-    private Database db = new Database();
+    @FXML
+    private VBox currentCourseContainer; // Container to display the list of current courses
 
+    @FXML
+    private VBox content; // General content area 
+
+    @FXML
+    private HBox buttons; // Container for buttons
+
+    // ----------------------------- Non-UI Fields -----------------------------
+
+    private Database db = new Database(); // Database instance for data operations
+
+    // ----------------------------- Initialization -----------------------------
+
+    /**
+     * Initializes the controller after its root element has been completely
+     * processed.
+     * Populates the current courses displayed in the UI.
+     */
     @FXML
     private void initialize() {
         displayCurrentCourses();
     }
 
+    // ----------------------------- Action Handlers -----------------------------
+
+    /**
+     * Handles the action when the "Add Course" button is clicked.
+     * Opens the course edit window for creating a new course.
+     */
     @FXML
     private void handleAddCourseButtonAction() {
         openCourseEditWindow(null);
     }
 
+    // ----------------------------- Primary Methods -----------------------------
+
+    /**
+     * Displays all current courses fetched from the database.
+     * Clears the existing course display and repopulates it.
+     * If no courses are available, shows a message indicating no current courses.
+     */
     public void displayCurrentCourses() {
         currentCourseContainer.getChildren().clear();
 
@@ -58,10 +89,14 @@ public class CoursesController {
         }
     }
 
-    public VBox getCurrentCourseContainer() {
-        return currentCourseContainer;
-    }
-
+    /**
+     * Creates a visual card (VBox) representing a single course.
+     * Includes course name, ID, and action buttons for viewing/editing and
+     * deleting.
+     *
+     * @param course The Course object to be represented in the card
+     * @return A VBox containing the course information and action buttons
+     */
     private VBox createCourseCard(Course course) {
         VBox courseCard = new VBox();
         courseCard.getStyleClass().add("card");
@@ -80,21 +115,29 @@ public class CoursesController {
         buttonContainer.setSpacing(10);
         Button viewEditButton = new Button("View/Edit Details");
         viewEditButton.setOnAction(event -> openCourseDetailsWindow(course));
+
         Button deleteButton = new Button("Delete");
         deleteButton.getStyleClass().add("delete-button");
         deleteButton.setOnAction(event -> {
             db.deleteCourse(course.getId());
             displayCurrentCourses();
         });
+
         buttonContainer.getChildren().addAll(viewEditButton, deleteButton);
-
         courseCardInfo.getChildren().addAll(nameLabel, idLabel, spacer, buttonContainer);
-
         courseCard.getChildren().add(courseCardInfo);
         VBox.setMargin(courseCard, new Insets(0, 10, 10, 10));
+
         return courseCard;
     }
 
+    /**
+     * Opens the course edit window for creating a new course or editing an existing
+     * one.
+     *
+     * @param course The Course object to be edited. If null, a new course is being
+     *               created.
+     */
     private void openCourseEditWindow(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-creation.fxml"));
@@ -119,6 +162,11 @@ public class CoursesController {
         }
     }
 
+    /**
+     * Opens the course details window to view or edit the selected course.
+     *
+     * @param course The Course object whose details are to be viewed/edited
+     */
     private void openCourseDetailsWindow(Course course) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/demo3/course-details.fxml"));
@@ -138,6 +186,17 @@ public class CoursesController {
             e.printStackTrace();
             System.err.println("Error loading course-details.fxml: " + e.getMessage());
         }
+    }
+
+    // ----------------------------- Getter Methods -----------------------------
+
+    /**
+     * Provides access to the currentCourseContainer VBox.
+     *
+     * @return The VBox that contains the list of current courses
+     */
+    public VBox getCurrentCourseContainer() {
+        return currentCourseContainer;
     }
 
 }

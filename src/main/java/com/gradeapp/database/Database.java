@@ -6,7 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
+// Importing necessary Java SQL and utility classes
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,10 +18,18 @@ import com.gradeapp.model.Grade;
 import com.gradeapp.model.Outcome;
 import com.gradeapp.model.Student;
 
+/**
+ * Database class responsible for managing all database operations.
+ * It handles the connection, initialization, and CRUD operations for various
+ * entities.
+ */
 public class Database {
-    private static final String URL = "jdbc:sqlite:com.gradeapp.db";
-    private static boolean isInitialized = false;
+    private static final String URL = "jdbc:sqlite:com.gradeapp.db"; // SQLite database URL
+    private static boolean isInitialized = false; // Flag to ensure the database is initialized only once
 
+    /**
+     * Constructor that initializes the database if it hasn't been initialized yet.
+     */
     public Database() {
         if (!isInitialized) {
             initialiseDatabase();
@@ -29,7 +37,12 @@ public class Database {
         }
     }
 
+    /**
+     * Initializes the database by creating all the necessary tables.
+     * Also handles any schema migrations or updates required.
+     */
     public void initialiseDatabase() {
+        // SQL statements to create tables if they do not exist
         String createCoursesTable = "CREATE TABLE IF NOT EXISTS courses ("
                 + "id TEXT PRIMARY KEY,"
                 + "name TEXT NOT NULL,"
@@ -131,6 +144,7 @@ public class Database {
 
         try (Connection conn = this.connect();
                 Statement stmt = conn.createStatement()) {
+            // Executing SQL statements to create tables
             stmt.execute(createCoursesTable);
             stmt.execute(createStudentsTable);
             stmt.execute(createClassesTable);
@@ -143,34 +157,8 @@ public class Database {
             stmt.execute(createStudentClassesTable);
             stmt.execute(createAssessmentPartOutcomesTable);
             stmt.execute(createStudentMarkBookTable);
-            createStudentClassTable();
+            createStudentClassTable(); // Ensures the student_classes table exists
 
-            try {
-                stmt.execute("ALTER TABLE classes ADD COLUMN course_id TEXT REFERENCES courses(id)");
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("duplicate column name")) {
-                    throw e;
-                }
-            }
-
-            try {
-                String addDateColumn = "ALTER TABLE grades ADD COLUMN date TEXT";
-                stmt.execute(addDateColumn);
-            } catch (SQLException e) {
-                if (!e.getMessage().contains("duplicate column name")) {
-                    throw e;
-                }
-            }
-
-            try {
-
-           stmt.execute("ALTER TABLE grades DROP COLUMN date");
-       } catch (SQLException e) {
-           // Ignore if the column doesn't exist
-           if (!e.getMessage().contains("no such column: date")) {
-               System.out.println("Error removing date column: " + e.getMessage());
-           }
-       }
             System.out.println("Database and tables initialized.");
         } catch (SQLException e) {
             System.out.println("Error initializing database: " + e.getMessage());
@@ -178,6 +166,11 @@ public class Database {
 
     }
 
+    /**
+     * Establishes a connection to the SQLite database.
+     *
+     * @return Connection object if successful, null otherwise.
+     */
     private Connection connect() {
         try {
             Connection conn = DriverManager.getConnection(URL);
@@ -190,7 +183,19 @@ public class Database {
 
     }
 
-    // STUDENT MARKBOOOK
+    // ----------------------------- STUDENT MARKBOOK -----------------------------
+
+    /**
+     * Saves or updates a student's markbook entry in the database.
+     *
+     * @param studentId    The ID of the student.
+     * @param assessmentId The ID of the assessment.
+     * @param partId       The ID of the assessment part.
+     * @param outcomeId    The ID of the outcome.
+     * @param weight       The weight of the outcome.
+     * @param score        The score achieved.
+     * @param percentage   The percentage score.
+     */
     public void saveStudentMarkBook(String studentId, int assessmentId, int partId, String outcomeId, double weight,
             double score, double percentage) {
         String sql = "INSERT OR REPLACE INTO student_markbook (student_id, assessment_id, part_id, outcome_id, weight, score, percentage) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -210,7 +215,15 @@ public class Database {
         }
     }
 
-    // ASSESSMENT PARTS
+    // ----------------------------- ASSESSMENT PARTS -----------------------------
+
+    /**
+     * Links an outcome to an assessment with a specified weight.
+     *
+     * @param assessmentId The ID of the assessment.
+     * @param outcomeId    The ID of the outcome.
+     * @param weight       The weight of the outcome in the assessment.
+     */
     public void linkOutcomeToAssessment(int assessmentId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_outcomes (assessment_id, outcome_id, weight) VALUES (?, ?, ?)";
         try (Connection conn = this.connect();
@@ -226,6 +239,13 @@ public class Database {
         }
     }
 
+    /**
+     * Links an outcome to an assessment part with a specified weight.
+     *
+     * @param partId    The ID of the assessment part.
+     * @param outcomeId The ID of the outcome.
+     * @param weight    The weight of the outcome in the assessment part.
+     */
     public void linkOutcomeToAssessmentPart(int partId, String outcomeId, double weight) {
         String sql = "INSERT OR REPLACE INTO assessment_part_outcomes (part_id, outcome_id, weight) VALUES (?, ?, ?)";
         try (Connection conn = this.connect();
@@ -241,6 +261,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all outcomes linked to a specific assessment.
+     *
+     * @param assessmentId The ID of the assessment.
+     * @return A list of linked Outcome objects.
+     */
     public List<Outcome> getLinkedOutcomesForAssessment(int assessmentId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, ao.weight FROM outcomes o " +
@@ -266,6 +292,13 @@ public class Database {
         return outcomes;
     }
 
+    /**
+     * Retrieves the weight of an outcome for a specific assessment part.
+     *
+     * @param partId    The ID of the assessment part.
+     * @param outcomeId The ID of the outcome.
+     * @return The weight of the outcome in the assessment part.
+     */
     public double getOutcomeWeightForPart(int partId, String outcomeId) {
         String sql = "SELECT weight FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
@@ -282,6 +315,13 @@ public class Database {
         return 0;
     }
 
+    /**
+     * Retrieves the weight of an outcome for a specific assessment.
+     *
+     * @param assessmentId The ID of the assessment.
+     * @param outcomeId    The ID of the outcome.
+     * @return The weight of the outcome in the assessment.
+     */
     public double getOutcomeWeightForAssessment(int assessmentId, String outcomeId) {
         String sql = "SELECT weight FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
@@ -298,6 +338,12 @@ public class Database {
         return 0;
     }
 
+    /**
+     * Retrieves all outcomes linked to a specific assessment part.
+     *
+     * @param partId The ID of the assessment part.
+     * @return A list of linked Outcome objects.
+     */
     public List<Outcome> getLinkedOutcomesForPart(int partId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, apo.weight FROM outcomes o " +
@@ -323,6 +369,13 @@ public class Database {
         return outcomes;
     }
 
+    /**
+     * Adds a new assessment to the database.
+     *
+     * @param assessment The Assessment object to add.
+     * @param courseId   The ID of the course the assessment belongs to.
+     * @return The generated ID of the new assessment, or -1 if insertion failed.
+     */
     public int addAssessment(Assessment assessment, String courseId) {
         String sql = "INSERT INTO assessments(course_id, name, description, weight, maxScore) VALUES(?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
@@ -351,6 +404,14 @@ public class Database {
         return -1;
     }
 
+    /**
+     * Adds a new assessment part to the database.
+     *
+     * @param part         The AssessmentPart object to add.
+     * @param assessmentId The ID of the parent assessment.
+     * @return The generated ID of the new assessment part, or -1 if insertion
+     *         failed.
+     */
     public int addAssessmentPart(AssessmentPart part, int assessmentId) {
         String sql = "INSERT INTO assessment_parts (assessment_id, name, weight, max_score) VALUES (?, ?, ?, ?)";
         try (Connection conn = this.connect();
@@ -375,6 +436,12 @@ public class Database {
         return -1;
     }
 
+    /**
+     * Retrieves all parts associated with a specific assessment.
+     *
+     * @param assessmentId The ID of the assessment.
+     * @return A list of AssessmentPart objects.
+     */
     public List<AssessmentPart> getAssessmentParts(int assessmentId) {
         List<AssessmentPart> parts = new ArrayList<>();
         String sql = "SELECT * FROM assessment_parts WHERE assessment_id = ?";
@@ -398,6 +465,10 @@ public class Database {
         return parts;
     }
 
+    /**
+     * Verifies and prints out all entries in the assessment_parts table.
+     * Useful for debugging purposes.
+     */
     public void verifyAssessmentParts() {
         String sql = "SELECT * FROM assessment_parts";
         try (Connection conn = this.connect();
@@ -420,21 +491,33 @@ public class Database {
         }
     }
 
-    // COURSES
+    // ----------------------------- COURSES -----------------------------
 
+    /**
+     * Updates an existing course in the database.
+     *
+     * @param course     The `Course` object containing the updated course
+     *                   information.
+     * @param originalId The original ID of the course to be updated.
+     */
     public void updateCourse(Course course, String originalId) {
         String sql = "UPDATE courses SET id = ?, name = ?, description = ? WHERE id = ?";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set new course data
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
             pstmt.setString(4, originalId);
             pstmt.executeUpdate();
+
+            // Delete existing outcomes and add updated ones
             deleteOutcomesForCourse(originalId);
             for (Outcome outcome : course.getOutcomes()) {
                 addOutcome(outcome, course.getId());
             }
+
+            // Update class associations if the course ID has changed
             if (!course.getId().equals(originalId)) {
                 updateClassCourseAssociations(originalId, course.getId());
             }
@@ -446,6 +529,11 @@ public class Database {
         }
     }
 
+    /**
+     * Deletes all outcomes associated with a specific course.
+     *
+     * @param courseId The ID of the course whose outcomes are to be deleted.
+     */
     private void deleteOutcomesForCourse(String courseId) {
         String sql = "DELETE FROM outcomes WHERE course_id = ?";
         try (Connection conn = this.connect();
@@ -458,6 +546,12 @@ public class Database {
         }
     }
 
+    /**
+     * Updates class-course associations when a course ID changes.
+     *
+     * @param oldCourseId The original course ID.
+     * @param newCourseId The new course ID to update in associated classes.
+     */
     private void updateClassCourseAssociations(String oldCourseId, String newCourseId) {
         String sql = "UPDATE classes SET course_id = ? WHERE course_id = ?";
         try (Connection conn = this.connect();
@@ -471,15 +565,22 @@ public class Database {
         }
     }
 
+    /**
+     * Adds a new course to the database along with its outcomes.
+     *
+     * @param course The `Course` object to be added.
+     */
     public void addCourse(Course course) {
         String sql = "INSERT INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set course data
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
             pstmt.executeUpdate();
 
+            // Add associated outcomes
             for (Outcome outcome : course.getOutcomes()) {
                 addOutcome(outcome, course.getId());
             }
@@ -489,6 +590,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all outcomes for a given course.
+     *
+     * @param courseId The ID of the course.
+     * @return A list of `Outcome` objects associated with the course.
+     */
     private List<Outcome> getOutcomesForCourse(String courseId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT * FROM outcomes WHERE course_id = ?";
@@ -496,6 +603,7 @@ public class Database {
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             try (ResultSet rs = pstmt.executeQuery()) {
+                // Iterate through outcomes and add to the list
                 while (rs.next()) {
                     String id = rs.getString("id");
                     String name = rs.getString("name");
@@ -510,6 +618,13 @@ public class Database {
         return outcomes;
     }
 
+    /**
+     * Checks if a course ID is unique in the database.
+     *
+     * @param newId     The new course ID to check.
+     * @param currentId The current course ID to exclude from the check.
+     * @return `true` if the new ID is unique, `false` otherwise.
+     */
     public boolean isCourseIdUnique(String newId, String currentId) {
         String sql = "SELECT COUNT(*) FROM courses WHERE id = ? AND id != ?";
         try (Connection conn = this.connect();
@@ -526,17 +641,23 @@ public class Database {
         return false;
     }
 
+    /**
+     * Saves a course to the database, replacing it if it already exists.
+     *
+     * @param course The `Course` object to be saved.
+     */
     public void saveCourse(Course course) {
         String sql = "INSERT OR REPLACE INTO courses(id, name, description) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set course data
             pstmt.setString(1, course.getId());
             pstmt.setString(2, course.getName());
             pstmt.setString(3, course.getDescription());
             pstmt.executeUpdate();
 
+            // Remove existing outcomes and add new ones
             deleteOutcomesForCourse(course.getId());
-
             for (Outcome outcome : course.getOutcomes()) {
                 addOutcome(outcome, course.getId());
             }
@@ -547,12 +668,18 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all courses from the database along with their outcomes.
+     *
+     * @return A list of `Course` objects.
+     */
     public List<Course> getAllCourses() {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT * FROM courses";
         try (Connection conn = connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 ResultSet rs = pstmt.executeQuery()) {
+            // Iterate through courses and populate the list
             while (rs.next()) {
                 String id = rs.getString("id");
                 String name = rs.getString("name");
@@ -561,7 +688,6 @@ public class Database {
                 course.setOutcomes(getOutcomesForCourse(id));
                 courses.add(course);
                 System.out.println("Retrieved course: " + name + ", Outcomes: " + course.getOutcomes().size());
-
             }
         } catch (SQLException e) {
             System.out.println("Error getting courses: " + e.getMessage());
@@ -569,10 +695,17 @@ public class Database {
         return courses;
     }
 
+    /**
+     * Deletes a course and its associated outcomes from the database.
+     *
+     * @param courseId The ID of the course to delete.
+     */
     public void deleteCourse(String courseId) {
         try (Connection conn = this.connect()) {
+            // Delete associated outcomes
             deleteOutcome(courseId, courseId);
 
+            // Delete the course
             String sql = "DELETE FROM courses WHERE id = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, courseId);
@@ -584,6 +717,12 @@ public class Database {
         }
     }
 
+    /**
+     * Deletes a specific outcome associated with a course.
+     *
+     * @param courseId  The ID of the course.
+     * @param outcomeId The ID of the outcome to delete.
+     */
     public void deleteOutcome(String courseId, String outcomeId) {
         String sql = "DELETE FROM outcomes WHERE course_id = ? AND id = ?";
         try (Connection conn = this.connect();
@@ -598,10 +737,17 @@ public class Database {
         }
     }
 
+    /**
+     * Adds a new outcome to a course.
+     *
+     * @param outcome  The `Outcome` object to add.
+     * @param courseId The ID of the course to associate the outcome with.
+     */
     public void addOutcome(Outcome outcome, String courseId) {
         String sql = "INSERT INTO outcomes (course_id, id, name, description, weight) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set outcome data
             pstmt.setString(1, courseId);
             pstmt.setString(2, outcome.getId());
             pstmt.setString(3, outcome.getName());
@@ -614,6 +760,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves an outcome by its ID.
+     *
+     * @param outcomeId The ID of the outcome to retrieve.
+     * @return The `Outcome` object if found, or `null` if not found.
+     */
     public Outcome getOutcomeById(String outcomeId) {
         String sql = "SELECT * FROM outcomes WHERE id = ?";
         try (Connection conn = this.connect();
@@ -621,6 +773,7 @@ public class Database {
             pstmt.setString(1, outcomeId);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
+                // Construct and return the Outcome object
                 String id = rs.getString("id");
                 String name = rs.getString("name");
                 String description = rs.getString("description");
@@ -633,10 +786,17 @@ public class Database {
         return null;
     }
 
+    /**
+     * Updates an existing outcome in the database.
+     *
+     * @param courseId The ID of the course the outcome belongs to.
+     * @param outcome  The `Outcome` object containing updated information.
+     */
     public void updateOutcome(String courseId, Outcome outcome) {
         String sql = "UPDATE outcomes SET name = ?, description = ?, weight = ? WHERE course_id = ? AND id = ?";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set updated outcome data
             pstmt.setString(1, outcome.getName());
             pstmt.setString(2, outcome.getDescription());
             pstmt.setDouble(3, outcome.getWeight());
@@ -650,25 +810,42 @@ public class Database {
         }
     }
 
-    // STUDENTS
+    // ----------------------------- STUDENTS -----------------------------
+
+    /**
+     * Adds a new student to the database.
+     *
+     * @param name      The name of the student.
+     * @param studentId The unique student ID.
+     * @throws SQLException If a database access error occurs.
+     */
     public void addStudent(String name, String studentId) throws SQLException {
         String sql = "INSERT INTO students(name, studentId) VALUES(?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set student data
             pstmt.setString(1, name);
             pstmt.setString(2, studentId);
             pstmt.executeUpdate();
             System.out.println("Student added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding student: " + e.getMessage());
-            throw e;
+            throw e; // Rethrow exception to be handled by the caller
         }
     }
 
+    /**
+     * Updates an existing student's information.
+     *
+     * @param oldStudentId The current student ID.
+     * @param newName      The new name of the student.
+     * @param newStudentId The new student ID.
+     */
     public void updateStudent(String oldStudentId, String newName, String newStudentId) {
         String sql = "UPDATE students SET name = ?, studentId = ? WHERE studentId = ?";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set updated student data
             pstmt.setString(1, newName);
             pstmt.setString(2, newStudentId);
             pstmt.setString(3, oldStudentId);
@@ -679,12 +856,18 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all students from the database.
+     *
+     * @return A list of `Student` objects.
+     */
     public List<Student> getAllStudents() {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students";
         try (Connection conn = connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 ResultSet rs = pstmt.executeQuery()) {
+            // Iterate through students and add to the list
             while (rs.next()) {
                 String name = rs.getString("name");
                 String studentId = rs.getString("studentId");
@@ -696,11 +879,19 @@ public class Database {
         return students;
     }
 
-    // CLASSES
+    // ----------------------------- CLASSES -----------------------------
+
+    /**
+     * Adds a new class to the database.
+     *
+     * @param name    The name of the class.
+     * @param classId The unique class ID.
+     */
     public void addClass(String name, String classId) {
         String sql = "INSERT INTO classes(name, classId) VALUES(?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set class data
             pstmt.setString(1, name);
             pstmt.setString(2, classId);
             pstmt.executeUpdate();
@@ -710,10 +901,18 @@ public class Database {
         }
     }
 
+    /**
+     * Adds a new class associated with a course.
+     *
+     * @param classObj The `Classes` object representing the class.
+     * @param courseId The ID of the course to associate the class with.
+     * @throws SQLException If a database access error occurs.
+     */
     public void addClass(Classes classObj, String courseId) throws SQLException {
         String sql = "INSERT INTO classes(name, classId, course_id) VALUES(?, ?, ?)";
         try (Connection conn = this.connect();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set class data
             pstmt.setString(1, classObj.getName());
             pstmt.setString(2, classObj.getClassId());
             pstmt.setString(3, courseId);
@@ -721,10 +920,16 @@ public class Database {
             System.out.println("Class added successfully.");
         } catch (SQLException e) {
             System.out.println("Error adding class: " + e.getMessage());
-            throw e;
+            throw e; // Rethrow exception to be handled by the caller
         }
     }
 
+    /**
+     * Unlinks an outcome from an assessment part.
+     *
+     * @param partId    The ID of the assessment part.
+     * @param outcomeId The ID of the outcome to unlink.
+     */
     public void unlinkOutcomeFromAssessmentPart(int partId, String outcomeId) {
         String sql = "DELETE FROM assessment_part_outcomes WHERE part_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
@@ -738,6 +943,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all classes associated with a specific course.
+     *
+     * @param courseId The ID of the course.
+     * @return A list of `Classes` objects.
+     */
     public List<Classes> getClassesForCourse(String courseId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT * FROM classes WHERE course_id = ?";
@@ -745,6 +956,7 @@ public class Database {
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, courseId);
             ResultSet rs = pstmt.executeQuery();
+            // Iterate through classes and add to the list
             while (rs.next()) {
                 String name = rs.getString("name");
                 String classId = rs.getString("classId");
@@ -756,6 +968,14 @@ public class Database {
         return classes;
     }
 
+    /**
+     * Retrieves all classes for a specific student within a particular course.
+     *
+     * @param studentId The ID of the student.
+     * @param courseId  The ID of the course.
+     * @return A list of `Classes` objects that the student is enrolled in for the
+     *         given course.
+     */
     public List<Classes> getClassesForStudentInCourse(String studentId, String courseId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT c.* FROM classes c " +
@@ -777,6 +997,13 @@ public class Database {
         return classes;
     }
 
+    /**
+     * Updates the details of an existing class.
+     *
+     * @param oldClassId The current ID of the class to be updated.
+     * @param newName    The new name for the class.
+     * @param newClassId The new ID for the class.
+     */
     public void updateClass(String oldClassId, String newName, String newClassId) {
         String sql = "UPDATE classes SET name = ?, classId = ? WHERE classId = ?";
         try (Connection conn = this.connect();
@@ -791,6 +1018,11 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all classes from the database.
+     *
+     * @return A list of all `Classes` objects.
+     */
     public List<Classes> getAllClasses() {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT name, classId FROM classes";
@@ -808,6 +1040,13 @@ public class Database {
         return classes;
     }
 
+    /**
+     * Adds a student to a specific class.
+     *
+     * @param studentId The ID of the student to add.
+     * @param classId   The ID of the class to which the student will be added.
+     * @return `true` if the student was added successfully, `false` otherwise.
+     */
     public boolean addStudentToClass(String studentId, String classId) {
         String sql = "INSERT OR IGNORE INTO student_classes (student_id, class_id) VALUES (?, ?)";
         try (Connection conn = this.connect();
@@ -822,6 +1061,12 @@ public class Database {
         }
     }
 
+    /**
+     * Removes a student from a specific class.
+     *
+     * @param studentId The ID of the student to remove.
+     * @param classId   The ID of the class from which the student will be removed.
+     */
     public void removeStudentFromClass(String studentId, String classId) {
         String sql = "DELETE FROM student_classes WHERE student_id = ? AND class_id = ?";
         try (Connection conn = this.connect();
@@ -835,6 +1080,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all students enrolled in a specific class.
+     *
+     * @param classId The ID of the class.
+     * @return A list of `Student` objects enrolled in the class.
+     */
     public List<Student> getStudentsInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT s.* FROM students s " +
@@ -857,6 +1108,14 @@ public class Database {
         return students;
     }
 
+    /**
+     * Retrieves all grades for a specific student and assessment.
+     *
+     * @param studentId    The ID of the student.
+     * @param assessmentId The ID of the assessment.
+     * @return A list of `Grade` objects representing the student's grades for the
+     *         assessment.
+     */
     public List<Grade> getGradesForStudentAndAssessment(String studentId, int assessmentId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT * FROM grades WHERE student_id = ? AND assessment_id = ?";
@@ -882,6 +1141,12 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves all students who are not enrolled in a specific class.
+     *
+     * @param classId The ID of the class.
+     * @return A list of `Student` objects not enrolled in the class.
+     */
     public List<Student> getStudentsNotInClass(String classId) {
         List<Student> students = new ArrayList<>();
         String sql = "SELECT * FROM students WHERE studentId NOT IN " +
@@ -901,6 +1166,11 @@ public class Database {
         return students;
     }
 
+    /**
+     * Creates the `student_classes` table if it does not exist.
+     * This table manages the many-to-many relationship between students and
+     * classes.
+     */
     public void createStudentClassTable() {
         String sql = "CREATE TABLE IF NOT EXISTS student_classes (" +
                 "student_id TEXT NOT NULL, " +
@@ -917,6 +1187,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves a student by their unique student ID.
+     *
+     * @param studentId The unique ID of the student.
+     * @return The `Student` object if found, or `null` if not found.
+     */
     public Student getStudentById(String studentId) {
         String sql = "SELECT * FROM students WHERE studentId = ?";
         try (Connection conn = this.connect();
@@ -933,6 +1209,12 @@ public class Database {
         return null;
     }
 
+    /**
+     * Retrieves all classes that a specific student is enrolled in.
+     *
+     * @param studentId The ID of the student.
+     * @return A list of `Classes` objects the student is enrolled in.
+     */
     public List<Classes> getClassesForStudent(String studentId) {
         List<Classes> classes = new ArrayList<>();
         String sql = "SELECT c.* FROM classes c " +
@@ -953,6 +1235,11 @@ public class Database {
         return classes;
     }
 
+    /**
+     * Saves or updates a grade for a student.
+     *
+     * @param grade The `Grade` object containing grade details.
+     */
     public void saveGrade(Grade grade) {
         String updateSql;
         if (grade.getAssessmentPart() != null) {
@@ -962,7 +1249,7 @@ public class Database {
         }
         String insertSql = "INSERT INTO grades (student_id, assessment_id, part_id, score, feedback) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = this.connect()) {
-            conn.setAutoCommit(false);
+            conn.setAutoCommit(false); // Start transaction
             try {
                 PreparedStatement pstmt = conn.prepareStatement(updateSql);
                 pstmt.setDouble(1, grade.getScore());
@@ -974,6 +1261,7 @@ public class Database {
                 }
                 int affectedRows = pstmt.executeUpdate();
                 if (affectedRows == 0) {
+                    // No existing grade found; insert new grade
                     pstmt = conn.prepareStatement(insertSql);
                     pstmt.setString(1, grade.getStudent().getStudentId());
                     pstmt.setInt(2, grade.getAssessment().getId());
@@ -986,16 +1274,16 @@ public class Database {
                     pstmt.setString(5, grade.getFeedback());
                     pstmt.executeUpdate();
                 }
-                conn.commit();
+                conn.commit(); // Commit transaction
                 System.out.println("Grade saved for Student: " + grade.getStudent().getStudentId() +
                         ", Assessment: " + grade.getAssessment().getId() +
                         ", Part: " + (grade.getAssessmentPart() != null ? grade.getAssessmentPart().getId() : "null") +
                         ", Score: " + grade.getScore());
             } catch (SQLException e) {
-                conn.rollback();
+                conn.rollback(); // Rollback transaction on error
                 throw e;
             } finally {
-                conn.setAutoCommit(true);
+                conn.setAutoCommit(true); // Restore default commit behavior
             }
         } catch (SQLException e) {
             System.out.println("Error saving grade: " + e.getMessage());
@@ -1003,6 +1291,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all grades for a specific student.
+     *
+     * @param studentId The ID of the student.
+     * @return A list of `Grade` objects representing all grades for the student.
+     */
     public List<Grade> getGradesForStudent(String studentId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT * FROM grades WHERE student_id = ?";
@@ -1017,7 +1311,6 @@ public class Database {
                         : null;
                 double score = rs.getDouble("score");
                 String feedback = rs.getString("feedback");
-                LocalDate date = rs.getDate("date").toLocalDate();
                 if (student != null && assessment != null) {
                     Grade grade = new Grade(student, assessment, part, score, feedback);
                     grades.add(grade);
@@ -1029,6 +1322,14 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves all grades for a specific student within a particular class.
+     *
+     * @param studentId The ID of the student.
+     * @param classId   The ID of the class.
+     * @return A list of `Grade` objects representing the student's grades in the
+     *         class.
+     */
     public List<Grade> getGradesForStudentInClass(String studentId, String classId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT g.*, a.name as assessment_name, ap.name as part_name " +
@@ -1071,6 +1372,12 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves all grades associated with a specific course.
+     *
+     * @param courseId The ID of the course.
+     * @return A list of `Grade` objects representing all grades for the course.
+     */
     public List<Grade> getAllGradesForCourse(String courseId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT g.*, s.name as student_name, a.name as assessment_name, ap.name as part_name " +
@@ -1112,6 +1419,12 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves all grades associated with a specific class.
+     *
+     * @param classId The ID of the class.
+     * @return A list of `Grade` objects representing all grades for the class.
+     */
     public List<Grade> getAllGradesForClass(String classId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT g.*, s.name as student_name, a.name as assessment_name, ap.name as part_name " +
@@ -1126,7 +1439,6 @@ public class Database {
             pstmt.setString(1, classId);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-
                 String studentId = rs.getString("student_id");
                 String studentName = rs.getString("student_name");
                 Student student = new Student(studentName, studentId);
@@ -1155,6 +1467,15 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves a specific grade for a student, assessment, and optionally an
+     * assessment part.
+     *
+     * @param studentId    The unique identifier of the student.
+     * @param assessmentId The unique identifier of the assessment.
+     * @param partId       The unique identifier of the assessment part (nullable).
+     * @return The `Grade` object if found, or `null` if no matching grade exists.
+     */
     public Grade getGrade(String studentId, int assessmentId, Integer partId) {
         String sql = "SELECT * FROM grades WHERE student_id = ? AND assessment_id = ? AND "
                 + (partId != null ? "part_id = ?" : "part_id IS NULL");
@@ -1181,6 +1502,14 @@ public class Database {
         return null;
     }
 
+    /**
+     * Retrieves all grades for a specific class and assessment.
+     *
+     * @param classId      The unique identifier of the class.
+     * @param assessmentId The unique identifier of the assessment.
+     * @return A list of `Grade` objects representing the grades for the specified
+     *         class and assessment.
+     */
     public List<Grade> getGradesForClassAndAssessment(String classId, int assessmentId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT g.*, s.name AS student_name, a.name AS assessment_name, ap.name AS part_name " +
@@ -1227,6 +1556,15 @@ public class Database {
         return grades;
     }
 
+    /**
+     * Retrieves all grades for a specific class, assessment, and assessment part.
+     *
+     * @param classId      The unique identifier of the class.
+     * @param assessmentId The unique identifier of the assessment.
+     * @param partId       The unique identifier of the assessment part.
+     * @return A list of `Grade` objects representing the grades for the specified
+     *         class, assessment, and part.
+     */
     public List<Grade> getGradesForClassAssessmentAndPart(String classId, int assessmentId, int partId) {
         List<Grade> grades = new ArrayList<>();
         String sql = "SELECT g.*, s.name AS student_name, a.name AS assessment_name, ap.name AS part_name " +
@@ -1270,8 +1608,15 @@ public class Database {
         return grades;
     }
 
-    // ASSESSMENTS
+    // ----------------------------- ASSESSMENTS -----------------------------
 
+    /**
+     * Deletes a record from a specified table based on the provided ID.
+     *
+     * @param table    The name of the table from which to delete the record.
+     * @param idColumn The name of the ID column in the table.
+     * @param id       The ID value of the record to delete.
+     */
     public void delete(String table, String idColumn, String id) {
         String sql = "DELETE FROM " + table + " WHERE " + idColumn + " = ?";
         try (Connection conn = this.connect();
@@ -1283,6 +1628,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all outcomes associated with a specific assessment part.
+     *
+     * @param partId The unique identifier of the assessment part.
+     * @return A list of `Outcome` objects associated with the assessment part.
+     */
     public List<Outcome> getOutcomesForAssessmentPart(int partId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, apo.weight as part_weight FROM outcomes o " +
@@ -1306,6 +1657,12 @@ public class Database {
         return outcomes;
     }
 
+    /**
+     * Retrieves all outcomes associated with a specific assessment.
+     *
+     * @param assessmentId The unique identifier of the assessment.
+     * @return A list of `Outcome` objects associated with the assessment.
+     */
     public List<Outcome> getOutcomesForAssessment(int assessmentId) {
         List<Outcome> outcomes = new ArrayList<>();
         String sql = "SELECT o.*, ao.weight as assessment_weight FROM outcomes o " +
@@ -1329,6 +1686,12 @@ public class Database {
         return outcomes;
     }
 
+    /**
+     * Updates the details of an existing assessment in the database.
+     *
+     * @param assessment The `Assessment` object containing the updated assessment
+     *                   information.
+     */
     public void updateAssessment(Assessment assessment) {
         String sql = "UPDATE assessments SET name = ?, description = ?, weight = ?, maxScore = ? WHERE id = ?";
         try (Connection conn = this.connect();
@@ -1344,6 +1707,11 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all assessments from the database.
+     *
+     * @return A list of all `Assessment` objects.
+     */
     public List<Assessment> getAllAssessments() {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments";
@@ -1365,6 +1733,12 @@ public class Database {
         return assessments;
     }
 
+    /**
+     * Retrieves an assessment by its unique ID.
+     *
+     * @param assessmentId The unique identifier of the assessment.
+     * @return The `Assessment` object if found, or `null` if not found.
+     */
     public Assessment getAssessmentById(int assessmentId) {
         String sql = "SELECT * FROM assessments WHERE id = ?";
         try (Connection conn = this.connect();
@@ -1385,6 +1759,11 @@ public class Database {
         return null;
     }
 
+    /**
+     * Deletes an assessment part from the database.
+     *
+     * @param partId The unique identifier of the assessment part to delete.
+     */
     public void deleteAssessmentPart(int partId) {
         String sql = "DELETE FROM assessment_parts WHERE id = ?";
         try (Connection conn = this.connect();
@@ -1397,6 +1776,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves an assessment part by its unique ID.
+     *
+     * @param partId The unique identifier of the assessment part.
+     * @return The `AssessmentPart` object if found, or `null` if not found.
+     */
     public AssessmentPart getAssessmentPartById(Integer partId) {
         String sql = "SELECT * FROM assessment_parts WHERE id = ?";
         try (Connection conn = this.connect();
@@ -1416,6 +1801,12 @@ public class Database {
         return null;
     }
 
+    /**
+     * Unlinks an outcome from an assessment.
+     *
+     * @param assessmentId The unique identifier of the assessment.
+     * @param outcomeId    The unique identifier of the outcome to unlink.
+     */
     public void unlinkOutcomeFromAssessment(int assessmentId, String outcomeId) {
         String sql = "DELETE FROM assessment_outcomes WHERE assessment_id = ? AND outcome_id = ?";
         try (Connection conn = this.connect();
@@ -1429,6 +1820,11 @@ public class Database {
         }
     }
 
+    /**
+     * Deletes an assessment and its associated outcome links from the database.
+     *
+     * @param assessmentId The unique identifier of the assessment to delete.
+     */
     public void deleteAssessment(int assessmentId) {
         try (Connection conn = this.connect()) {
             conn.setAutoCommit(false);
@@ -1459,6 +1855,12 @@ public class Database {
         }
     }
 
+    /**
+     * Retrieves all assessments associated with a specific course.
+     *
+     * @param courseId The unique identifier of the course.
+     * @return A list of `Assessment` objects associated with the course.
+     */
     public List<Assessment> getAssessmentsForCourse(String courseId) {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments WHERE course_id = ?";
@@ -1488,6 +1890,12 @@ public class Database {
         return assessments;
     }
 
+    /**
+     * Retrieves all assessments associated with a specific class.
+     *
+     * @param classId The unique identifier of the class.
+     * @return A list of `Assessment` objects associated with the class.
+     */
     public List<Assessment> getAssessmentsForClass(String classId) {
         List<Assessment> assessments = new ArrayList<>();
         String sql = "SELECT * FROM assessments WHERE class_id = ?";
@@ -1517,6 +1925,13 @@ public class Database {
         return assessments;
     }
 
+    /**
+     * Retrieves the class associated with a specific student.
+     *
+     * @param studentId The unique identifier of the student.
+     * @return The `Classes` object representing the class the student is enrolled
+     *         in, or `null` if not found.
+     */
     public Classes getClassForStudent(String studentId) {
         String sql = "SELECT c.* FROM classes c " +
                 "JOIN student_classes sc ON c.classId = sc.class_id " +
@@ -1540,6 +1955,13 @@ public class Database {
         return null;
     }
 
+    /**
+     * Retrieves all courses that a specific student is enrolled in.
+     *
+     * @param studentId The unique identifier of the student.
+     * @return A list of `Course` objects representing the courses the student is
+     *         enrolled in.
+     */
     public List<Course> getCoursesForStudent(String studentId) {
         List<Course> courses = new ArrayList<>();
         String sql = "SELECT DISTINCT c.* FROM courses c " +
@@ -1563,6 +1985,12 @@ public class Database {
         return courses;
     }
 
+    /**
+     * Deletes a student from the database.
+     *
+     * @param studentId The unique identifier of the student to delete.
+     * @return `true` if the student was deleted successfully, `false` otherwise.
+     */
     public boolean deleteStudent(String studentId) {
         String sql = "DELETE FROM students WHERE studentId = ?";
         try (Connection conn = this.connect();
