@@ -1,0 +1,59 @@
+# Diff Details
+
+Date : 2024-09-26 23:08:38
+
+Directory c:\\Users\\noval\\Documents\\GitHub\\gradeappv3
+
+Total : 44 files,  878 codes, 2087 comments, 340 blanks, all 3305 lines
+
+[Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [src/main/java/com/gradeapp/controller/ArchiveController.java](/src/main/java/com/gradeapp/controller/ArchiveController.java) | Java | 0 | 3 | -2 | 1 |
+| [src/main/java/com/gradeapp/controller/AssessmentController.java](/src/main/java/com/gradeapp/controller/AssessmentController.java) | Java | -103 | 114 | 15 | 26 |
+| [src/main/java/com/gradeapp/controller/AssessmentCreationCallback.java](/src/main/java/com/gradeapp/controller/AssessmentCreationCallback.java) | Java | 0 | 8 | 1 | 9 |
+| [src/main/java/com/gradeapp/controller/AssessmentCreationController.java](/src/main/java/com/gradeapp/controller/AssessmentCreationController.java) | Java | 10 | 63 | 24 | 97 |
+| [src/main/java/com/gradeapp/controller/ClassController.java](/src/main/java/com/gradeapp/controller/ClassController.java) | Java | 82 | 115 | 30 | 227 |
+| [src/main/java/com/gradeapp/controller/CourseDetailsController.java](/src/main/java/com/gradeapp/controller/CourseDetailsController.java) | Java | 40 | 99 | 17 | 156 |
+| [src/main/java/com/gradeapp/controller/CourseEditController.java](/src/main/java/com/gradeapp/controller/CourseEditController.java) | Java | 2 | 111 | 42 | 155 |
+| [src/main/java/com/gradeapp/controller/CoursesController.java](/src/main/java/com/gradeapp/controller/CoursesController.java) | Java | 0 | 50 | 10 | 60 |
+| [src/main/java/com/gradeapp/controller/DataImportExportController.java](/src/main/java/com/gradeapp/controller/DataImportExportController.java) | Java | 31 | 43 | 6 | 80 |
+| [src/main/java/com/gradeapp/controller/ExportController.java](/src/main/java/com/gradeapp/controller/ExportController.java) | Java | 325 | 84 | 60 | 469 |
+| [src/main/java/com/gradeapp/controller/GradingController.java](/src/main/java/com/gradeapp/controller/GradingController.java) | Java | -17 | 80 | 6 | 69 |
+| [src/main/java/com/gradeapp/controller/HelloController.java](/src/main/java/com/gradeapp/controller/HelloController.java) | Java | 4 | 1 | 0 | 5 |
+| [src/main/java/com/gradeapp/controller/HomeController.java](/src/main/java/com/gradeapp/controller/HomeController.java) | Java | 0 | -1 | 0 | -1 |
+| [src/main/java/com/gradeapp/controller/MarkingController.java](/src/main/java/com/gradeapp/controller/MarkingController.java) | Java | 98 | 56 | 34 | 188 |
+| [src/main/java/com/gradeapp/controller/ReportController.java](/src/main/java/com/gradeapp/controller/ReportController.java) | Java | -60 | -5 | -16 | -81 |
+| [src/main/java/com/gradeapp/controller/StudentController.java](/src/main/java/com/gradeapp/controller/StudentController.java) | Java | -11 | 110 | 23 | 122 |
+| [src/main/java/com/gradeapp/controller/StudentDetailsController.java](/src/main/java/com/gradeapp/controller/StudentDetailsController.java) | Java | 13 | 52 | 25 | 90 |
+| [src/main/java/com/gradeapp/controller/StudentMarkbookController.java](/src/main/java/com/gradeapp/controller/StudentMarkbookController.java) | Java | 185 | 61 | 38 | 284 |
+| [src/main/java/com/gradeapp/database/Database.java](/src/main/java/com/gradeapp/database/Database.java) | Java | 376 | 457 | 28 | 861 |
+| [src/main/java/com/gradeapp/model/Assessment.java](/src/main/java/com/gradeapp/model/Assessment.java) | Java | -17 | 60 | 2 | 45 |
+| [src/main/java/com/gradeapp/model/AssessmentPart.java](/src/main/java/com/gradeapp/model/AssessmentPart.java) | Java | 0 | 41 | 1 | 42 |
+| [src/main/java/com/gradeapp/model/Classes.java](/src/main/java/com/gradeapp/model/Classes.java) | Java | 0 | 53 | 2 | 55 |
+| [src/main/java/com/gradeapp/model/Course.java](/src/main/java/com/gradeapp/model/Course.java) | Java | 0 | 87 | 6 | 93 |
+| [src/main/java/com/gradeapp/model/Grade.java](/src/main/java/com/gradeapp/model/Grade.java) | Java | -4 | 27 | 1 | 24 |
+| [src/main/java/com/gradeapp/model/GradeBook.java](/src/main/java/com/gradeapp/model/GradeBook.java) | Java | -19 | 41 | 2 | 24 |
+| [src/main/java/com/gradeapp/model/Outcome.java](/src/main/java/com/gradeapp/model/Outcome.java) | Java | 0 | 19 | 3 | 22 |
+| [src/main/java/com/gradeapp/model/Student.java](/src/main/java/com/gradeapp/model/Student.java) | Java | 5 | 45 | 5 | 55 |
+| [src/main/java/com/gradeapp/model/StudentGrade.java](/src/main/java/com/gradeapp/model/StudentGrade.java) | Java | -9 | 0 | -4 | -13 |
+| [src/main/java/com/gradeapp/model/Task.java](/src/main/java/com/gradeapp/model/Task.java) | Java | -69 | -2 | -18 | -89 |
+| [src/main/java/com/gradeapp/util/Calculator.java](/src/main/java/com/gradeapp/util/Calculator.java) | Java | 5 | 107 | 6 | 118 |
+| [src/main/java/com/gradeapp/util/ChartGenerator.java](/src/main/java/com/gradeapp/util/ChartGenerator.java) | Java | 10 | 26 | 4 | 40 |
+| [src/main/java/com/gradeapp/util/DataValidator.java](/src/main/java/com/gradeapp/util/DataValidator.java) | Java | -56 | 0 | -14 | -70 |
+| [src/main/java/com/gradeapp/util/FileHandler.java](/src/main/java/com/gradeapp/util/FileHandler.java) | Java | -49 | 80 | -6 | 25 |
+| [src/main/java/com/gradeapp/util/ReportExporter.java](/src/main/java/com/gradeapp/util/ReportExporter.java) | Java | -55 | -1 | -10 | -66 |
+| [src/main/java/com/gradeapp/util/WeightedAverageGradeCalculator.java](/src/main/java/com/gradeapp/util/WeightedAverageGradeCalculator.java) | Java | -33 | -2 | -11 | -46 |
+| [src/main/resources/org/example/demo3/classes-view.fxml](/src/main/resources/org/example/demo3/classes-view.fxml) | XML | 42 | 11 | 5 | 58 |
+| [src/main/resources/org/example/demo3/courses-view.fxml](/src/main/resources/org/example/demo3/courses-view.fxml) | XML | -3 | -3 | -3 | -9 |
+| [src/main/resources/org/example/demo3/export-view.fxml](/src/main/resources/org/example/demo3/export-view.fxml) | XML | 66 | 4 | 10 | 80 |
+| [src/main/resources/org/example/demo3/hello-view.fxml](/src/main/resources/org/example/demo3/hello-view.fxml) | XML | -2 | 0 | 0 | -2 |
+| [src/main/resources/org/example/demo3/marking-view.fxml](/src/main/resources/org/example/demo3/marking-view.fxml) | XML | -10 | 0 | 6 | -4 |
+| [src/main/resources/org/example/demo3/student-details-view.fxml](/src/main/resources/org/example/demo3/student-details-view.fxml) | XML | 2 | 0 | 0 | 2 |
+| [src/main/resources/org/example/demo3/student-markbook.fxml](/src/main/resources/org/example/demo3/student-markbook.fxml) | XML | 86 | 0 | 4 | 90 |
+| [src/main/resources/org/example/demo3/students-view.fxml](/src/main/resources/org/example/demo3/students-view.fxml) | XML | 5 | -8 | 0 | -3 |
+| [src/main/resources/org/example/demo3/styles.css](/src/main/resources/org/example/demo3/styles.css) | CSS | 8 | 1 | 8 | 17 |
+
+[Summary](results.md) / [Details](details.md) / [Diff Summary](diff.md) / Diff Details
