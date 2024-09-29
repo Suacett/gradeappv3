@@ -40,7 +40,7 @@ import javafx.util.StringConverter;
  */
 public class AssessmentController implements AssessmentCreationCallback {
 
-    // ----------------------- FXML UI Components -----------------------
+    // ----------------------- FXML UI Components -------------------------
 
     @FXML
     private VBox currentAssessmentContainer;
