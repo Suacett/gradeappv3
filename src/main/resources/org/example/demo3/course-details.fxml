@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="664.0" prefWidth="800.0" spacing="10.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
+<VBox prefHeight="733.0" prefWidth="800.0" spacing="10.0" stylesheets="@styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gradeapp.controller.CourseDetailsController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -23,7 +23,7 @@
             <Font size="18.0" />
         </font>
     </Label>
-   <HBox prefHeight="100.0" prefWidth="760.0" styleClass="section-style" VBox.vgrow="ALWAYS">
+   <HBox prefHeight="130.0" prefWidth="760.0" styleClass="section-style" VBox.vgrow="ALWAYS">
       <children>
       
           <GridPane hgap="10" prefHeight="124.0" prefWidth="738.0" vgap="10" HBox.hgrow="ALWAYS">
@@ -58,7 +58,7 @@
       </VBox.margin>
     </Label>
 
-    <TableView fx:id="outcomesTable" editable="true" VBox.vgrow="ALWAYS">
+    <TableView fx:id="outcomesTable" editable="true" prefHeight="143.0" prefWidth="760.0" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="identifierColumn" text="Identifier" />
             <TableColumn fx:id="nameColumn" text="Name" />
@@ -81,7 +81,7 @@
       </VBox.margin>
     </Label>
 
-    <TableView fx:id="classesTable" VBox.vgrow="ALWAYS">
+    <TableView fx:id="classesTable" prefHeight="252.0" prefWidth="760.0" VBox.vgrow="ALWAYS">
         <columns>
             <TableColumn fx:id="classNameColumn" prefWidth="200.0" text="Class Name" />
             <TableColumn fx:id="classIdColumn" prefWidth="100.0" text="Class ID" />
