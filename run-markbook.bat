@@ -45,6 +45,19 @@ goto :error
 :run_default
 echo %INFO% Attempting to run %APP_NAME%...
 
+:: Check if target directory exists, if not build first
+if not exist "target" (
+    echo %WARNING% Project not built yet. Building now...
+    where mvn >nul 2>&1
+    if errorlevel 1 (
+        echo %ERROR% Maven is required to build the project
+        echo %INFO% Download from: https://maven.apache.org/download.cgi
+        goto :error
+    )
+    call :build
+    if errorlevel 1 goto :error
+)
+
 :: Try Maven first
 where mvn >nul 2>&1
 if %errorlevel%==0 (
@@ -122,6 +135,13 @@ echo %INFO% Running %APP_NAME% using Maven...
 
 call :check_maven
 if errorlevel 1 goto :error
+
+REM Check if project has been built
+if not exist "target" (
+    echo %WARNING% Project not built yet. Building now...
+    call :build
+    if errorlevel 1 goto :error
+)
 
 call mvn javafx:run
 goto :end

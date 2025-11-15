@@ -88,6 +88,16 @@ build_app() {
 # Function to run using Maven
 run_with_maven() {
     print_info "Running $APP_NAME using Maven..."
+
+    # Check if project has been built at least once
+    if [ ! -d "target" ] || [ ! "$(ls -A target 2>/dev/null)" ]; then
+        print_warning "Project has not been built yet. Building now..."
+        if ! mvn clean package -DskipTests; then
+            print_error "Build failed. Cannot run application."
+            return 1
+        fi
+    fi
+
     mvn javafx:run
 }
 
