@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gradeapp.config.AppConfig;
 import com.gradeapp.model.Assessment;
 import com.gradeapp.model.AssessmentPart;
 import com.gradeapp.model.Classes;
@@ -22,10 +23,17 @@ import com.gradeapp.model.Student;
  * Database class responsible for managing all database operations.
  * It handles the connection, initialization, and CRUD operations for various
  * entities.
+ * Now uses AppConfig for cross-platform database path management.
  */
 public class Database {
-    private static final String URL = "jdbc:sqlite:com.gradeapp.db"; // SQLite database URL
+    private static final String URL; // SQLite database URL (initialized from config)
     private static boolean isInitialized = false; // Flag to ensure the database is initialized only once
+
+    // Static initializer to get database URL from configuration
+    static {
+        URL = AppConfig.getInstance().getDatabaseUrl();
+        System.out.println("Database initialized at: " + URL);
+    }
 
     /**
      * Constructor that initializes the database if it hasn't been initialized yet.
