@@ -25,7 +25,7 @@ Document major changes and use Javadoc for code documentation.
 Authors
 
 Tom Baldwin - Initial work - TomBaldwin 
-Brock Vandenbergh - Backend stuff
+- Backend stuff
 Ben Cartland - Managing the project and docs
 
 This project is under the MIT License - see the LICENSE.md file for details.
